@@ -37,17 +37,46 @@ class MainActivity : AppCompatActivity() {
         setupWebView()
         setupSwipeRefresh()
         
-        // Check if device owner and setup
+        // Check if device owner
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
             setupDeviceOwner()
             // Start background sync
             SyncWorker.schedule(this)
             // Start in kiosk mode immediately
             startLockTask()
+        } else {
+            // Show setup instructions
+            val intent = Intent(this, DeviceOwnerSetupActivity::class.java)
+            startActivity(intent)
+            // Don't finish - let user come back after setup
         }
         
         // Load customer login page
         loadCustomerDashboard()
+    }
+    
+    private fun requestDeviceAdmin() {
+        try {
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent)
+            intent.putExtra(
+                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Eden requires device admin to secure your financed device"
+            )
+            startActivityForResult(intent, 1)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                // Device admin granted, but we need Device Owner for full control
+                // Show message to user
+            }
+        }
     }
     
     private fun setupWebView() {

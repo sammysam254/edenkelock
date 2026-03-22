@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Logo/Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔒 Eden Device Setup"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#059669"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Checking status..."
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="15dp"
+            android:background="#F3F4F6"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"/>
+
+        <!-- Instructions -->
+        <TextView
+            android:id="@+id/instructionsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading instructions..."
+            android:textSize="14sp"
+            android:textColor="#374151"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Command Box -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ADB Command:"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#059669"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/commandText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="adb shell dpm set-device-owner..."
+            android:textSize="12sp"
+            android:textColor="#1F2937"
+            android:background="#F9FAFB"
+            android:padding="15dp"
+            android:fontFamily="monospace"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Copy Button -->
+        <Button
+            android:id="@+id/copyCommandButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📋 Copy Command"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:background="#10B981"
+            android:padding="15dp"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Check Status Button -->
+        <Button
+            android:id="@+id/checkStatusButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔄 Check Status"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:background="#059669"
+            android:padding="15dp"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Note -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚠️ Note: Device Owner setup is required for device locking to work. Without it, the app cannot block factory reset, disable ADB, or prevent uninstallation."
+            android:textSize="12sp"
+            android:textColor="#DC2626"
+            android:background="#FEE2E2"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+</ScrollView>

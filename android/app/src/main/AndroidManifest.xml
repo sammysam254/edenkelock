@@ -77,6 +77,12 @@
             android:lockTaskMode="if_whitelisted"
             android:excludeFromRecents="true" />
 
+        <!-- Device Owner Setup Activity -->
+        <activity
+            android:name=".DeviceOwnerSetupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
         <!-- Boot Receiver -->
         <receiver
             android:name=".BootReceiver"
