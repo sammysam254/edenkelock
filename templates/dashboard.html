@@ -53,6 +53,7 @@
             </div>
 
             <div class="action-buttons">
+                <button class="btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 1.1em; padding: 15px 30px;" onclick="unlockDevice()">🔓 Unlock Device</button>
                 <button class="btn btn-primary" onclick="makePayment()">💳 Make Payment</button>
                 <button class="btn" style="background: #6b7280; color: white;" onclick="viewHistory()">📜 Payment History</button>
             </div>
@@ -142,6 +143,15 @@
             localStorage.removeItem('eden_customer_token');
             localStorage.removeItem('eden_customer_phone');
             window.location.href = '/customer-login';
+        }
+
+        function unlockDevice() {
+            if (typeof AndroidInterface !== 'undefined') {
+                AndroidInterface.unlockDevice();
+                alert('Device unlocked! You can now use your device normally.');
+            } else {
+                alert('This feature only works on the Android app.');
+            }
         }
     </script>
 </body>

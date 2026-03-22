@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             setupDeviceOwner()
             // Start background sync
             SyncWorker.schedule(this)
+            // Start in kiosk mode immediately
+            startLockTask()
         }
         
         // Load customer login page
@@ -60,6 +62,18 @@ class MainActivity : AppCompatActivity() {
             setSupportZoom(true)
             builtInZoomControls = false
         }
+        
+        // Add JavaScript interface for unlock functionality
+        webView.addJavascriptInterface(object {
+            @android.webkit.JavascriptInterface
+            fun unlockDevice() {
+                runOnUiThread {
+                    if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+                        stopLockTask()
+                    }
+                }
+            }
+        }, "AndroidInterface")
         
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
@@ -121,11 +135,8 @@ class MainActivity : AppCompatActivity() {
     }
     
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
+        // Disable back button - app is in kiosk mode
+        // Do nothing
     }
     
     override fun onResume() {

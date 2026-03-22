@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Eden M-Kopa</string>
+    <string name="app_name">Eden</string>
     <string name="device_locked_title">Device Locked</string>
     <string name="device_locked_message">Please make your payment to unlock this device</string>
     <string name="contact_support">Contact Support</string>
