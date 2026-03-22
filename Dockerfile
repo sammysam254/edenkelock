@@ -1,39 +1,15 @@
-FROM node:18-alpine AS builder
-
-# Build dashboard
-WORKDIR /app/dashboard
-COPY dashboard/package*.json ./
-RUN npm install
-COPY dashboard/ ./
-
-# Set build-time environment variables
-ENV NEXT_PUBLIC_SUPABASE_URL=https://fvkjeteywfcppbtovbiv.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2a2pldGV5d2ZjcHBidG92Yml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTU2NzEsImV4cCI6MjA4OTc3MTY3MX0.5pOcpCSWn98Vvmq4IBQkWWv-nvvA6zbeUZXjSQ3cfC0
-
-RUN npm run build
-
-# Python runtime with Node.js
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install Node.js
-RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Copy Python requirements
+# Copy requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy server
+# Copy application files
 COPY server.py .
-
-# Copy built dashboard
-COPY --from=builder /app/dashboard/.next ./dashboard/.next
-COPY --from=builder /app/dashboard/package.json ./dashboard/package.json
-COPY --from=builder /app/dashboard/node_modules ./dashboard/node_modules
+COPY templates/ ./templates/
+COPY static/ ./static/
 
 # Expose port
 EXPOSE 10000

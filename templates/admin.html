@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Eden M-Kopa</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 Admin Panel</h1>
+            <p>Manage devices and customers</p>
+            <div class="nav">
+                <a href="/">Home</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/admin">Admin</a>
+                <a href="/administrator">Administrator</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Devices</h3>
+                <div class="value" id="totalDevices">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Devices</h3>
+                <div class="value" id="activeDevices">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Locked Devices</h3>
+                <div class="value" id="lockedDevices">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Revenue</h3>
+                <div class="value" id="totalRevenue">$0.00</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #059669; margin-bottom: 20px;">Device Management</h2>
+            <div class="device-grid" id="deviceGrid">
+                <p style="color: #6b7280;">Loading devices...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('totalDevices').textContent = data.totalDevices || 0;
+                document.getElementById('activeDevices').textContent = data.activeDevices || 0;
+                document.getElementById('lockedDevices').textContent = (data.totalDevices - data.activeDevices) || 0;
+                document.getElementById('totalRevenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
+            });
+
+        // Sample devices - replace with API call
+        const devices = [
+            { id: 'DEV001', customer: 'John Doe', status: 'active', total: 1000, paid: 650 },
+            { id: 'DEV002', customer: 'Jane Smith', status: 'locked', total: 800, paid: 200 },
+            { id: 'DEV003', customer: 'Bob Johnson', status: 'active', total: 1200, paid: 900 }
+        ];
+
+        function renderDevices() {
+            const grid = document.getElementById('deviceGrid');
+            grid.innerHTML = devices.map(device => {
+                const progress = (device.paid / device.total) * 100;
+                const statusClass = device.status === 'active' ? 'status-active' : 'status-locked';
+                const cardClass = device.status === 'locked' ? 'device-card locked' : 'device-card';
+                
+                return `
+                    <div class="${cardClass}">
+                        <div class="device-header">
+                            <div class="device-id">${device.id}</div>
+                            <span class="status-badge ${statusClass}">${device.status.toUpperCase()}</span>
+                        </div>
+                        <p style="color: #6b7280; margin-bottom: 15px;">Customer: ${device.customer}</p>
+                        <div class="progress-bar" style="height: 20px;">
+                            <div class="progress-fill" style="width: ${progress}%; font-size: 0.8em;">${progress.toFixed(0)}%</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 15px; color: #6b7280;">
+                            <div>
+                                <small>Paid</small>
+                                <div style="color: #059669; font-weight: bold;">$${device.paid}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <small>Total</small>
+                                <div style="color: #1f2937; font-weight: bold;">$${device.total}</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="toggleLock('${device.id}')">
+                                ${device.status === 'active' ? '🔒 Lock' : '🔓 Unlock'}
+                            </button>
+                            <button class="btn btn-small" style="background: #6b7280; color: white;" onclick="viewDevice('${device.id}')">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleLock(deviceId) {
+            alert('Toggle lock for device: ' + deviceId);
+        }
+
+        function viewDevice(deviceId) {
+            alert('View details for device: ' + deviceId);
+        }
+
+        renderDevices();
+    </script>
+</body>
+</html>

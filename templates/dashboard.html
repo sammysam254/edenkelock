@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Eden M-Kopa</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 User Dashboard</h1>
+            <p>Manage your device and payments</p>
+            <div class="nav">
+                <a href="/">Home</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/admin">Admin</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #059669; margin-bottom: 20px;">Loan Information</h2>
+            
+            <div class="loan-info">
+                <div class="info-item">
+                    <label>Total Loan Amount</label>
+                    <div class="amount" id="totalAmount">$0.00</div>
+                </div>
+                <div class="info-item">
+                    <label>Amount Paid</label>
+                    <div class="amount" id="amountPaid">$0.00</div>
+                </div>
+                <div class="info-item">
+                    <label>Remaining Balance</label>
+                    <div class="amount" id="balance">$0.00</div>
+                </div>
+                <div class="info-item">
+                    <label>Device Status</label>
+                    <div class="amount" id="deviceStatus">Active</div>
+                </div>
+            </div>
+
+            <h3 style="color: #059669; margin: 25px 0 15px 0;">Payment Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="makePayment()">💳 Pay Now</button>
+                <button class="btn btn-danger" onclick="viewHistory()">📜 Payment History</button>
+            </div>
+        </div>
+
+        <div class="card payment-history" id="paymentHistory" style="display: none;">
+            <h2 style="color: #059669; margin-bottom: 20px;">Payment History</h2>
+            <div id="historyList">
+                <p style="color: #6b7280;">No payment history available</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - replace with actual API call
+        const loanData = {
+            totalAmount: 1000,
+            amountPaid: 650,
+            deviceStatus: 'active'
+        };
+
+        const balance = loanData.totalAmount - loanData.amountPaid;
+        const progress = (loanData.amountPaid / loanData.totalAmount) * 100;
+
+        document.getElementById('totalAmount').textContent = '$' + loanData.totalAmount.toFixed(2);
+        document.getElementById('amountPaid').textContent = '$' + loanData.amountPaid.toFixed(2);
+        document.getElementById('balance').textContent = '$' + balance.toFixed(2);
+        document.getElementById('deviceStatus').textContent = loanData.deviceStatus.toUpperCase();
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressBar').textContent = progress.toFixed(0) + '%';
+
+        function makePayment() {
+            alert('Payment gateway integration coming soon!');
+        }
+
+        function viewHistory() {
+            const historyDiv = document.getElementById('paymentHistory');
+            if (historyDiv.style.display === 'none') {
+                historyDiv.style.display = 'block';
+                loadPaymentHistory();
+            } else {
+                historyDiv.style.display = 'none';
+            }
+        }
+
+        function loadPaymentHistory() {
+            // Sample payment history
+            const payments = [
+                { date: '2024-03-15', amount: 200 },
+                { date: '2024-03-01', amount: 250 },
+                { date: '2024-02-15', amount: 200 }
+            ];
+
+            const historyHTML = payments.map(p => `
+                <div class="payment-item">
+                    <span class="date">${p.date}</span>
+                    <span class="amount">$${p.amount.toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('historyList').innerHTML = historyHTML;
+        }
+    </script>
+</body>
+</html>

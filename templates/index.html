@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eden M-Kopa - Device Financing Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 Eden M-Kopa</h1>
+            <p>Device Financing & Management Platform</p>
+            <div class="nav">
+                <a href="/">Home</a>
+                <a href="/dashboard">User Dashboard</a>
+                <a href="/admin">Admin Panel</a>
+                <a href="/administrator">Administrator</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Devices</h3>
+                <div class="value" id="totalDevices">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Devices</h3>
+                <div class="value" id="activeDevices">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Customers</h3>
+                <div class="value" id="totalCustomers">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Revenue</h3>
+                <div class="value" id="totalRevenue">$0.00</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #059669; margin-bottom: 15px;">Welcome to Eden M-Kopa</h2>
+            <p style="color: #6b7280; line-height: 1.6;">
+                Eden M-Kopa is a comprehensive device financing and management platform that enables 
+                businesses to offer pay-as-you-go devices with remote lock/unlock capabilities. 
+                Built with blockchain integration for secure payment tracking and Android Device 
+                Policy Controller for device management.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #059669; margin-bottom: 15px;">Key Features</h2>
+            <ul style="color: #6b7280; line-height: 2;">
+                <li>📱 Remote device lock/unlock management</li>
+                <li>💰 Flexible payment plans and tracking</li>
+                <li>🔐 Blockchain-based payment verification</li>
+                <li>📊 Real-time analytics and reporting</li>
+                <li>👥 Customer and device management</li>
+                <li>🔔 Automated payment reminders</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('totalDevices').textContent = data.totalDevices || 0;
+                document.getElementById('activeDevices').textContent = data.activeDevices || 0;
+                document.getElementById('totalCustomers').textContent = data.totalCustomers || 0;
+                document.getElementById('totalRevenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
+            })
+            .catch(err => console.error('Failed to load stats:', err));
+    </script>
+</body>
+</html>
