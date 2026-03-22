@@ -19,6 +19,33 @@
         </div>
 
         <div class="card">
+            <h2 style="color: #059669; margin-bottom: 20px;">📱 Scan Device QR Code</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                To provision a new device as Device Owner:
+                <br>1. Factory reset the device
+                <br>2. Install Eden APK
+                <br>3. Tap white screen 3 times to show QR code
+                <br>4. Click "Scan QR Code" below and scan the device
+            </p>
+            
+            <button class="btn btn-primary" onclick="startQRScanner()" style="margin-bottom: 20px;">
+                📷 Scan Device QR Code
+            </button>
+            
+            <div id="qrScannerContainer" style="display: none;">
+                <video id="qrVideo" style="width: 100%; max-width: 500px; border: 2px solid #10b981; border-radius: 10px;"></video>
+                <button class="btn" onclick="stopQRScanner()" style="margin-top: 10px; background: #ef4444; color: white;">
+                    Stop Scanner
+                </button>
+            </div>
+            
+            <div id="qrResult" style="display: none; margin-top: 20px; padding: 15px; background: #d1fae5; border-radius: 8px;">
+                <h3 style="color: #059669;">✅ QR Code Scanned Successfully!</h3>
+                <p id="qrResultText" style="color: #374151; margin-top: 10px;"></p>
+            </div>
+        </div>
+
+        <div class="card">
             <h2 style="color: #059669; margin-bottom: 20px;">Enroll New Device</h2>
             <form id="enrollDeviceForm" style="max-width: 800px;">
                 <h3 style="color: #059669; margin: 20px 0 15px 0;">Device Information</h3>
@@ -116,6 +143,7 @@
         }
     </style>
 
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
         // Check authentication
         const token = localStorage.getItem('eden_token');
@@ -123,6 +151,71 @@
         
         if (!token || (user.role !== 'admin' && user.role !== 'super_admin')) {
             window.location.href = '/login';
+        }
+
+        let html5QrCode = null;
+
+        function startQRScanner() {
+            const container = document.getElementById('qrScannerContainer');
+            container.style.display = 'block';
+            
+            html5QrCode = new Html5Qrcode("qrVideo");
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText, decodedResult) => {
+                    handleQRCodeScanned(decodedText);
+                    stopQRScanner();
+                },
+                (errorMessage) => {
+                    // Ignore scan errors
+                }
+            ).catch((err) => {
+                alert('Error starting camera: ' + err);
+            });
+        }
+
+        function stopQRScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('qrScannerContainer').style.display = 'none';
+                }).catch((err) => {
+                    console.error('Error stopping scanner:', err);
+                });
+            }
+        }
+
+        function handleQRCodeScanned(qrData) {
+            try {
+                const provisioningData = JSON.parse(qrData);
+                
+                document.getElementById('qrResult').style.display = 'block';
+                document.getElementById('qrResultText').innerHTML = `
+                    <strong>Device Provisioning Data Received:</strong><br>
+                    Device ID: ${provisioningData.android?.app?.extra?.PROVISIONING_ADMIN_EXTRAS_BUNDLE?.device_id || 'Unknown'}<br>
+                    <br>
+                    <strong>Next Steps:</strong><br>
+                    1. The device will now provision automatically<br>
+                    2. Wait for provisioning to complete (1-2 minutes)<br>
+                    3. Device will restart and Eden will be Device Owner<br>
+                    4. You can now enroll this device below
+                `;
+                
+                alert('QR Code scanned successfully! Device will provision automatically.');
+                
+            } catch (e) {
+                document.getElementById('qrResult').style.display = 'block';
+                document.getElementById('qrResultText').innerHTML = `
+                    <strong>QR Code Data:</strong><br>
+                    ${qrData}<br>
+                    <br>
+                    Device will provision automatically.
+                `;
+            }
         }
 
         // Load recent devices
