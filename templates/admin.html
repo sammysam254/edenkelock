@@ -3,138 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Eden</title>
+    <title>Administrator Panel - Eden</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌿 Admin Panel</h1>
-            <p>Manage devices and customers</p>
+            <h1>🌿 Administrator Panel</h1>
+            <p>Enroll devices for customers</p>
             <div class="nav">
                 <a href="/">Home</a>
-                <a href="/dashboard">Dashboard</a>
-                <a href="/admin">Admin</a>
-                <a href="/administrator">Administrator</a>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Devices</h3>
-                <div class="value" id="totalDevices">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Active Devices</h3>
-                <div class="value" id="activeDevices">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Locked Devices</h3>
-                <div class="value" id="lockedDevices">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Revenue</h3>
-                <div class="value" id="totalRevenue">$0.00</div>
+                <a href="/admin">Enroll Device</a>
+                <a href="#" onclick="logout()">Logout</a>
             </div>
         </div>
 
         <div class="card">
-            <h2 style="color: #059669; margin-bottom: 20px;">Device Management</h2>
-            <div class="device-grid" id="deviceGrid">
-                <p style="color: #6b7280;">Loading devices...</p>
-            </div>
+            <h2 style="color: #059669; margin-bottom: 20px;">Enroll New Device</h2>
+            <form id="enrollDeviceForm" style="max-width: 600px;">
+                <div class="form-group">
+                    <label>Device ID</label>
+                    <input type="text" id="deviceId" required placeholder="DEV001">
+                </div>
+                <div class="form-group">
+                    <label>Customer ID</label>
+                    <input type="text" id="customerId" required placeholder="CUST001">
+                </div>
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="customerName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Customer Phone</label>
+                    <input type="tel" id="customerPhone" required placeholder="+254700000000">
+                </div>
+                <div class="form-group">
+                    <label>Total Amount ($)</label>
+                    <input type="number" id="totalAmount" required step="0.01" placeholder="1000.00">
+                </div>
+                <div class="form-group">
+                    <label>Initial Payment ($)</label>
+                    <input type="number" id="initialPayment" value="0" step="0.01" placeholder="0.00">
+                </div>
+                <button type="submit" class="btn btn-primary">Enroll Device</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #059669; margin-bottom: 20px;">Recently Enrolled Devices</h2>
+            <table id="devicesTable">
+                <thead>
+                    <tr>
+                        <th>Device ID</th>
+                        <th>Customer</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="devicesBody">
+                    <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
+    <style>
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+    </style>
+
     <script>
-        fetch('/api/stats')
+        // Check authentication
+        const token = localStorage.getItem('eden_token');
+        const user = JSON.parse(localStorage.getItem('eden_user') || '{}');
+        
+        if (!token || (user.role !== 'admin' && user.role !== 'super_admin')) {
+            window.location.href = '/login';
+        }
+
+        // Load recent devices
+        fetch('/api/devices', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(devices => {
+            const tbody = document.getElementById('devicesBody');
+            if (!devices || devices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No devices enrolled yet</td></tr>';
+                return;
+            }
+            
+            // Show last 10 devices
+            const recentDevices = devices.slice(-10).reverse();
+            tbody.innerHTML = recentDevices.map(device => `
+                <tr>
+                    <td>${device.device_id}</td>
+                    <td>${device.customer_id}</td>
+                    <td>$${parseFloat(device.total_amount).toFixed(2)}</td>
+                    <td><span class="status-badge status-${device.status === 'active' ? 'active' : 'locked'}">${device.status.toUpperCase()}</span></td>
+                    <td>${new Date(device.created_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        })
+        .catch(err => {
+            document.getElementById('devicesBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ef4444;">Error loading devices</td></tr>';
+        });
+
+        // Enroll device
+        document.getElementById('enrollDeviceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const deviceData = {
+                device_id: document.getElementById('deviceId').value,
+                customer_id: document.getElementById('customerId').value,
+                customer_name: document.getElementById('customerName').value,
+                customer_phone: document.getElementById('customerPhone').value,
+                total_amount: parseFloat(document.getElementById('totalAmount').value),
+                amount_paid: parseFloat(document.getElementById('initialPayment').value)
+            };
+            
+            fetch('/api/devices/enroll', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(deviceData)
+            })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('totalDevices').textContent = data.totalDevices || 0;
-                document.getElementById('activeDevices').textContent = data.activeDevices || 0;
-                document.getElementById('lockedDevices').textContent = (data.totalDevices - data.activeDevices) || 0;
-                document.getElementById('totalRevenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
-            });
-
-        // Load real devices from API
-        fetch('/api/devices')
-            .then(res => res.json())
-            .then(devices => {
-                if (devices.length === 0) {
-                    document.getElementById('deviceGrid').innerHTML = '<p style="color: #6b7280;">No devices found</p>';
-                    return;
+                if (data.success) {
+                    alert('Device enrolled successfully!');
+                    document.getElementById('enrollDeviceForm').reset();
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
                 }
-                renderDevices(devices);
             })
             .catch(err => {
-                console.error('Error loading devices:', err);
-                document.getElementById('deviceGrid').innerHTML = '<p style="color: #ef4444;">Error loading devices</p>';
+                alert('Error: ' + err.message);
             });
+        });
 
-        function renderDevices(devices) {
-            const grid = document.getElementById('deviceGrid');
-            grid.innerHTML = devices.map(device => {
-                const progress = (device.amount_paid / device.total_amount) * 100;
-                const statusClass = device.status === 'active' ? 'status-active' : 'status-locked';
-                const cardClass = device.status === 'locked' ? 'device-card locked' : 'device-card';
-                
-                return `
-                    <div class="${cardClass}">
-                        <div class="device-header">
-                            <div class="device-id">${device.device_id}</div>
-                            <span class="status-badge ${statusClass}">${device.status.toUpperCase()}</span>
-                        </div>
-                        <p style="color: #6b7280; margin-bottom: 15px;">Customer: ${device.customer_id}</p>
-                        <div class="progress-bar" style="height: 20px;">
-                            <div class="progress-fill" style="width: ${progress}%; font-size: 0.8em;">${progress.toFixed(0)}%</div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-top: 15px; color: #6b7280;">
-                            <div>
-                                <small>Paid</small>
-                                <div style="color: #059669; font-weight: bold;">$${device.amount_paid}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <small>Total</small>
-                                <div style="color: #1f2937; font-weight: bold;">$${device.total_amount}</div>
-                            </div>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="toggleLock('${device.device_id}', '${device.status}')">
-                                ${device.status === 'active' ? '🔒 Lock' : '🔓 Unlock'}
-                            </button>
-                            <button class="btn btn-small" style="background: #6b7280; color: white;" onclick="viewDevice('${device.device_id}')">
-                                View Details
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleLock(deviceId, currentStatus) {
-            const action = currentStatus === 'active' ? 'lock' : 'unlock';
-            fetch(`/api/devices/${deviceId}/${action}`, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`Device ${action}ed successfully!`);
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (data.error || 'Unknown error'));
-                    }
-                })
-                .catch(err => {
-                    alert('Error: ' + err.message);
-                });
-        }
-
-        function viewDevice(deviceId) {
-            fetch(`/api/devices/${deviceId}`)
-                .then(res => res.json())
-                .then(device => {
-                    alert(`Device: ${device.device_id}\nCustomer: ${device.customer_id}\nStatus: ${device.status}\nPaid: $${device.amount_paid}\nTotal: $${device.total_amount}`);
-                })
-                .catch(err => alert('Error: ' + err.message));
+        function logout() {
+            localStorage.removeItem('eden_token');
+            localStorage.removeItem('eden_user');
+            window.location.href = '/login';
         }
     </script>
 </body>

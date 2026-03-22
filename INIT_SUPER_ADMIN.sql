@@ -23,11 +23,11 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
 INSERT INTO admins (email, password_hash, full_name, role)
 VALUES (
     'sammyseth260@gmail.com',
-    '5ba3e91e5a1c15b76194ca105cb345523bb7cdac33a708d4491484eb4a1c6b9f',
+    '5ba3e91e5a1c15b76194ca105cb345523bb7cdac33a708d4491484eb4a13e6ed',
     'Super Administrator',
     'super_admin'
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
 -- Step 4: Verify the super admin was created
 SELECT id, email, full_name, role, created_at 
