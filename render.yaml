@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: eden-mkopa
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SUPABASE_URL
+        value: https://fvkjeteywfcppbtovbiv.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: RPC_URL
+        value: ""
+      - key: CONTRACT_ADDRESS
+        value: ""
+      - key: POLL_INTERVAL
+        value: 30
+      - key: PORT
+        value: 10000

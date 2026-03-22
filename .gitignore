@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+backend/.env
+dashboard/.env.local
+
+# Build outputs
+dashboard/.next/
+dashboard/out/
+android/app/build/
+android/build/
+*.apk
+*.aab
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# QR codes
+provisioning/qr_*.png
+
+# Backend
+backend/last_block.txt
+
+# Android
+*.iml
+.gradle
+local.properties
+.externalNativeBuild
+.cxx
