@@ -67,40 +67,37 @@
     </div>
 
     <script>
-        const token = localStorage.getItem('eden_customer_token');
         const phone = localStorage.getItem('eden_customer_phone');
         
-        if (!token || !phone) {
+        if (!phone) {
             window.location.href = '/customer-login';
         }
 
-        fetch(`/api/customer/dashboard?phone=${phone}`, {
-            headers: { 'Authorization': 'Bearer ' + token }
-        })
+        fetch(`/api/customer/dashboard?phone=${encodeURIComponent(phone)}`)
         .then(res => res.json())
         .then(data => {
             if (data.error) {
-                alert('Session expired. Please login again.');
+                alert('No device found for this phone number. Please contact administrator.');
                 window.location.href = '/customer-login';
                 return;
             }
             
             const device = data.device;
             const balance = device.total_amount - device.amount_paid;
-            const progress = (device.amount_paid / device.total_amount) * 100;
+            const progress = device.total_amount > 0 ? (device.amount_paid / device.total_amount) * 100 : 0;
 
-            document.getElementById('deviceId').textContent = device.device_id;
-            document.getElementById('deviceStatus').textContent = device.status.toUpperCase();
+            document.getElementById('deviceId').textContent = device.device_id || 'N/A';
+            document.getElementById('deviceStatus').textContent = (device.status || 'locked').toUpperCase();
             document.getElementById('deviceStatus').style.color = device.status === 'active' ? '#059669' : '#ef4444';
-            document.getElementById('totalAmount').textContent = 'KES ' + parseFloat(device.total_amount).toLocaleString();
-            document.getElementById('amountPaid').textContent = 'KES ' + parseFloat(device.amount_paid).toLocaleString();
+            document.getElementById('totalAmount').textContent = 'KES ' + parseFloat(device.total_amount || 0).toLocaleString();
+            document.getElementById('amountPaid').textContent = 'KES ' + parseFloat(device.amount_paid || 0).toLocaleString();
             document.getElementById('balance').textContent = 'KES ' + balance.toLocaleString();
             document.getElementById('customerName').textContent = device.customer_name || 'N/A';
             document.getElementById('progressBar').style.width = progress + '%';
             document.getElementById('progressBar').textContent = progress.toFixed(0) + '%';
         })
         .catch(err => {
-            alert('Error loading dashboard');
+            alert('Error loading dashboard. Please try again.');
             console.error(err);
         });
 
@@ -119,9 +116,7 @@
         }
 
         function loadPaymentHistory() {
-            fetch(`/api/customer/payments?phone=${phone}`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            })
+            fetch(`/api/customer/payments?phone=${encodeURIComponent(phone)}`)
             .then(res => res.json())
             .then(payments => {
                 if (!payments || payments.length === 0) {

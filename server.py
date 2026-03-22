@@ -278,15 +278,10 @@ def customer_login():
 @app.route("/api/customer/dashboard", methods=["GET"])
 def customer_dashboard():
     try:
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
         phone = request.args.get("phone")
         
-        if not token or not phone:
-            return jsonify({"error": "Unauthorized"}), 401
-        
-        session = verify_customer_token(token)
-        if not session or session.get("phone_number") != phone:
-            return jsonify({"error": "Invalid session"}), 401
+        if not phone:
+            return jsonify({"error": "Phone number required"}), 400
         
         device_result = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
         
@@ -303,15 +298,10 @@ def customer_dashboard():
 @app.route("/api/customer/payments", methods=["GET"])
 def customer_payments():
     try:
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
         phone = request.args.get("phone")
         
-        if not token or not phone:
-            return jsonify({"error": "Unauthorized"}), 401
-        
-        session = verify_customer_token(token)
-        if not session or session.get("phone_number") != phone:
-            return jsonify({"error": "Invalid session"}), 401
+        if not phone:
+            return jsonify([])
         
         device_result = supabase.table("devices").select("id").eq("customer_phone", phone).execute()
         
@@ -538,3 +528,5 @@ def health():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port, debug=False)
+
+
