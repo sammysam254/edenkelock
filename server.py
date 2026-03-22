@@ -1,5 +1,7 @@
-﻿import os
-from flask import Flask, jsonify, render_template
+import os
+import subprocess
+import threading
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from supabase import create_client
 import logging
@@ -19,21 +21,15 @@ except Exception as e:
     logger.warning(f"Supabase init failed: {e}")
     supabase = None
 
-@app.route("/")
-def home():
-    return render_template('index.html')
 
-@app.route("/dashboard")
-def dashboard():
-    return render_template('dashboard.html')
+def start_nextjs():
+    try:
+        logger.info("Starting Next.js...")
+        subprocess.run(["npm", "start"], cwd="dashboard", env={**os.environ, "PORT": "3000"})
+    except Exception as e:
+        logger.error(f"Next.js error: {e}")
 
-@app.route("/admin")
-def admin():
-    return render_template('admin.html')
-
-@app.route("/administrator")
-def administrator():
-    return render_template('admin.html')
+threading.Thread(target=start_nextjs, daemon=True).start()
 
 @app.route("/api/health")
 def health():
@@ -42,7 +38,7 @@ def health():
 @app.route("/api/stats")
 def stats():
     if not supabase:
-        return jsonify({"totalDevices": 0, "activeDevices": 0, "totalCustomers": 0, "totalRevenue": 0})
+        return jsonify({"error": "Supabase not configured"}), 500
     try:
         devices = supabase.table("devices").select("*", count="exact").execute()
         customers = supabase.table("customers").select("*", count="exact").execute()
@@ -57,8 +53,22 @@ def stats():
         })
     except Exception as e:
         logger.error(f"Error: {e}")
-        return jsonify({"totalDevices": 0, "activeDevices": 0, "totalCustomers": 0, "totalRevenue": 0})
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def proxy(path):
+    import requests
+    try:
+        url = f"http://localhost:3000/{path}"
+        if request.query_string:
+            url += f"?{request.query_string.decode()}"
+        resp = requests.get(url, timeout=30)
+        return resp.content, resp.status_code, dict(resp.headers)
+    except:
+        return "Starting...", 503
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "10000"))
     app.run(host="0.0.0.0", port=port)
+
