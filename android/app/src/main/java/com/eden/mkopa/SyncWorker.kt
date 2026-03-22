@@ -51,7 +51,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, p
                 .build()
             
             val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-                15, TimeUnit.MINUTES
+                1, TimeUnit.MINUTES  // Check every 1 minute for immediate locking
             )
                 .setConstraints(constraints)
                 .build()
@@ -59,8 +59,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, p
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 "device_sync",
                 ExistingPeriodicWorkPolicy.KEEP,
-                syncRequest
-            )
+                syncRequest)
         }
     }
 }

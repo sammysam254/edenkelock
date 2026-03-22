@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         // Check if device owner and setup
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
             setupDeviceOwner()
+            // Start background sync
+            SyncWorker.schedule(this)
         }
         
         // Load customer login page

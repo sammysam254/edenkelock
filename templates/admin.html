@@ -80,6 +80,7 @@
                         <th>Total Amount</th>
                         <th>Status</th>
                         <th>Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="devicesBody">
@@ -145,6 +146,12 @@
                     <td>KES ${parseFloat(device.total_amount).toLocaleString()}</td>
                     <td><span class="status-badge status-${device.status === 'active' ? 'active' : 'locked'}">${device.status.toUpperCase()}</span></td>
                     <td>${new Date(device.created_at).toLocaleDateString('en-KE', {timeZone: 'Africa/Nairobi'})}</td>
+                    <td>
+                        ${device.status === 'locked' 
+                            ? `<button class="btn btn-primary btn-small" onclick="unlockDevice('${device.device_id}')">🔓 Unlock</button>`
+                            : `<button class="btn btn-danger btn-small" onclick="lockDevice('${device.device_id}')">🔒 Lock</button>`
+                        }
+                    </td>
                 </tr>
             `).join('');
         })
@@ -221,6 +228,44 @@
             localStorage.removeItem('eden_token');
             localStorage.removeItem('eden_user');
             window.location.href = '/login';
+        }
+
+        function lockDevice(deviceId) {
+            if (!confirm('Are you sure you want to LOCK this device?')) return;
+            
+            fetch(`/api/devices/${deviceId}/lock`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Device LOCKED successfully! The device will lock within 1 minute.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        }
+
+        function unlockDevice(deviceId) {
+            if (!confirm('Are you sure you want to UNLOCK this device?')) return;
+            
+            fetch(`/api/devices/${deviceId}/unlock`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Device UNLOCKED successfully! The device will unlock within 1 minute.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
         }
     </script>
 </body>
