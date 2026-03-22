@@ -20,11 +20,11 @@
         "source": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-main-41:\\layout\\activity_lock_screen.xml"
     },
     {
-        "merged": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-merged_res-40:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-main-41:\\drawable\\ic_launcher_foreground.xml"
+        "merged": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-merged_res-40:\\layout_activity_device_owner_setup.xml.flat",
+        "source": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-main-41:\\layout\\activity_device_owner_setup.xml"
     },
     {
-        "merged": "com.eden.mkopa.app-merged_res-40:/layout_activity_device_owner_setup.xml.flat",
-        "source": "com.eden.mkopa.app-main-41:/layout/activity_device_owner_setup.xml"
+        "merged": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-merged_res-40:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\COLLINS KIBET\\.gradle\\daemon\\8.2\\com.eden.mkopa.app-main-41:\\drawable\\ic_launcher_foreground.xml"
     }
 ]

@@ -21,32 +21,39 @@ The app MUST be set as **Device Owner** during initial device setup.
 
 **For Customer Devices:**
 
-1. **Factory Reset Device**
+1. **Enroll Device in Dashboard**
+   - Admin/Super Admin logs into dashboard
+   - Fills out enrollment form with customer details
+   - Uploads KYC documents (ID front/back, passport photo)
+   - Submits enrollment
+   - **QR code appears automatically after enrollment**
+
+2. **Factory Reset Device**
    ```
    Settings → System → Reset → Factory Data Reset
    ```
 
-2. **Start Setup Wizard**
+3. **Start Setup Wizard**
    - Device boots to welcome screen
    - **Tap screen 6 times quickly**
-   - QR scanner appears
+   - Android's built-in QR scanner appears
 
-3. **Admin Generates QR**
-   - Login to Eden dashboard
-   - Go to "Enroll Device"
-   - Enter device details
-   - QR code is generated
-
-4. **Scan QR Code**
-   - Device scans QR from dashboard
-   - Eden app downloads automatically
-   - Device Owner is set
-   - Device locks immediately
+4. **Scan QR Code from Dashboard**
+   - Point device camera at QR code on admin dashboard
+   - Device scans QR code automatically
+   - Eden app downloads automatically from server
+   - Device Owner is set automatically
+   - Device restarts (1-2 minutes)
 
 5. **Done!**
    - Device is now locked
+   - Eden app opens in kiosk mode
    - Customer can only use Eden app
    - All restrictions active
+
+**For Existing Devices:**
+- Click "Generate QR" button next to device in dashboard
+- Follow steps 2-5 above
 
 ### Method 2: ADB Command (Testing)
 
@@ -123,14 +130,23 @@ If any of these work, Device Owner is NOT set correctly.
 
 **For Each Customer Device:**
 
-1. Admin receives new device
+1. Admin logs into dashboard
+2. Enrolls device with customer details and KYC documents
+3. QR code appears automatically after enrollment
+4. Factory reset the device
+5. During setup wizard, tap screen 6 times
+6. Android's QR scanner appears
+7. Scan QR code from dashboard
+8. Device auto-configures and provisions
+9. Device restarts with Eden as Device Owner
+10. Hand device to customer
+11. Customer logs in with phone + PIN
+12. Device is locked and ready
+
+**For Existing Enrolled Devices:**
+1. Click "Generate QR" button in dashboard
 2. Factory reset device
-3. During setup, tap 6 times
-4. Admin scans QR from dashboard
-5. Device auto-configures
-6. Hand device to customer
-7. Customer logs in with phone + PIN
-8. Device is locked and ready
+3. Follow steps 5-9 above
 
 ## 🐛 Troubleshooting
 

@@ -101,15 +101,39 @@
 
     <script>
         let currentPhone = '';
+        
+        // Get device_id from URL if present (from Android app)
+        const urlParams = new URLSearchParams(window.location.search);
+        const deviceId = urlParams.get('device_id');
+        const serialNumber = urlParams.get('serial_number');
+        
+        // If device_id is present, show message
+        if (deviceId) {
+            const loginCard = document.querySelector('.login-card');
+            const deviceInfo = document.createElement('div');
+            deviceInfo.style.cssText = 'background: #d1fae5; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;';
+            deviceInfo.innerHTML = `
+                <p style="color: #059669; margin: 0; font-size: 0.9em;">
+                    📱 Device provisioned successfully!<br>
+                    Login with your registered phone number
+                </p>
+            `;
+            loginCard.insertBefore(deviceInfo, loginCard.firstChild.nextSibling.nextSibling);
+        }
 
         document.getElementById('phoneForm').addEventListener('submit', function(e) {
             e.preventDefault();
             currentPhone = document.getElementById('phoneNumber').value;
             
+            // Include device_id in check if available
+            const requestData = { phone_number: currentPhone };
+            if (deviceId) requestData.device_id = deviceId;
+            if (serialNumber) requestData.serial_number = serialNumber;
+            
             fetch('/api/customer/check-phone', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone_number: currentPhone })
+                body: JSON.stringify(requestData)
             })
             .then(res => res.json())
             .then(data => {
@@ -132,16 +156,22 @@
             e.preventDefault();
             const pin = document.getElementById('pin').value;
             
+            // Include device_id in login if available
+            const requestData = { phone_number: currentPhone, pin: pin };
+            if (deviceId) requestData.device_id = deviceId;
+            if (serialNumber) requestData.serial_number = serialNumber;
+            
             fetch('/api/customer/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone_number: currentPhone, pin: pin })
+                body: JSON.stringify(requestData)
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     localStorage.setItem('eden_customer_token', data.token);
                     localStorage.setItem('eden_customer_phone', currentPhone);
+                    if (deviceId) localStorage.setItem('eden_device_id', deviceId);
                     window.location.href = '/dashboard';
                 } else {
                     alert('Invalid PIN');

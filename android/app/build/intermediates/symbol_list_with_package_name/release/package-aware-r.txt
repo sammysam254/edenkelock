@@ -3204,7 +3204,6 @@ id ignoreRequest
 id image
 id indeterminate
 id info
-id instructionText
 id instructionsText
 id invisible
 id inward
@@ -3331,7 +3330,6 @@ id pressed
 id progressBar
 id progress_circular
 id progress_horizontal
-id qrCodeImage
 id radio
 id ratio
 id rectangles
@@ -3460,7 +3458,6 @@ id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
 id webView
-id welcomeText
 id withText
 id with_icon
 id withinBounds
@@ -3583,7 +3580,6 @@ layout abc_tooltip
 layout activity_device_owner_setup
 layout activity_lock_screen
 layout activity_main
-layout activity_setup_wizard
 layout custom_dialog
 layout design_bottom_navigation_item
 layout design_bottom_sheet_dialog

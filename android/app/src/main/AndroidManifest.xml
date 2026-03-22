@@ -52,23 +52,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Setup Wizard Activity -->
-        <activity
-            android:name=".SetupWizardActivity"
-            android:exported="true"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <!-- NFC Provisioning -->
-            <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="application/com.android.managedprovisioning" />
-            </intent-filter>
-        </activity>
-
         <!-- Lock Screen Activity -->
         <activity
             android:name=".LockScreenActivity"

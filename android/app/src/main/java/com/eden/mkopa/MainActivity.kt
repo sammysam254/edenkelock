@@ -155,11 +155,26 @@ class MainActivity : AppCompatActivity() {
     private fun loadCustomerDashboard() {
         val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("is_logged_in", false)
+        val deviceId = prefs.getString("device_id", null)
+        val serialNumber = prefs.getString("serial_number", null)
         
         if (isLoggedIn) {
-            webView.loadUrl("$BASE_URL/dashboard")
+            // Load dashboard with device info
+            var url = "$BASE_URL/dashboard"
+            if (deviceId != null) {
+                url += "?device_id=$deviceId"
+            }
+            webView.loadUrl(url)
         } else {
-            webView.loadUrl("$BASE_URL/customer-login")
+            // Load login with device info for auto-linking
+            var url = "$BASE_URL/customer-login"
+            if (deviceId != null) {
+                url += "?device_id=$deviceId"
+            }
+            if (serialNumber != null) {
+                url += if (deviceId != null) "&serial_number=$serialNumber" else "?serial_number=$serialNumber"
+            }
+            webView.loadUrl(url)
         }
     }
     

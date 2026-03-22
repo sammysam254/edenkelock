@@ -19949,11 +19949,13 @@ com.google.errorprone.annotations.concurrent.GuardedBy
 com.google.errorprone.annotations.concurrent.LazyInit
 com.google.errorprone.annotations.concurrent.LockMethod
 com.google.errorprone.annotations.concurrent.UnlockMethod
+com.google.zxing.BarcodeFormat
 com.google.zxing.Binarizer
 com.google.zxing.BinaryBitmap
 com.google.zxing.ChecksumException
 com.google.zxing.DecodeHintType
 com.google.zxing.Dimension
+com.google.zxing.EncodeHintType
 com.google.zxing.FormatException
 com.google.zxing.InvertedLuminanceSource
 com.google.zxing.LuminanceSource
@@ -19970,8 +19972,7 @@ com.google.zxing.ResultMetadataType
 com.google.zxing.ResultPoint
 com.google.zxing.ResultPointCallback
 com.google.zxing.Writer
-com.google.zxing.WriterException:
-    public void <init>(java.lang.Throwable)
+com.google.zxing.WriterException
 com.google.zxing.aztec.AztecDetectorResult
 com.google.zxing.aztec.AztecReader
 com.google.zxing.aztec.AztecWriter
@@ -20027,51 +20028,14 @@ com.google.zxing.client.result.VINParsedResult
 com.google.zxing.client.result.VINResultParser
 com.google.zxing.client.result.WifiParsedResult
 com.google.zxing.client.result.WifiResultParser
-com.google.zxing.common.BitArray:
-    private static final float LOAD_FACTOR
-    public void <init>(int)
-    public void clear()
-    public void flip(int)
-    public int[] getBitArray()
-    public int getNextSet(int)
-    public int getNextUnset(int)
-    public boolean isRange(int,int,boolean)
-    public void reverse()
-    public void set(int)
-    public void setBulk(int,int)
-    public void setRange(int,int)
-com.google.zxing.common.BitMatrix:
-    public void <init>(int)
-    public void clear()
-    public void flip()
-    public void flip(int,int)
-    public int[] getBottomRightOnBit()
-    public int[] getEnclosingRectangle()
-    public int getHeight()
-    public com.google.zxing.common.BitArray getRow(int,com.google.zxing.common.BitArray)
-    public int getRowSize()
-    public int[] getTopLeftOnBit()
-    public int getWidth()
-    public static com.google.zxing.common.BitMatrix parse(java.lang.String,java.lang.String,java.lang.String)
-    public static com.google.zxing.common.BitMatrix parse(boolean[][])
-    public void rotate(int)
-    public void rotate180()
-    public void rotate90()
-    public void set(int,int)
-    public void setRow(int,com.google.zxing.common.BitArray)
-    public java.lang.String toString(java.lang.String,java.lang.String,java.lang.String)
-    public void unset(int,int)
-    public void xor(com.google.zxing.common.BitMatrix)
+com.google.zxing.common.BitArray
+com.google.zxing.common.BitMatrix
 com.google.zxing.common.BitSource
-com.google.zxing.common.CharacterSetECI:
-    public static com.google.zxing.common.CharacterSetECI getCharacterSetECIByValue(int)
-    public java.nio.charset.Charset getCharset()
+com.google.zxing.common.CharacterSetECI
 com.google.zxing.common.DecoderResult
 com.google.zxing.common.DefaultGridSampler
 com.google.zxing.common.DetectorResult
-com.google.zxing.common.ECIEncoderSet:
-    public byte[] encode(char,int)
-    public java.lang.String getCharsetName(int)
+com.google.zxing.common.ECIEncoderSet
 com.google.zxing.common.ECIInput
 com.google.zxing.common.ECIStringBuilder
 com.google.zxing.common.GlobalHistogramBinarizer
@@ -20081,22 +20045,14 @@ com.google.zxing.common.MinimalECIInput$1
 com.google.zxing.common.MinimalECIInput$InputEdge
 com.google.zxing.common.MinimalECIInput
 com.google.zxing.common.PerspectiveTransform
-com.google.zxing.common.StringUtils:
-    public static final java.lang.String GB2312
-    public static final java.lang.String SHIFT_JIS
-    private void <init>()
-    public static java.nio.charset.Charset guessCharset(byte[],java.util.Map)
-    public static java.lang.String guessEncoding(byte[],java.util.Map)
+com.google.zxing.common.StringUtils
 com.google.zxing.common.detector.MathUtils
 com.google.zxing.common.detector.MonochromeRectangleDetector
 com.google.zxing.common.detector.WhiteRectangleDetector
-com.google.zxing.common.reedsolomon.GenericGF:
-    com.google.zxing.common.reedsolomon.GenericGFPoly getOne()
-    public int getSize()
-com.google.zxing.common.reedsolomon.GenericGFPoly:
-    int evaluateAt(int)
-    com.google.zxing.common.reedsolomon.GenericGFPoly multiply(int)
+com.google.zxing.common.reedsolomon.GenericGF
+com.google.zxing.common.reedsolomon.GenericGFPoly
 com.google.zxing.common.reedsolomon.ReedSolomonDecoder
+com.google.zxing.common.reedsolomon.ReedSolomonEncoder
 com.google.zxing.common.reedsolomon.ReedSolomonException
 com.google.zxing.datamatrix.DataMatrixReader
 com.google.zxing.datamatrix.DataMatrixWriter
@@ -20241,8 +20197,7 @@ com.google.zxing.pdf417.encoder.PDF417HighLevelEncoder$NoECIInput
 com.google.zxing.pdf417.encoder.PDF417HighLevelEncoder
 com.google.zxing.pdf417.encoder.PDF417HighLevelEncoderTestAdapter
 com.google.zxing.qrcode.QRCodeReader
-com.google.zxing.qrcode.QRCodeWriter:
-    private static final int QUIET_ZONE_SIZE
+com.google.zxing.qrcode.QRCodeWriter
 com.google.zxing.qrcode.decoder.BitMatrixParser
 com.google.zxing.qrcode.decoder.DataBlock
 com.google.zxing.qrcode.decoder.DataMask$1
@@ -20257,17 +20212,13 @@ com.google.zxing.qrcode.decoder.DataMask
 com.google.zxing.qrcode.decoder.DecodedBitStreamParser$1
 com.google.zxing.qrcode.decoder.DecodedBitStreamParser
 com.google.zxing.qrcode.decoder.Decoder
-com.google.zxing.qrcode.decoder.ErrorCorrectionLevel:
-    public static com.google.zxing.qrcode.decoder.ErrorCorrectionLevel forBits(int)
+com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 com.google.zxing.qrcode.decoder.FormatInformation
-com.google.zxing.qrcode.decoder.Mode:
-    public static com.google.zxing.qrcode.decoder.Mode forBits(int)
+com.google.zxing.qrcode.decoder.Mode
 com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData
-com.google.zxing.qrcode.decoder.Version:
-    com.google.zxing.common.BitMatrix buildFunctionPattern()
-    static com.google.zxing.qrcode.decoder.Version decodeVersionInformation(int)
-    public int[] getAlignmentPatternCenters()
-    public static com.google.zxing.qrcode.decoder.Version getProvisionalVersionForDimension(int)
+com.google.zxing.qrcode.decoder.Version$ECB
+com.google.zxing.qrcode.decoder.Version$ECBlocks
+com.google.zxing.qrcode.decoder.Version
 com.google.zxing.qrcode.detector.AlignmentPattern
 com.google.zxing.qrcode.detector.AlignmentPatternFinder
 com.google.zxing.qrcode.detector.Detector
@@ -20276,29 +20227,19 @@ com.google.zxing.qrcode.detector.FinderPatternFinder$1
 com.google.zxing.qrcode.detector.FinderPatternFinder$EstimatedModuleComparator
 com.google.zxing.qrcode.detector.FinderPatternFinder
 com.google.zxing.qrcode.detector.FinderPatternInfo
-com.google.zxing.qrcode.encoder.ByteMatrix:
-    public void set(int,int,byte)
-com.google.zxing.qrcode.encoder.Encoder:
-    private void <init>()
-    public static com.google.zxing.qrcode.decoder.Mode chooseMode(java.lang.String)
-    public static com.google.zxing.qrcode.encoder.QRCode encode(java.lang.String,com.google.zxing.qrcode.decoder.ErrorCorrectionLevel)
-com.google.zxing.qrcode.encoder.MaskUtil:
-    private static final int N1
-    private static final int N2
-    private static final int N3
-    private static final int N4
-    private void <init>()
-com.google.zxing.qrcode.encoder.MatrixUtil:
-    private static final int TYPE_INFO_MASK_PATTERN
-    private static final int TYPE_INFO_POLY
-    private static final int VERSION_INFO_POLY
-    private void <init>()
-com.google.zxing.qrcode.encoder.QRCode:
-    public static final int NUM_MASK_PATTERNS
-    public com.google.zxing.qrcode.decoder.ErrorCorrectionLevel getECLevel()
-    public int getMaskPattern()
-    public com.google.zxing.qrcode.decoder.Mode getMode()
-    public com.google.zxing.qrcode.decoder.Version getVersion()
+com.google.zxing.qrcode.encoder.BlockPair
+com.google.zxing.qrcode.encoder.ByteMatrix
+com.google.zxing.qrcode.encoder.Encoder$1
+com.google.zxing.qrcode.encoder.Encoder
+com.google.zxing.qrcode.encoder.MaskUtil
+com.google.zxing.qrcode.encoder.MatrixUtil
+com.google.zxing.qrcode.encoder.MinimalEncoder$1
+com.google.zxing.qrcode.encoder.MinimalEncoder$Edge
+com.google.zxing.qrcode.encoder.MinimalEncoder$ResultList$ResultNode
+com.google.zxing.qrcode.encoder.MinimalEncoder$ResultList
+com.google.zxing.qrcode.encoder.MinimalEncoder$VersionSize
+com.google.zxing.qrcode.encoder.MinimalEncoder
+com.google.zxing.qrcode.encoder.QRCode
 kotlin.ArrayIntrinsicsKt
 kotlin.BuilderInference
 kotlin.CharCodeJVMKt
@@ -27732,10 +27673,8 @@ androidx.activity.result.ActivityResultRegistry$1:
     public final synthetic java.lang.String val$key
 androidx.activity.result.ActivityResultRegistry$3$$InternalSyntheticThrowCCEIfNotNull$294$2025804ee48157b73e7ba6ee24ee7819a25f8590dbb68233572fab25cfbc15f1$0
 androidx.activity.result.ActivityResultRegistry$3:
-    public void <init>(com.google.zxing.qrcode.encoder.MinimalEncoder,com.google.zxing.qrcode.decoder.Version,com.google.zxing.qrcode.encoder.MinimalEncoder$Edge)
     public final void deleteByWorkSpecId()
     public final androidx.lifecycle.ViewModel get(java.lang.Class)
-    public static void getBits()
     public final int getColor()
     public final float getDimension(int)
     public static float getFloat()
@@ -27743,10 +27682,7 @@ androidx.activity.result.ActivityResultRegistry$3:
     public static android.location.Location getLastKnownLocation()
     public final int getLayoutDimension(int,int)
     public static androidx.lifecycle.Lifecycle getLifecycle()
-    public final int getSize()
-    public final int getSize(com.google.zxing.qrcode.decoder.Version)
     public static java.lang.CharSequence[] getTextArray()
-    public static com.google.zxing.qrcode.decoder.Version getVersion()
     public static android.content.res.TypedArray getWrappedTypeArray()
     public final void insert()
     public static boolean isNight()
@@ -28153,15 +28089,11 @@ androidx.appcompat.app.AlertDialog$Builder:
     public final int get(int)
     public static java.util.List getAll()
     public static android.content.Context getContext()
-    public static androidx.core.view.NestedScrollingParentHelper[] getECBlocks()
-    public static int getECCodewordsPerBlock()
     public static androidx.core.provider.FontsContractCompat$FontInfo[] getFonts()
     public final int getHeaderTableSize()
     public static int getMaxConcurrentStreams()
     public static int getMaxFrameSize()
-    public final int getNumBlocks()
     public static int getStatusCode()
-    public final int getTotalECCodewords()
     public final boolean hasNext()
     public final boolean isSet(int)
     public static void merge()
@@ -28962,22 +28894,14 @@ androidx.appcompat.widget.AppCompatEmojiTextHelper:
 androidx.appcompat.widget.AppCompatHintHelper
 androidx.appcompat.widget.AppCompatImageHelper$$InternalSyntheticThrowCCEIfNotNull$28$10a30577155ed305124b1eecd11a353f50cd4eeab38bf8ffdb2be587bc20d1f7$0
 androidx.appcompat.widget.AppCompatImageHelper:
-    public java.lang.Object mInternalImageTint
+    public com.google.android.material.appbar.AppBarLayout mInternalImageTint
     public java.lang.Object mTmpInfo
-    public void <init>()
     public static boolean applyFrameworkTintUsingColorFilter()
     public final void applyImageLevel()
-    public static androidx.emoji2.viewsintegration.EmojiEditTextHelper getMatrix()
     public final android.content.res.ColorStateList getSupportImageTintList()
     public final android.graphics.PorterDuff$Mode getSupportImageTintMode()
     public final boolean hasOverlappingRendering()
-    public static boolean isValidMaskPattern(int)
     public static void obtainLevelFromDrawable()
-    public static void setECLevel()
-    public static void setMaskPattern()
-    public static void setMatrix()
-    public static void setMode()
-    public static void setVersion()
     public static boolean shouldApplyFrameworkTintUsingColorFilter()
 androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView:
     public final void initEmojiKeyListener()
@@ -30922,8 +30846,6 @@ androidx.core.view.NestedScrollingChildHelper:
     public static void stopNestedScroll()
 androidx.core.view.NestedScrollingParent
 androidx.core.view.NestedScrollingParentHelper:
-    public static int getCount()
-    public static int getDataCodewords()
     public final int getNestedScrollAxes()
     public static void onNestedScrollAccepted()
     public final void onNestedScrollAccepted(int,int)
@@ -31534,13 +31456,8 @@ androidx.emoji2.text.flatbuffer.Utf8
 androidx.emoji2.text.flatbuffer.Utf8Safe
 androidx.emoji2.viewsintegration.EmojiEditTextHelper$HelperInternal
 androidx.emoji2.viewsintegration.EmojiEditTextHelper:
-    public static void clear()
-    public static byte[][] getArray()
-    public static int getHeight()
     public static android.text.method.KeyListener getKeyListener()
-    public static int getWidth()
     public static android.view.inputmethod.InputConnection onCreateInputConnection()
-    public final void set(int,int,boolean)
     public static void setEnabled()
 androidx.emoji2.viewsintegration.EmojiInputConnection$EmojiCompatDeleteHelper
 androidx.emoji2.viewsintegration.EmojiInputConnection:
@@ -34470,10 +34387,9 @@ androidx.work.impl.model.DependencyDao_Impl$1:
     private static java.lang.String createQuery$androidx$work$impl$model$WorkSpecDao_Impl$1()
     private static java.lang.String createQuery$androidx$work$impl$model$WorkTagDao_Impl$1()
 androidx.work.impl.model.DependencyDao_Impl:
-    public static com.google.zxing.common.reedsolomon.GenericGFPoly buildGenerator()
-    public static void encode()
     public static boolean hasDependents()
     public static void insertDependency()
+    public static boolean isCacheable(okhttp3.Response,okhttp3.Request)
     public static boolean isEmojiCapableKeyListener()
     public static void onTypefaceRequestFailed()
     public static void onTypefaceRetrieved()
@@ -34487,7 +34403,6 @@ androidx.work.impl.model.PreferenceDao_Impl:
     public static androidx.core.graphics.Insets getLowerBound()
     public final android.view.textclassifier.TextClassifier getTextClassifier()
     public static androidx.core.graphics.Insets getUpperBound()
-    public static boolean isCacheable(okhttp3.Response,okhttp3.Request)
     public final void setTextClassifier()
     public static android.view.WindowInsetsAnimation$Bounds toBounds()
 androidx.work.impl.model.RawWorkInfoDao
@@ -34760,12 +34675,6 @@ com.eden.mkopa.MainActivity:
     public static void setupWebView()
 com.eden.mkopa.R$id
 com.eden.mkopa.R$layout
-com.eden.mkopa.SetupWizardActivity$$InternalSyntheticLambda$1$bd98ed30b464a1371ed7d3adc8ee827b538d86165f71a8f1dc8ccc35b1a1e8fb$0
-com.eden.mkopa.SetupWizardActivity$$InternalSyntheticLambda$2$b3fbb5e853fcec1448a716d9669a7969bc694288728720867493ba69c009aab2$0
-com.eden.mkopa.SetupWizardActivity:
-    public static void handleTap()
-    public static void showQRCode()
-    public static void startMainActivity()
 com.eden.mkopa.SyncWorker$Companion:
     public static final int access$computeHashSize(com.eden.mkopa.SyncWorker$Companion,int)
     public static final int access$computeShift(com.eden.mkopa.SyncWorker$Companion,int)
@@ -34779,8 +34688,6 @@ com.eden.mkopa.SyncWorker$Companion:
     public static int code()
     public static int computeHashSize()
     public static int computeShift()
-    public static com.google.zxing.common.BitMatrix encode()
-    public static com.google.zxing.common.BitMatrix encode$1()
     public static boolean equalsNonHost()
     public static okhttp3.internal.connection.Exchange exchange()
     public static java.lang.Object failure-PtdJZtk()
@@ -35277,24 +35184,18 @@ com.google.android.material.appbar.AppBarLayout$BaseBehavior:
     public static void snapToChildIfNeeded()
     public static void updateAccessibilityActions(androidx.coordinatorlayout.widget.CoordinatorLayout)
     public static void updateAppBarLayoutDrawableState()
-com.google.android.material.appbar.AppBarLayout$ChildScrollEffect$$InternalSyntheticThrowCCEIfNotNull$11$9eac1343f0b017509a5c8e5d1c3fb090387dd776b9e647c7e1b8cfc81fdb24dd$0
-com.google.android.material.appbar.AppBarLayout$ChildScrollEffect$$InternalSyntheticThrowCCEIfNotNull$54$2c9945742814a9a7ee0d7c2aecc2645dbf6df4226a416e4ceaa4f5dd743e5169$0
-com.google.android.material.appbar.AppBarLayout$ChildScrollEffect$$InternalSyntheticThrowCCEIfNotNull$8$f6da0da8232254dde46d2ce50659f6fee112ea91de69b9fc03331bd0a93fb1a3$0
 com.google.android.material.appbar.AppBarLayout$ChildScrollEffect:
-    public static kotlin.collections.builders.MapBuilder build(kotlin.collections.builders.MapBuilder)
-    public static final void cancelConsumed(kotlinx.coroutines.channels.ReceiveChannel,java.lang.Throwable)
-    public static final void checkParallelism(int)
-    public static final int differenceModulo(int,int,int)
-    public static final java.lang.String getCoroutineName()
+    public static final java.util.concurrent.CancellationException CancellationException(java.lang.String,java.lang.Throwable)
+    public static synthetic androidx.fragment.app.Fragment$InstantiationException callUndeliveredElementCatchingException$default(kotlin.jvm.functions.Function1,java.lang.Object)
+    public static int compare(int,int)
+    public static java.util.Set emptySet()
+    public static final boolean equals(char,char,boolean)
     public static java.lang.String getLegacyEasingContent(java.lang.String,java.lang.String)
-    public static final boolean hasCopyableElements(kotlin.coroutines.CoroutineContext)
+    public static final java.lang.Throwable handlerException(java.lang.Throwable,java.lang.Throwable)
     public static boolean isUsingLightSystemBar(int,boolean)
-    public static boolean isWhiteHorizontal(byte[],int,int)
-    public static boolean isWhiteVertical(byte[][],int,int,int)
-    public static final java.util.Map mapOf(kotlin.Pair)
-    public static final int mod(int,int)
+    public static final boolean isWhitespace(char)
     public abstract void onOffsetChanged()
-    public static java.lang.String userAgent()
+    public static java.util.Set setOf(java.lang.Object)
 com.google.android.material.appbar.AppBarLayout$LayoutParams
 com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior$$InternalSyntheticThrowCCEIfNotNull$17$1b885065a0277c4760921b8bf006691f1ac4a031f6cf74c96c84e4522ffa4d82$0
 com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior$$InternalSyntheticThrowCCEIfNotNull$7$8235b48d3e7fd94281bed0d20c581b92319f87fb574d802f6771e65d747b3514$0
@@ -36005,18 +35906,17 @@ com.google.android.material.datepicker.YearGridAdapter:
     public static int getYearForPosition()
     public static void onBindViewHolder$2()
     public static com.google.android.material.datepicker.YearGridAdapter$ViewHolder onCreateViewHolder()
+com.google.android.material.drawable.DrawableUtils$$InternalSyntheticThrowCCEIfNotNull$15$690b3a065d868c587991ed72215c0f7b3ecce6cbeb2b4914ba34597d8af33b1e$0
 com.google.android.material.drawable.DrawableUtils:
-    public static final java.util.concurrent.CancellationException CancellationException(java.lang.String,java.lang.Throwable)
-    public static synthetic androidx.fragment.app.Fragment$InstantiationException callUndeliveredElementCatchingException$default(kotlin.jvm.functions.Function1,java.lang.Object)
-    public static int compare(int,int)
+    public static final java.lang.Object[] arrayOfUninitializedElements(int)
+    public static final java.lang.Object[] copyOfUninitializedElements(int,java.lang.Object[])
     public static android.graphics.drawable.Drawable createTintableMutatedDrawableIfNeeded(android.graphics.drawable.Drawable,android.content.res.ColorStateList,android.graphics.PorterDuff$Mode)
-    public static java.util.Set emptySet()
-    public static final boolean equals(char,char,boolean)
-    public static final java.lang.Throwable handlerException(java.lang.Throwable,java.lang.Throwable)
+    public static final void dispatcherFailure(kotlinx.coroutines.AbstractCoroutine,java.lang.Throwable)
+    public static java.lang.Object fold(kotlin.coroutines.CoroutineContext$Element,java.lang.Object,kotlin.jvm.functions.Function2)
     public static boolean isEditable(android.widget.EditText)
     public static boolean isMeizuDevice()
-    public static final boolean isWhitespace(char)
-    public static java.util.Set setOf(java.lang.Object)
+    public static kotlin.SynchronizedLazyImpl lazy(androidx.lifecycle.SavedStateHandlesProvider$viewModel$2)
+    public static final void resetAt(int,java.lang.Object[])
     public static android.graphics.PorterDuffColorFilter updateTintFilter(android.graphics.drawable.Drawable,android.content.res.ColorStateList,android.graphics.PorterDuff$Mode)
 com.google.android.material.drawable.ScaledDrawableWrapper
 com.google.android.material.elevation.ElevationOverlayProvider:
@@ -36200,23 +36100,41 @@ com.google.android.material.internal.TextDrawableHelper:
 com.google.android.material.internal.ThemeEnforcement:
     public static varargs androidx.activity.result.ActivityResultRegistry$3 obtainTintedStyledAttributes(android.content.Context,android.util.AttributeSet,int[],int,int,int[])
 com.google.android.material.internal.ToolbarUtils$1
-com.google.android.material.internal.ViewUtils$$InternalSyntheticThrowCCEIfNotNull$15$ffa39f6cb4fbec47a762319f01ed8d561cf21e21ab61f9eb8ea6773cc4d9dbde$0
+com.google.android.material.internal.ViewUtils$$InternalSyntheticThrowCCEIfNotNull$7$58cde50683968be51a7e2c053dcaa1833f8f67568b60b1e3f19e7557f91fe76a$0
 com.google.android.material.internal.ViewUtils$2
 com.google.android.material.internal.ViewUtils$OnApplyWindowInsetsListener
 com.google.android.material.internal.ViewUtils$RelativePadding
 com.google.android.material.internal.ViewUtils:
-    public static final java.lang.Object[] arrayOfUninitializedElements(int)
-    public static final java.lang.Object[] copyOfUninitializedElements(int,java.lang.Object[])
-    public static final void dispatcherFailure(kotlinx.coroutines.AbstractCoroutine,java.lang.Throwable)
+    public static synthetic void close$default(kotlinx.coroutines.channels.Channel)
+    public static long coerceAtLeast(long,long)
+    public static long coerceAtMost(long,long)
+    public static java.lang.Object constructor-impl$default()
+    public static kotlin.ranges.IntProgression downTo(int,int)
     public static float dpToPx(android.content.Context,int)
-    public static java.lang.Object fold(kotlin.coroutines.CoroutineContext$Element,java.lang.Object,kotlin.jvm.functions.Function2)
+    public static java.util.List emptyList()
+    public static java.lang.Object getCOROUTINE_SUSPENDED()
     public static boolean isFontScaleAtLeast2_0(android.content.Context)
-    public static kotlin.SynchronizedLazyImpl lazy(androidx.lifecycle.SavedStateHandlesProvider$viewModel$2)
     public static int[] mergeIconState(com.google.android.material.textfield.TextInputLayout,com.google.android.material.internal.CheckableImageButton)
-    public static final void resetAt(int,java.lang.Object[])
+    public abstract long nanoTime()
+    public abstract void parkNanos()
+    public static final java.lang.Object recoverResult(java.lang.Object)
+    public abstract void registerTimeLoopThread()
     public static void setIconMinSize(com.google.android.material.internal.CheckableImageButton,int)
     public static void setIconOnClickListener(com.google.android.material.internal.CheckableImageButton,android.view.View$OnClickListener,android.view.View$OnLongClickListener)
     public static void setIconOnLongClickListener(com.google.android.material.internal.CheckableImageButton,android.view.View$OnLongClickListener)
+    public static final int systemProp(int,int,int,java.lang.String)
+    public static final java.lang.String systemProp(java.lang.String)
+    public static final boolean systemProp(java.lang.String,boolean)
+    public static synthetic long systemProp$default(java.lang.String,long)
+    public static void terminateCollectionToArray(int,java.lang.Object[])
+    public static void throwIndexOverflow()
+    public static final java.lang.Object toState(java.lang.Object,kotlin.jvm.functions.Function1)
+    public static java.lang.Object toState$default(java.lang.Object)
+    public abstract void trackTask()
+    public abstract void unTrackTask()
+    public abstract void unpark()
+    public abstract void unregisterTimeLoopThread()
+    public abstract java.lang.Runnable wrapTask()
 com.google.android.material.internal.VisibilityAwareImageButton
 com.google.android.material.math.MathUtils
 com.google.android.material.motion.MaterialBackAnimationHelper
@@ -36450,33 +36368,20 @@ com.google.android.material.sidesheet.LeftSheetDelegate:
 com.google.android.material.sidesheet.RightSheetDelegate
 com.google.android.material.sidesheet.SheetCallback
 com.google.android.material.sidesheet.SheetDelegate
-com.google.android.material.sidesheet.SheetUtils$$InternalSyntheticThrowCCEIfNotNull$7$e7619dfa9be532daf7b11251bdf895df3dbe69d1ae77958cfe4986e49d42cbf3$0
+com.google.android.material.sidesheet.SheetUtils$$InternalSyntheticThrowCCEIfNotNull$11$bf5603f027b0c65960ce6455488e66623ae98dd1f68f69542d086741213fe051$0
+com.google.android.material.sidesheet.SheetUtils$$InternalSyntheticThrowCCEIfNotNull$54$b22590c7a1982e4b4b375609d24d63765e7c4b0ac03b3799fa8037645ad03733$0
+com.google.android.material.sidesheet.SheetUtils$$InternalSyntheticThrowCCEIfNotNull$8$6c38e2529ef6a529173a3a7134b2c75c21f080ef4a1b2455d09abf3f96fbd454$0
 com.google.android.material.sidesheet.SheetUtils:
-    public static synthetic void close$default(kotlinx.coroutines.channels.Channel)
-    public static long coerceAtLeast(long,long)
-    public static long coerceAtMost(long,long)
-    public static java.lang.Object constructor-impl$default()
-    public static kotlin.ranges.IntProgression downTo(int,int)
-    public static java.util.List emptyList()
-    public static java.lang.Object getCOROUTINE_SUSPENDED()
+    public static kotlin.collections.builders.MapBuilder build(kotlin.collections.builders.MapBuilder)
+    public static final void cancelConsumed(kotlinx.coroutines.channels.ReceiveChannel,java.lang.Throwable)
+    public static final void checkParallelism(int)
+    public static final int differenceModulo(int,int,int)
+    public static final java.lang.String getCoroutineName()
+    public static final boolean hasCopyableElements(kotlin.coroutines.CoroutineContext)
     public static boolean isSwipeMostlyHorizontal(float,float)
-    public abstract long nanoTime()
-    public abstract void parkNanos()
-    public static final java.lang.Object recoverResult(java.lang.Object)
-    public abstract void registerTimeLoopThread()
-    public static final int systemProp(int,int,int,java.lang.String)
-    public static final java.lang.String systemProp(java.lang.String)
-    public static final boolean systemProp(java.lang.String,boolean)
-    public static synthetic long systemProp$default(java.lang.String,long)
-    public static void terminateCollectionToArray(int,java.lang.Object[])
-    public static void throwIndexOverflow()
-    public static final java.lang.Object toState(java.lang.Object,kotlin.jvm.functions.Function1)
-    public static java.lang.Object toState$default(java.lang.Object)
-    public abstract void trackTask()
-    public abstract void unTrackTask()
-    public abstract void unpark()
-    public abstract void unregisterTimeLoopThread()
-    public abstract java.lang.Runnable wrapTask()
+    public static final java.util.Map mapOf(kotlin.Pair)
+    public static final int mod(int,int)
+    public static java.lang.String userAgent()
 com.google.android.material.sidesheet.SideSheetBehavior$$InternalSyntheticLambda$2$d3cacd97ad6fa5b54fa0e7242a348c40ec6030be8bf0a83cb679ff7f75e87731$0
 com.google.android.material.sidesheet.SideSheetBehavior$SavedState$1
 com.google.android.material.sidesheet.SideSheetBehavior$StateSettlingTracker$$InternalSyntheticLambda$1$e0d76f536e2711a7e2f829fd7b69be01c71a320b0aec14b05669b9ddd9797109$0
@@ -36956,99 +36861,6 @@ com.google.android.material.transformation.FabTransformationSheetBehavior:
     public static void updateImportantForAccessibility()
 com.google.android.material.transformation.TransformationChildCard
 com.google.android.material.transformation.TransformationChildLayout
-com.google.zxing.BarcodeFormat$EnumUnboxingLocalUtility
-com.google.zxing.BarcodeFormat
-com.google.zxing.EncodeHintType
-com.google.zxing.common.BitArray:
-    public final void appendBitArray(com.google.zxing.common.BitArray)
-    public static com.google.zxing.common.BitArray clone()
-    public static int getSize()
-    public static void toBytes()
-    public static void xor()
-com.google.zxing.common.BitMatrix
-com.google.zxing.common.CharacterSetECI
-com.google.zxing.common.ECIEncoderSet
-com.google.zxing.common.StringUtils:
-    public static final boolean ASSUME_SHIFT_JIS
-    public static final java.nio.charset.Charset EUC_JP
-    public static final java.nio.charset.Charset GB2312_CHARSET
-com.google.zxing.common.reedsolomon.GenericGF:
-    public static final com.google.zxing.common.reedsolomon.GenericGF AZTEC_DATA_10
-    public static final com.google.zxing.common.reedsolomon.GenericGF AZTEC_DATA_12
-    public static final com.google.zxing.common.reedsolomon.GenericGF AZTEC_DATA_6
-    public static final com.google.zxing.common.reedsolomon.GenericGF AZTEC_DATA_8
-    public static final com.google.zxing.common.reedsolomon.GenericGF AZTEC_PARAM
-    public static final com.google.zxing.common.reedsolomon.GenericGF DATA_MATRIX_FIELD_256
-    public static final com.google.zxing.common.reedsolomon.GenericGF MAXICODE_FIELD_64
-    public final com.google.zxing.common.reedsolomon.GenericGFPoly one
-    public static com.google.zxing.common.reedsolomon.GenericGFPoly buildMonomial()
-    public static int exp()
-    public static int getGeneratorBase()
-    public static com.google.zxing.common.reedsolomon.GenericGFPoly getZero()
-    public static int inverse()
-    public static int log()
-com.google.zxing.common.reedsolomon.GenericGFPoly:
-    public static com.google.zxing.common.reedsolomon.GenericGFPoly[] divide()
-    public final int getCoefficient(int)
-    public static int[] getCoefficients()
-    public static com.google.zxing.common.reedsolomon.GenericGFPoly multiply()
-    public final com.google.zxing.common.reedsolomon.GenericGFPoly multiplyByMonomial(int,int)
-com.google.zxing.common.reedsolomon.ReedSolomonEncoder
-com.google.zxing.qrcode.QRCodeWriter
-com.google.zxing.qrcode.decoder.ErrorCorrectionLevel:
-    public static final com.google.zxing.qrcode.decoder.ErrorCorrectionLevel[] FOR_BITS
-    public static final enum com.google.zxing.qrcode.decoder.ErrorCorrectionLevel H
-    public static final enum com.google.zxing.qrcode.decoder.ErrorCorrectionLevel M
-    public static final enum com.google.zxing.qrcode.decoder.ErrorCorrectionLevel Q
-    public static int getBits()
-com.google.zxing.qrcode.decoder.Mode:
-    public static final enum com.google.zxing.qrcode.decoder.Mode ECI
-    public static final enum com.google.zxing.qrcode.decoder.Mode FNC1_FIRST_POSITION
-    public static final enum com.google.zxing.qrcode.decoder.Mode FNC1_SECOND_POSITION
-    public static final enum com.google.zxing.qrcode.decoder.Mode HANZI
-    public static final enum com.google.zxing.qrcode.decoder.Mode STRUCTURED_APPEND
-    public static final enum com.google.zxing.qrcode.decoder.Mode TERMINATOR
-    public static int getBits()
-com.google.zxing.qrcode.decoder.Version$ECB
-com.google.zxing.qrcode.decoder.Version$ECBlocks
-com.google.zxing.qrcode.decoder.Version:
-    public static final int[] VERSION_DECODE_INFO
-    public final int[] alignmentPatternCenters
-    public static int getDimensionForVersion()
-    public static androidx.appcompat.app.AlertDialog$Builder getECBlocksForLevel()
-    public static int getTotalCodewords()
-    public static int getVersionNumber()
-com.google.zxing.qrcode.encoder.BlockPair:
-    public static byte[] getDataBytes()
-    public static byte[] getErrorCorrectionBytes()
-com.google.zxing.qrcode.encoder.ByteMatrix
-com.google.zxing.qrcode.encoder.Encoder$1
-com.google.zxing.qrcode.encoder.Encoder:
-    public static void appendBytes(java.lang.String,com.google.zxing.qrcode.decoder.Mode,com.google.zxing.common.BitArray,java.nio.charset.Charset)
-    public static int calculateBitsNeeded(com.google.zxing.qrcode.decoder.Mode,com.google.zxing.common.BitArray,com.google.zxing.common.BitArray,com.google.zxing.qrcode.decoder.Version)
-    public static com.google.zxing.qrcode.decoder.Version chooseVersion(int,com.google.zxing.qrcode.decoder.ErrorCorrectionLevel)
-    public static int getAlphanumericCode(int)
-com.google.zxing.qrcode.encoder.MaskUtil
-com.google.zxing.qrcode.encoder.MatrixUtil:
-    public static int findMSBSet(int)
-com.google.zxing.qrcode.encoder.MinimalEncoder$1
-com.google.zxing.qrcode.encoder.MinimalEncoder$Edge
-com.google.zxing.qrcode.encoder.MinimalEncoder$ResultList$ResultNode:
-    public final int characterLength
-    public final int charsetEncoderIndex
-    public final int fromPosition
-    public final com.google.zxing.qrcode.decoder.Mode mode
-    public final synthetic androidx.activity.result.ActivityResultRegistry$3 this$1
-    public void <init>(androidx.activity.result.ActivityResultRegistry$3,com.google.zxing.qrcode.decoder.Mode,int,int,int)
-    public static void getBits()
-    public final int getCharacterCountIndicator()
-    public static int getSize()
-    public static java.lang.String makePrintable()
-com.google.zxing.qrcode.encoder.MinimalEncoder$ResultList
-com.google.zxing.qrcode.encoder.MinimalEncoder$VersionSize$EnumUnboxingLocalUtility
-com.google.zxing.qrcode.encoder.MinimalEncoder$VersionSize
-com.google.zxing.qrcode.encoder.MinimalEncoder
-com.google.zxing.qrcode.encoder.QRCode
 kotlin.ExceptionsKt
 kotlin.ExceptionsKt__ExceptionsKt
 kotlin.KotlinNothingValueException

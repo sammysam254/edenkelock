@@ -18,7 +18,6 @@
 -keep class com.eden.mkopa.DeviceOwnerSetupActivity { <init>(); }
 -keep class com.eden.mkopa.LockScreenActivity { <init>(); }
 -keep class com.eden.mkopa.MainActivity { <init>(); }
--keep class com.eden.mkopa.SetupWizardActivity { <init>(); }
 -keep class com.eden.mkopa.SyncService { <init>(); }
 -keep class android.widget.Space { <init>(android.content.Context, android.util.AttributeSet); }
 

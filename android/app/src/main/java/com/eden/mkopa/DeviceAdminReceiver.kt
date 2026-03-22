@@ -26,6 +26,20 @@ class DeviceAdminReceiver : DeviceAdminReceiver() {
         val devicePolicyManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         val adminComponent = ComponentName(context, DeviceAdminReceiver::class.java)
         
+        // Extract provisioning extras (device_id, serial_number from QR code)
+        val adminExtras = intent.getBundleExtra(DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE)
+        val deviceId = adminExtras?.getString("device_id")
+        val serialNumber = adminExtras?.getString("serial_number")
+        
+        // Save device info
+        val prefs = context.getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            if (deviceId != null) putString("device_id", deviceId)
+            if (serialNumber != null) putString("serial_number", serialNumber)
+            putLong("provisioning_time", System.currentTimeMillis())
+            apply()
+        }
+        
         // Apply all restrictions
         setupDeviceOwner(context, devicePolicyManager, adminComponent)
         

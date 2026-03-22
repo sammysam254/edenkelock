@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-102:12
-INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-102:12
-INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-102:12
-INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-102:12
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-85:12
+INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-85:12
+INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-85:12
+INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:2:1-85:12
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\fcbc5d16c187e197fa242b722ddc8c8e\transformed\material-1.11.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\3e12dc78bff8e4a706493c9e795b8073\transformed\jetified-appcompat-resources-1.6.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\a4481682e3066cfdc55a77f4128b8e07\transformed\constraintlayout-2.0.1\AndroidManifest.xml:2:1-11:12
@@ -123,8 +123,8 @@ ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:17:5-82
 	android:name
 		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:17:19-54
 application
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:19:5-100:19
-INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:19:5-100:19
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:19:5-83:19
+INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml:19:5-83:19
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\fcbc5d16c187e197fa242b722ddc8c8e\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\fcbc5d16c187e197fa242b722ddc8c8e\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\a4481682e3066cfdc55a77f4128b8e07\transformed\constraintlayout-2.0.1\AndroidManifest.xml:9:5-20
@@ -213,64 +213,44 @@ category#android.intent.category.DEFAULT
 ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:51:17-76
 	android:name
 		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:51:27-73
-activity#com.eden.mkopa.SetupWizardActivity
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:56:9-70:20
-	android:exported
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:58:13-36
-	android:theme
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:59:13-71
-	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:57:13-48
-intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.DEFAULT
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:60:13-63:29
-intent-filter#action:name:android.nfc.action.NDEF_DISCOVERED+category:name:android.intent.category.DEFAULT+data:mimeType:application/com.android.managedprovisioning
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:65:13-69:29
-action#android.nfc.action.NDEF_DISCOVERED
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:66:17-77
-	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:66:25-74
-data
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:68:17-88
-	android:mimeType
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:68:23-85
 activity#com.eden.mkopa.LockScreenActivity
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:73:9-78:49
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:56:9-61:49
 	android:lockTaskMode
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:77:13-50
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:60:13-50
 	android:excludeFromRecents
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:78:13-46
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:61:13-46
 	android:launchMode
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:76:13-44
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:59:13-44
 	android:exported
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:75:13-37
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:58:13-37
 	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:74:13-47
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:57:13-47
 activity#com.eden.mkopa.DeviceOwnerSetupActivity
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:81:9-84:72
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:64:9-67:72
 	android:exported
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:83:13-37
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:66:13-37
 	android:theme
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:84:13-69
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:67:13-69
 	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:82:13-53
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:65:13-53
 receiver#com.eden.mkopa.BootReceiver
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:87:9-93:20
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:70:9-76:20
 	android:exported
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:89:13-36
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:72:13-36
 	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:88:13-41
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:71:13-41
 intent-filter#action:name:android.intent.action.BOOT_COMPLETED
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:90:13-92:29
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:73:13-75:29
 action#android.intent.action.BOOT_COMPLETED
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:91:17-79
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:74:17-79
 	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:91:25-76
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:74:25-76
 service#com.eden.mkopa.SyncService
-ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:96:9-98:40
+ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:79:9-81:40
 	android:exported
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:98:13-37
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:81:13-37
 	android:name
-		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:97:13-40
+		ADDED from C:\lockd\android\app\src\main\AndroidManifest.xml:80:13-40
 uses-sdk
 INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\lockd\android\app\src\main\AndroidManifest.xml
