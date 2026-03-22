@@ -304,3 +304,12 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
     token VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Update devices table to include serial number and customer details
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS serial_number VARCHAR(255);
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS customer_name VARCHAR(255);
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(50);
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS national_id VARCHAR(50);
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS id_front_url TEXT;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS id_back_url TEXT;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS passport_photo_url TEXT;

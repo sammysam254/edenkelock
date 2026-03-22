@@ -20,32 +20,53 @@
 
         <div class="card">
             <h2 style="color: #059669; margin-bottom: 20px;">Enroll New Device</h2>
-            <form id="enrollDeviceForm" style="max-width: 600px;">
+            <form id="enrollDeviceForm" style="max-width: 800px;">
+                <h3 style="color: #059669; margin: 20px 0 15px 0;">Device Information</h3>
                 <div class="form-group">
-                    <label>Device ID</label>
-                    <input type="text" id="deviceId" required placeholder="DEV001">
+                    <label>Device Serial Number *</label>
+                    <input type="text" id="serialNumber" required placeholder="IMEI or Serial Number">
                 </div>
                 <div class="form-group">
-                    <label>Customer ID</label>
-                    <input type="text" id="customerId" required placeholder="CUST001">
-                </div>
-                <div class="form-group">
-                    <label>Customer Name</label>
-                    <input type="text" id="customerName" required placeholder="John Doe">
-                </div>
-                <div class="form-group">
-                    <label>Customer Phone</label>
-                    <input type="tel" id="customerPhone" required placeholder="+254700000000">
-                </div>
-                <div class="form-group">
-                    <label>Total Amount ($)</label>
+                    <label>Total Amount ($) *</label>
                     <input type="number" id="totalAmount" required step="0.01" placeholder="1000.00">
                 </div>
                 <div class="form-group">
                     <label>Initial Payment ($)</label>
                     <input type="number" id="initialPayment" value="0" step="0.01" placeholder="0.00">
                 </div>
-                <button type="submit" class="btn btn-primary">Enroll Device</button>
+
+                <h3 style="color: #059669; margin: 30px 0 15px 0;">Customer Information</h3>
+                <div class="form-group">
+                    <label>National ID Number *</label>
+                    <input type="text" id="nationalId" required placeholder="12345678">
+                </div>
+                <div class="form-group">
+                    <label>Customer Full Name *</label>
+                    <input type="text" id="customerName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Customer Phone Number *</label>
+                    <input type="tel" id="customerPhone" required placeholder="+254700000000">
+                </div>
+
+                <h3 style="color: #059669; margin: 30px 0 15px 0;">KYC Documents</h3>
+                <div class="form-group">
+                    <label>ID Front Photo *</label>
+                    <input type="file" id="idFront" accept="image/*" required>
+                    <small style="color: #6b7280;">Upload front side of national ID</small>
+                </div>
+                <div class="form-group">
+                    <label>ID Back Photo *</label>
+                    <input type="file" id="idBack" accept="image/*" required>
+                    <small style="color: #6b7280;">Upload back side of national ID</small>
+                </div>
+                <div class="form-group">
+                    <label>Passport Photo *</label>
+                    <input type="file" id="passportPhoto" accept="image/*" required>
+                    <small style="color: #6b7280;">Upload customer passport photo</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Enroll Device</button>
             </form>
         </div>
 
@@ -132,40 +153,69 @@
         });
 
         // Enroll device
-        document.getElementById('enrollDeviceForm').addEventListener('submit', function(e) {
+        document.getElementById('enrollDeviceForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const deviceData = {
-                device_id: document.getElementById('deviceId').value,
-                customer_id: document.getElementById('customerId').value,
-                customer_name: document.getElementById('customerName').value,
-                customer_phone: document.getElementById('customerPhone').value,
-                total_amount: parseFloat(document.getElementById('totalAmount').value),
-                amount_paid: parseFloat(document.getElementById('initialPayment').value)
-            };
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
             
-            fetch('/api/devices/enroll', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify(deviceData)
-            })
-            .then(res => res.json())
-            .then(data => {
+            try {
+                // Convert images to base64
+                const idFrontFile = document.getElementById('idFront').files[0];
+                const idBackFile = document.getElementById('idBack').files[0];
+                const passportFile = document.getElementById('passportPhoto').files[0];
+                
+                const idFrontBase64 = await fileToBase64(idFrontFile);
+                const idBackBase64 = await fileToBase64(idBackFile);
+                const passportBase64 = await fileToBase64(passportFile);
+                
+                const deviceData = {
+                    serial_number: document.getElementById('serialNumber').value,
+                    national_id: document.getElementById('nationalId').value,
+                    customer_name: document.getElementById('customerName').value,
+                    customer_phone: document.getElementById('customerPhone').value,
+                    total_amount: parseFloat(document.getElementById('totalAmount').value),
+                    amount_paid: parseFloat(document.getElementById('initialPayment').value),
+                    id_front: idFrontBase64,
+                    id_back: idBackBase64,
+                    passport_photo: passportBase64
+                };
+                
+                const response = await fetch('/api/devices/enroll', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(deviceData)
+                });
+                
+                const data = await response.json();
+                
                 if (data.success) {
-                    alert('Device enrolled successfully!');
+                    alert('Device enrolled successfully!\nDevice ID: ' + data.device_id);
                     document.getElementById('enrollDeviceForm').reset();
                     location.reload();
                 } else {
                     alert('Error: ' + (data.error || 'Unknown error'));
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 alert('Error: ' + err.message);
-            });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enroll Device';
+            }
         });
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
 
         function logout() {
             localStorage.removeItem('eden_token');
