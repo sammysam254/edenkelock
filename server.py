@@ -1,4 +1,4 @@
-﻿from flask import Flask, request, jsonify, render_template, send_from_directory
+﻿from flask import Flask, request, jsonify, render_template, send_from_directory, redirect
 from flask_cors import CORS
 import os
 import hashlib
@@ -517,6 +517,45 @@ def get_stats():
             "totalRevenue": 0
         })
 
+
+# ============================================
+# APK DOWNLOAD ENDPOINT
+# ============================================
+
+@app.route("/download/eden.apk", methods=["GET"])
+def download_apk():
+    """Public endpoint to download Eden APK for factory reset recovery"""
+    try:
+        # Try static/apk folder first
+        apk_path = os.path.join(os.getcwd(), "static", "apk", "eden.apk")
+        
+        # If not in static, try android build folder
+        if not os.path.exists(apk_path):
+            apk_path = os.path.join(os.getcwd(), "android", "app", "build", "outputs", "apk", "release", "app-release.apk")
+        
+        # If release doesn't exist, try debug
+        if not os.path.exists(apk_path):
+            apk_path = os.path.join(os.getcwd(), "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk")
+        
+        # If still doesn't exist, return error
+        if not os.path.exists(apk_path):
+            return jsonify({"error": "APK not found. Please build and copy APK to static/apk/eden.apk"}), 404
+        
+        return send_from_directory(
+            os.path.dirname(apk_path),
+            os.path.basename(apk_path),
+            as_attachment=True,
+            download_name="eden.apk",
+            mimetype="application/vnd.android.package-archive"
+        )
+    except Exception as e:
+        print(f"APK download error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/app", methods=["GET"])
+def app_redirect():
+    """Redirect /app to APK download"""
+    return redirect("/download/eden.apk")
 # ============================================
 # HEALTH CHECK
 # ============================================
@@ -528,5 +567,8 @@ def health():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port, debug=False)
+
+
+
 
 

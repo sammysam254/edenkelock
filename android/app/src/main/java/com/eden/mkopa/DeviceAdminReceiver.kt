@@ -41,10 +41,10 @@ class DeviceAdminReceiver : DeviceAdminReceiver() {
         adminComponent: ComponentName
     ) {
         try {
-            // Block uninstall
+            // Block uninstall - CANNOT REMOVE APP
             devicePolicyManager.setUninstallBlocked(adminComponent, context.packageName, true)
             
-            // Add critical user restrictions
+            // Add ALL critical user restrictions
             devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_FACTORY_RESET)
             devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_SAFE_BOOT)
             devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_DEBUGGING_FEATURES)
@@ -52,11 +52,19 @@ class DeviceAdminReceiver : DeviceAdminReceiver() {
             devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
             devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_ADD_USER)
             devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_REMOVE_USER)
+            devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_MODIFY_ACCOUNTS)
+            devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_CREDENTIALS)
+            devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_REMOVE_MANAGED_PROFILE)
+            
+            // Hide settings options
+            devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)
+            devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA)
+            devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_UNMUTE_MICROPHONE)
             
             // Set lock task packages (kiosk mode)
             devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf(context.packageName))
             
-            // Enable factory reset protection
+            // Enable factory reset protection - SURVIVES FACTORY RESET
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                 devicePolicyManager.setFactoryResetProtectionPolicy(
                     adminComponent,
@@ -70,7 +78,15 @@ class DeviceAdminReceiver : DeviceAdminReceiver() {
             // Set persistent preferred activities (make Eden the default launcher)
             devicePolicyManager.clearPackagePersistentPreferredActivities(adminComponent, context.packageName)
             
-            Toast.makeText(context, "Device Owner Setup Complete", Toast.LENGTH_LONG).show()
+            // Save APK download URL for factory reset recovery
+            val prefs = context.getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+            prefs.edit().apply {
+                putString("apk_download_url", "https://eden-mkopa.onrender.com/download/eden.apk")
+                putBoolean("device_owner_setup", true)
+                apply()
+            }
+            
+            Toast.makeText(context, "Device Owner Setup Complete - Factory Reset Blocked", Toast.LENGTH_LONG).show()
             
         } catch (e: Exception) {
             e.printStackTrace()
