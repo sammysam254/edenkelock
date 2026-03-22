@@ -1,9 +1,25 @@
 -- Initialize Super Admin for Eden
 -- Run this in Supabase SQL Editor
 
--- Insert super admin with email: sammyseth260@gmail.com and password: 58369234
--- Password is hashed using SHA256
+-- Step 1: Create admins table if it doesn't exist
+CREATE TABLE IF NOT EXISTS admins (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    role VARCHAR(50) DEFAULT 'admin',
+    created_at TIMESTAMP DEFAULT NOW()
+);
 
+-- Step 2: Create admin sessions table if it doesn't exist
+CREATE TABLE IF NOT EXISTS admin_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    admin_id UUID REFERENCES admins(id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Step 3: Insert super admin with email: sammyseth260@gmail.com and password: 58369234
 INSERT INTO admins (email, password_hash, full_name, role)
 VALUES (
     'sammyseth260@gmail.com',
@@ -13,7 +29,7 @@ VALUES (
 )
 ON CONFLICT (email) DO NOTHING;
 
--- Verify the super admin was created
+-- Step 4: Verify the super admin was created
 SELECT id, email, full_name, role, created_at 
 FROM admins 
 WHERE email = 'sammyseth260@gmail.com';
