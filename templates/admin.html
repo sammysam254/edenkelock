@@ -117,6 +117,20 @@
         </div>
     </div>
 
+    <!-- QR Code Modal -->
+    <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; text-align: center;">
+            <h2 style="color: #059669; margin-bottom: 20px;">📱 Device Provisioning QR Code</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                Scan this QR code on the device to provision it as Device Owner
+            </p>
+            <canvas id="qrCanvas" style="max-width: 100%; border: 3px solid #10b981; border-radius: 10px;"></canvas>
+            <div id="qrDeviceInfo" style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: left;">
+            </div>
+            <button class="btn btn-primary" onclick="closeQRModal()" style="margin-top: 20px;">Close</button>
+        </div>
+    </div>
+
     <style>
         .form-group {
             margin-bottom: 20px;
@@ -244,6 +258,7 @@
                             ? `<button class="btn btn-primary btn-small" onclick="unlockDevice('${device.device_id}')">🔓 Unlock</button>`
                             : `<button class="btn btn-danger btn-small" onclick="lockDevice('${device.device_id}')">🔒 Lock</button>`
                         }
+                        <button class="btn btn-small" style="background: #0d9488; color: white; margin-left: 5px;" onclick="generateProvisioningQR('${device.device_id}', '${device.serial_number}')">📱 Generate QR</button>
                     </td>
                 </tr>
             `).join('');
@@ -296,7 +311,12 @@
                 if (data.success) {
                     alert('Device enrolled successfully!\nDevice ID: ' + data.device_id);
                     document.getElementById('enrollDeviceForm').reset();
-                    location.reload();
+                    
+                    // Show provisioning QR code
+                    generateProvisioningQR(data.device_id, deviceData.serial_number);
+                    
+                    // Reload after closing QR modal
+                    setTimeout(() => location.reload(), 30000);
                 } else {
                     alert('Error: ' + (data.error || 'Unknown error'));
                 }
@@ -360,6 +380,61 @@
             })
             .catch(err => alert('Error: ' + err.message));
         }
+
+        function generateProvisioningQR(deviceId, serialNumber) {
+            // Generate provisioning QR code
+            const provisioningData = {
+                "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.eden.mkopa/.DeviceAdminReceiver",
+                "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/download/eden.apk",
+                "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true,
+                "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+                "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
+                    "device_id": deviceId,
+                    "serial_number": serialNumber,
+                    "setup_time": Date.now()
+                }
+            };
+            
+            const qrContent = JSON.stringify(provisioningData);
+            
+            // Show modal
+            document.getElementById('qrModal').style.display = 'flex';
+            
+            // Generate QR code on canvas
+            const canvas = document.getElementById('qrCanvas');
+            QRCode.toCanvas(canvas, qrContent, {
+                width: 400,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function (error) {
+                if (error) {
+                    alert('Error generating QR code: ' + error);
+                    closeQRModal();
+                }
+            });
+            
+            // Show device info
+            document.getElementById('qrDeviceInfo').innerHTML = `
+                <strong>Device ID:</strong> ${deviceId}<br>
+                <strong>Serial Number:</strong> ${serialNumber}<br>
+                <br>
+                <strong>Instructions:</strong><br>
+                1. Factory reset the device<br>
+                2. During setup, tap screen 6 times<br>
+                3. Device will show QR scanner<br>
+                4. Scan this QR code<br>
+                5. Device will provision automatically
+            `;
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </body>
 </html>
