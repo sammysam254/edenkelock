@@ -180,7 +180,7 @@
             <p style="color: #6b7280; margin-bottom: 20px;">
                 Scan this QR code on the device to provision it as Device Owner
             </p>
-            <canvas id="qrCanvas" style="max-width: 100%; border: 3px solid #10b981; border-radius: 10px;"></canvas>
+            <div id="qrCanvas" style="max-width: 100%; display: flex; justify-content: center;"></div>
             <div id="qrDeviceInfo" style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: left;">
             </div>
             <button class="btn btn-primary" onclick="closeQRModal()" style="margin-top: 20px;">Close</button>
@@ -531,21 +531,25 @@
             // Show modal
             document.getElementById('qrModal').style.display = 'flex';
             
-            // Generate QR code on canvas
-            const canvas = document.getElementById('qrCanvas');
-            QRCode.toCanvas(canvas, qrContent, {
-                width: 400,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error) {
-                if (error) {
-                    alert('Error generating QR code: ' + error);
-                    closeQRModal();
-                }
-            });
+            // Clear previous QR code
+            const qrCanvas = document.getElementById('qrCanvas');
+            qrCanvas.innerHTML = '';
+            
+            // Generate QR code using QRCode.js
+            try {
+                new QRCode(qrCanvas, {
+                    text: qrContent,
+                    width: 400,
+                    height: 400,
+                    colorDark: '#000000',
+                    colorLight: '#FFFFFF',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                alert('Error generating QR code: ' + error);
+                closeQRModal();
+                return;
+            }
             
             // Show device info
             document.getElementById('qrDeviceInfo').innerHTML = `
@@ -566,6 +570,6 @@
         }
     </script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </body>
 </html>
