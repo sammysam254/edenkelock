@@ -118,18 +118,16 @@
     </div>
 
     <!-- QR Code Modal -->
-    <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; text-align: center;">
-            <h2 style="color: #059669; margin-bottom: 20px;">📱 Device Provisioning QR Code</h2>
-            <p style="color: #6b7280; margin-bottom: 20px;">
+    <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; padding: 20px;">
+        <div style="background: white; padding: 20px; border-radius: 15px; max-width: 500px; width: 100%; text-align: center; max-height: 90vh; overflow-y: auto;">
+            <h2 style="color: #059669; margin-bottom: 15px; font-size: 1.3em;">📱 Device Provisioning QR Code</h2>
+            <p style="color: #6b7280; margin-bottom: 15px; font-size: 0.9em;">
                 Scan this QR code on the device to provision it as Device Owner
             </p>
-            <div id="qrCanvas" style="max-width: 100%; display: flex; justify-content: center;"></div>
-            <div id="qrDeviceInfo" style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: left;">
+            <div id="qrCanvas" style="width: 100%; display: flex; justify-content: center; margin-bottom: 15px;"></div>
+            <div id="qrDeviceInfo" style="margin-top: 15px; padding: 12px; background: #f3f4f6; border-radius: 8px; text-align: left; font-size: 0.85em;">
             </div>
-            <canvas id="qrCanvas" style="max-width: 100%; border: 3px solid #10b981; border-radius: 10px;"></canvas>
-            </div>
-            <button class="btn btn-primary" onclick="closeQRModal()" style="margin-top: 20px;">Close</button>
+            <button class="btn btn-primary" onclick="closeQRModal()" style="margin-top: 15px; width: 100%;">Close</button>
         </div>
     </div>
 
@@ -410,8 +408,8 @@
             try {
                 new QRCode(qrCanvas, {
                     text: qrContent,
-                    width: 400,
-                    height: 400,
+                    width: 280,
+                    height: 280,
                     colorDark: '#000000',
                     colorLight: '#FFFFFF',
                     correctLevel: QRCode.CorrectLevel.H
