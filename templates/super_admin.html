@@ -513,16 +513,16 @@
         }
 
         function generateProvisioningQR(deviceId, serialNumber) {
-            // Generate provisioning QR code
+            // Generate provisioning QR code with correct Android format
             const provisioningData = {
                 "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.eden.mkopa/.DeviceAdminReceiver",
                 "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/download/eden.apk",
                 "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true,
                 "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+                "android.app.extra.PROVISIONING_WIFI_SSID": "",
                 "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
                     "device_id": deviceId,
-                    "serial_number": serialNumber,
-                    "setup_time": Date.now()
+                    "serial_number": serialNumber
                 }
             };
             
@@ -543,7 +543,7 @@
                     height: 280,
                     colorDark: '#000000',
                     colorLight: '#FFFFFF',
-                    correctLevel: QRCode.CorrectLevel.H
+                    correctLevel: QRCode.CorrectLevel.M
                 });
             } catch (error) {
                 alert('Error generating QR code: ' + error);
@@ -561,7 +561,9 @@
                 2. During setup, tap screen 6 times<br>
                 3. Device will show QR scanner<br>
                 4. Scan this QR code<br>
-                5. Device will provision automatically
+                5. Device will provision automatically<br>
+                <br>
+                <strong>Note:</strong> Ensure device has WiFi connection during setup
             `;
         }
 
