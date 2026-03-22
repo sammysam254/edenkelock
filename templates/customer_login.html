@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login - Eden</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 style="color: #059669; text-align: center; margin-bottom: 10px;"> Eden</h1>
+                <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">Customer Dashboard Login</p>
+                
+                <div id="phoneStep">
+                    <form id="phoneForm">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phoneNumber" required placeholder="+254700000000">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Continue</button>
+                    </form>
+                </div>
+
+                <div id="pinStep" style="display: none;">
+                    <form id="pinForm">
+                        <div class="form-group">
+                            <label>Enter PIN</label>
+                            <input type="password" id="pin" required maxlength="4" placeholder="4-digit PIN">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+                        <button type="button" onclick="backToPhone()" class="btn" style="width: 100%; margin-top: 10px; background: #6b7280; color: white;">Back</button>
+                    </form>
+                </div>
+
+                <div id="setPinStep" style="display: none;">
+                    <p style="color: #059669; margin-bottom: 20px; text-align: center;">Set your 4-digit PIN</p>
+                    <form id="setPinForm">
+                        <div class="form-group">
+                            <label>New PIN</label>
+                            <input type="password" id="newPin" required maxlength="4" placeholder="4-digit PIN">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm PIN</label>
+                            <input type="password" id="confirmPin" required maxlength="4" placeholder="Confirm PIN">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Set PIN</button>
+                    </form>
+                </div>
+                
+                <p style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 0.9em;">
+                    <a href="/" style="color: #059669;">Back to Home</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+    </style>
+
+    <script>
+        let currentPhone = '';
+
+        document.getElementById('phoneForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            currentPhone = document.getElementById('phoneNumber').value;
+            
+            fetch('/api/customer/check-phone', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone_number: currentPhone })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.exists) {
+                    if (data.has_pin) {
+                        document.getElementById('phoneStep').style.display = 'none';
+                        document.getElementById('pinStep').style.display = 'block';
+                    } else {
+                        document.getElementById('phoneStep').style.display = 'none';
+                        document.getElementById('setPinStep').style.display = 'block';
+                    }
+                } else {
+                    alert('Phone number not registered. Please contact administrator.');
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        });
+
+        document.getElementById('pinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pin = document.getElementById('pin').value;
+            
+            fetch('/api/customer/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone_number: currentPhone, pin: pin })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('eden_customer_token', data.token);
+                    localStorage.setItem('eden_customer_phone', currentPhone);
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Invalid PIN');
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        });
+
+        document.getElementById('setPinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newPin = document.getElementById('newPin').value;
+            const confirmPin = document.getElementById('confirmPin').value;
+            
+            if (newPin !== confirmPin) {
+                alert('PINs do not match');
+                return;
+            }
+            
+            if (newPin.length !== 4) {
+                alert('PIN must be 4 digits');
+                return;
+            }
+            
+            fetch('/api/customer/set-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone_number: currentPhone, pin: newPin })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('PIN set successfully! Please login.');
+                    document.getElementById('setPinStep').style.display = 'none';
+                    document.getElementById('pinStep').style.display = 'block';
+                } else {
+                    alert('Error setting PIN');
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        });
+
+        function backToPhone() {
+            document.getElementById('pinStep').style.display = 'none';
+            document.getElementById('phoneStep').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

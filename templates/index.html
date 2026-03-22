@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
             <p>Device Financing & Management Platform</p>
             <div class="nav">
                 <a href="/">Home</a>
-                <a href="/dashboard">User Dashboard</a>
+                <a href="/customer-login">Customer Login</a>
                 <a href="/login" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">🔐 Admin Login</a>
             </div>
         </div>
@@ -33,7 +33,7 @@
             </div>
             <div class="stat-card">
                 <h3>Total Revenue</h3>
-                <div class="value" id="totalRevenue">$0.00</div>
+                <div class="value" id="totalRevenue">KES 0</div>
             </div>
         </div>
 
@@ -46,8 +46,8 @@
                 Policy Controller for device management.
             </p>
             <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
-                <a href="/dashboard" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
-                    📱 User Dashboard
+                <a href="/customer-login" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
+                    📱 Customer Login
                 </a>
                 <a href="/login" class="btn" style="text-decoration: none; display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white;">
                     🔐 Admin Login
@@ -75,7 +75,7 @@
                 document.getElementById('totalDevices').textContent = data.totalDevices || 0;
                 document.getElementById('activeDevices').textContent = data.activeDevices || 0;
                 document.getElementById('totalCustomers').textContent = data.totalCustomers || 0;
-                document.getElementById('totalRevenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
+                document.getElementById('totalRevenue').textContent = 'KES ' + (data.totalRevenue || 0).toLocaleString();
             })
             .catch(err => console.error('Failed to load stats:', err));
     </script>

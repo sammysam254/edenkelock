@@ -1,13 +1,13 @@
--- Eden M-Kopa Database Schema
+-- Eden Database Schema
 -- Run this in Supabase SQL Editor
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
--- SUPER ADMINS TABLE
+-- SUPER ADMINS TABLE (Optional - not used in current system)
 -- ============================================
-CREATE TABLE super_admins (
+CREATE TABLE IF NOT EXISTS super_admins (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email TEXT UNIQUE NOT NULL,
     full_name TEXT NOT NULL,
@@ -18,15 +18,15 @@ CREATE TABLE super_admins (
 );
 
 -- ============================================
--- ADMINISTRATORS TABLE
+-- ADMINISTRATORS TABLE (Optional - not used in current system)
 -- ============================================
-CREATE TABLE administrators (
+CREATE TABLE IF NOT EXISTS administrators (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     admin_code TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
     full_name TEXT NOT NULL,
     phone TEXT NOT NULL,
-    created_by UUID REFERENCES super_admins(id),
+    created_by UUID,
     region TEXT,
     branch TEXT,
     is_active BOOLEAN DEFAULT true,
@@ -35,16 +35,16 @@ CREATE TABLE administrators (
 );
 
 -- ============================================
--- CUSTOMERS TABLE
+-- CUSTOMERS TABLE (Optional - not used in current system)
 -- ============================================
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_code TEXT UNIQUE NOT NULL,
     full_name TEXT NOT NULL,
     phone TEXT NOT NULL,
     national_id TEXT UNIQUE NOT NULL,
     address TEXT,
-    enrolled_by UUID REFERENCES administrators(id),
+    enrolled_by UUID,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -53,26 +53,20 @@ CREATE TABLE customers (
 -- ============================================
 -- DEVICES TABLE
 -- ============================================
-CREATE TABLE devices (
+CREATE TABLE IF NOT EXISTS devices (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    device_code TEXT UNIQUE NOT NULL,
-    imei TEXT UNIQUE NOT NULL,
-    customer_id UUID REFERENCES customers(id),
-    enrolled_by UUID REFERENCES administrators(id),
-    wallet_address TEXT,
-    device_model TEXT NOT NULL,
-    device_price DECIMAL(10, 2) NOT NULL,
-    down_payment DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    loan_total DECIMAL(10, 2) NOT NULL,
-    loan_balance DECIMAL(10, 2) NOT NULL,
-    daily_payment DECIMAL(10, 2) NOT NULL,
-    total_paid DECIMAL(10, 2) DEFAULT 0,
-    payment_period_days INTEGER NOT NULL,
-    next_payment_due DATE,
-    days_overdue INTEGER DEFAULT 0,
-    is_locked BOOLEAN DEFAULT true,
-    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'paid_off', 'defaulted', 'retired')),
-    last_sync TIMESTAMP WITH TIME ZONE,
+    device_id TEXT UNIQUE,
+    customer_id TEXT,
+    serial_number TEXT,
+    national_id TEXT,
+    customer_name TEXT,
+    customer_phone TEXT,
+    total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    amount_paid DECIMAL(10, 2) DEFAULT 0,
+    status TEXT DEFAULT 'locked' CHECK (status IN ('active', 'locked', 'paid_off', 'defaulted', 'retired')),
+    id_front_url TEXT,
+    id_back_url TEXT,
+    passport_photo_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -80,19 +74,13 @@ CREATE TABLE devices (
 -- ============================================
 -- PAYMENT TRANSACTIONS TABLE
 -- ============================================
-CREATE TABLE payment_transactions (
+CREATE TABLE IF NOT EXISTS payment_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    transaction_code TEXT UNIQUE NOT NULL,
-    device_id UUID REFERENCES devices(id),
-    customer_id UUID REFERENCES customers(id),
+    device_id UUID,
+    customer_id TEXT,
     amount DECIMAL(10, 2) NOT NULL,
-    payment_method TEXT NOT NULL CHECK (payment_method IN ('mpesa', 'cash', 'bank', 'crypto')),
-    mpesa_receipt TEXT,
-    mpesa_phone TEXT,
-    wallet_transaction_hash TEXT,
+    payment_method TEXT DEFAULT 'mpesa' CHECK (payment_method IN ('mpesa', 'cash', 'bank', 'crypto')),
     status TEXT DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed', 'reversed')),
-    processed_by UUID REFERENCES administrators(id),
-    notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -313,3 +301,20 @@ ALTER TABLE devices ADD COLUMN IF NOT EXISTS national_id VARCHAR(50);
 ALTER TABLE devices ADD COLUMN IF NOT EXISTS id_front_url TEXT;
 ALTER TABLE devices ADD COLUMN IF NOT EXISTS id_back_url TEXT;
 ALTER TABLE devices ADD COLUMN IF NOT EXISTS passport_photo_url TEXT;
+
+-- Customer accounts table for dashboard access
+CREATE TABLE IF NOT EXISTS customer_accounts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    phone_number VARCHAR(50) UNIQUE NOT NULL,
+    pin_hash VARCHAR(255),
+    is_pin_set BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Customer sessions table
+CREATE TABLE IF NOT EXISTS customer_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    phone_number VARCHAR(50) NOT NULL,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);

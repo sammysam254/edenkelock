@@ -3,40 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard - Eden</title>
+    <title>My Dashboard - Eden</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌿 User Dashboard</h1>
-            <p>Manage your device and payments</p>
+            <h1>🌿 My Dashboard</h1>
+            <p>View your device and payment information</p>
             <div class="nav">
-                <a href="/">Home</a>
                 <a href="/dashboard">Dashboard</a>
-                <a href="/admin">Admin</a>
+                <a href="#" onclick="logout()">Logout</a>
             </div>
         </div>
 
         <div class="card">
-            <h2 style="color: #059669; margin-bottom: 20px;">Loan Information</h2>
+            <h2 style="color: #059669; margin-bottom: 20px;">Device & Loan Information</h2>
             
             <div class="loan-info">
                 <div class="info-item">
-                    <label>Total Loan Amount</label>
-                    <div class="amount" id="totalAmount">$0.00</div>
-                </div>
-                <div class="info-item">
-                    <label>Amount Paid</label>
-                    <div class="amount" id="amountPaid">$0.00</div>
-                </div>
-                <div class="info-item">
-                    <label>Remaining Balance</label>
-                    <div class="amount" id="balance">$0.00</div>
+                    <label>Device ID</label>
+                    <div class="amount" id="deviceId" style="font-size: 1.2em;">-</div>
                 </div>
                 <div class="info-item">
                     <label>Device Status</label>
-                    <div class="amount" id="deviceStatus">Active</div>
+                    <div class="amount" id="deviceStatus">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Total Loan Amount</label>
+                    <div class="amount" id="totalAmount">KES 0</div>
+                </div>
+                <div class="info-item">
+                    <label>Amount Paid</label>
+                    <div class="amount" id="amountPaid" style="color: #059669;">KES 0</div>
+                </div>
+                <div class="info-item">
+                    <label>Remaining Balance</label>
+                    <div class="amount" id="balance" style="color: #ef4444;">KES 0</div>
+                </div>
+                <div class="info-item">
+                    <label>Customer Name</label>
+                    <div class="amount" id="customerName" style="font-size: 1.2em;">-</div>
                 </div>
             </div>
 
@@ -46,8 +53,8 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="makePayment()">💳 Pay Now</button>
-                <button class="btn btn-danger" onclick="viewHistory()">📜 Payment History</button>
+                <button class="btn btn-primary" onclick="makePayment()">💳 Make Payment</button>
+                <button class="btn" style="background: #6b7280; color: white;" onclick="viewHistory()">📜 Payment History</button>
             </div>
         </div>
 
@@ -60,58 +67,45 @@
     </div>
 
     <script>
-        // Get device ID from URL parameter or use default
-        const urlParams = new URLSearchParams(window.location.search);
-        const deviceId = urlParams.get('device') || 'DEV001';
+        const token = localStorage.getItem('eden_customer_token');
+        const phone = localStorage.getItem('eden_customer_phone');
+        
+        if (!token || !phone) {
+            window.location.href = '/customer-login';
+        }
 
-        // Load device data from API
-        fetch(`/api/devices/${deviceId}`)
-            .then(res => res.json())
-            .then(device => {
-                if (device.error) {
-                    alert('Device not found');
-                    return;
-                }
-                
-                const balance = device.total_amount - device.amount_paid;
-                const progress = (device.amount_paid / device.total_amount) * 100;
+        fetch(`/api/customer/dashboard?phone=${phone}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert('Session expired. Please login again.');
+                window.location.href = '/customer-login';
+                return;
+            }
+            
+            const device = data.device;
+            const balance = device.total_amount - device.amount_paid;
+            const progress = (device.amount_paid / device.total_amount) * 100;
 
-                document.getElementById('totalAmount').textContent = '$' + device.total_amount.toFixed(2);
-                document.getElementById('amountPaid').textContent = '$' + device.amount_paid.toFixed(2);
-                document.getElementById('balance').textContent = '$' + balance.toFixed(2);
-                document.getElementById('deviceStatus').textContent = device.status.toUpperCase();
-                document.getElementById('deviceStatus').style.color = device.status === 'active' ? '#059669' : '#ef4444';
-                document.getElementById('progressBar').style.width = progress + '%';
-                document.getElementById('progressBar').textContent = progress.toFixed(0) + '%';
-            })
-            .catch(err => {
-                console.error('Error loading device:', err);
-                alert('Error loading device data');
-            });
+            document.getElementById('deviceId').textContent = device.device_id;
+            document.getElementById('deviceStatus').textContent = device.status.toUpperCase();
+            document.getElementById('deviceStatus').style.color = device.status === 'active' ? '#059669' : '#ef4444';
+            document.getElementById('totalAmount').textContent = 'KES ' + parseFloat(device.total_amount).toLocaleString();
+            document.getElementById('amountPaid').textContent = 'KES ' + parseFloat(device.amount_paid).toLocaleString();
+            document.getElementById('balance').textContent = 'KES ' + balance.toLocaleString();
+            document.getElementById('customerName').textContent = device.customer_name || 'N/A';
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressBar').textContent = progress.toFixed(0) + '%';
+        })
+        .catch(err => {
+            alert('Error loading dashboard');
+            console.error(err);
+        });
 
         function makePayment() {
-            const amount = prompt('Enter payment amount:');
-            if (!amount || isNaN(amount)) return;
-            
-            fetch('/api/payments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    device_id: deviceId,
-                    amount: parseFloat(amount),
-                    payment_method: 'manual'
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Payment recorded successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(err => alert('Error: ' + err.message));
+            alert('Payment feature coming soon! Contact administrator to make payment.');
         }
 
         function viewHistory() {
@@ -125,26 +119,34 @@
         }
 
         function loadPaymentHistory() {
-            fetch(`/api/payments/${deviceId}`)
-                .then(res => res.json())
-                .then(payments => {
-                    if (payments.length === 0) {
-                        document.getElementById('historyList').innerHTML = '<p style="color: #6b7280;">No payment history available</p>';
-                        return;
-                    }
-                    
-                    const historyHTML = payments.map(p => `
-                        <div class="payment-item">
-                            <span class="date">${new Date(p.created_at).toLocaleDateString()}</span>
-                            <span class="amount">$${parseFloat(p.amount).toFixed(2)}</span>
-                        </div>
-                    `).join('');
+            fetch(`/api/customer/payments?phone=${phone}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(payments => {
+                if (!payments || payments.length === 0) {
+                    document.getElementById('historyList').innerHTML = '<p style="color: #6b7280;">No payment history available</p>';
+                    return;
+                }
+                
+                const historyHTML = payments.map(p => `
+                    <div class="payment-item">
+                        <span class="date">${new Date(p.created_at).toLocaleDateString('en-KE', {timeZone: 'Africa/Nairobi'})}</span>
+                        <span class="amount">KES ${parseFloat(p.amount).toLocaleString()}</span>
+                    </div>
+                `).join('');
 
-                    document.getElementById('historyList').innerHTML = historyHTML;
-                })
-                .catch(err => {
-                    document.getElementById('historyList').innerHTML = '<p style="color: #ef4444;">Error loading payment history</p>';
-                });
+                document.getElementById('historyList').innerHTML = historyHTML;
+            })
+            .catch(err => {
+                document.getElementById('historyList').innerHTML = '<p style="color: #ef4444;">Error loading payment history</p>';
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('eden_customer_token');
+            localStorage.removeItem('eden_customer_phone');
+            window.location.href = '/customer-login';
         }
     </script>
 </body>
