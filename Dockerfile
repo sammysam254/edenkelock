@@ -26,7 +26,6 @@ COPY server.py .
 
 # Copy built dashboard
 COPY --from=builder /app/dashboard/.next ./dashboard/.next
-COPY --from=builder /app/dashboard/public ./dashboard/public
 COPY --from=builder /app/dashboard/package.json ./dashboard/package.json
 COPY --from=builder /app/dashboard/node_modules ./dashboard/node_modules
 
