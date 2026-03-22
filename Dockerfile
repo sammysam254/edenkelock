@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY server.py .
 COPY templates/ ./templates/
 COPY static/ ./static/
+COPY app/ ./app/
 
 # Expose port
 EXPOSE 10000
