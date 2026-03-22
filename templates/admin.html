@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Eden M-Kopa</title>
+    <title>Admin Panel - Eden</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -56,45 +56,53 @@
                 document.getElementById('totalRevenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
             });
 
-        // Sample devices - replace with API call
-        const devices = [
-            { id: 'DEV001', customer: 'John Doe', status: 'active', total: 1000, paid: 650 },
-            { id: 'DEV002', customer: 'Jane Smith', status: 'locked', total: 800, paid: 200 },
-            { id: 'DEV003', customer: 'Bob Johnson', status: 'active', total: 1200, paid: 900 }
-        ];
+        // Load real devices from API
+        fetch('/api/devices')
+            .then(res => res.json())
+            .then(devices => {
+                if (devices.length === 0) {
+                    document.getElementById('deviceGrid').innerHTML = '<p style="color: #6b7280;">No devices found</p>';
+                    return;
+                }
+                renderDevices(devices);
+            })
+            .catch(err => {
+                console.error('Error loading devices:', err);
+                document.getElementById('deviceGrid').innerHTML = '<p style="color: #ef4444;">Error loading devices</p>';
+            });
 
-        function renderDevices() {
+        function renderDevices(devices) {
             const grid = document.getElementById('deviceGrid');
             grid.innerHTML = devices.map(device => {
-                const progress = (device.paid / device.total) * 100;
+                const progress = (device.amount_paid / device.total_amount) * 100;
                 const statusClass = device.status === 'active' ? 'status-active' : 'status-locked';
                 const cardClass = device.status === 'locked' ? 'device-card locked' : 'device-card';
                 
                 return `
                     <div class="${cardClass}">
                         <div class="device-header">
-                            <div class="device-id">${device.id}</div>
+                            <div class="device-id">${device.device_id}</div>
                             <span class="status-badge ${statusClass}">${device.status.toUpperCase()}</span>
                         </div>
-                        <p style="color: #6b7280; margin-bottom: 15px;">Customer: ${device.customer}</p>
+                        <p style="color: #6b7280; margin-bottom: 15px;">Customer: ${device.customer_id}</p>
                         <div class="progress-bar" style="height: 20px;">
                             <div class="progress-fill" style="width: ${progress}%; font-size: 0.8em;">${progress.toFixed(0)}%</div>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-top: 15px; color: #6b7280;">
                             <div>
                                 <small>Paid</small>
-                                <div style="color: #059669; font-weight: bold;">$${device.paid}</div>
+                                <div style="color: #059669; font-weight: bold;">$${device.amount_paid}</div>
                             </div>
                             <div style="text-align: right;">
                                 <small>Total</small>
-                                <div style="color: #1f2937; font-weight: bold;">$${device.total}</div>
+                                <div style="color: #1f2937; font-weight: bold;">$${device.total_amount}</div>
                             </div>
                         </div>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="toggleLock('${device.id}')">
+                            <button class="btn btn-primary btn-small" onclick="toggleLock('${device.device_id}', '${device.status}')">
                                 ${device.status === 'active' ? '🔒 Lock' : '🔓 Unlock'}
                             </button>
-                            <button class="btn btn-small" style="background: #6b7280; color: white;" onclick="viewDevice('${device.id}')">
+                            <button class="btn btn-small" style="background: #6b7280; color: white;" onclick="viewDevice('${device.device_id}')">
                                 View Details
                             </button>
                         </div>
@@ -103,15 +111,31 @@
             }).join('');
         }
 
-        function toggleLock(deviceId) {
-            alert('Toggle lock for device: ' + deviceId);
+        function toggleLock(deviceId, currentStatus) {
+            const action = currentStatus === 'active' ? 'lock' : 'unlock';
+            fetch(`/api/devices/${deviceId}/${action}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Device ${action}ed successfully!`);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    alert('Error: ' + err.message);
+                });
         }
 
         function viewDevice(deviceId) {
-            alert('View details for device: ' + deviceId);
+            fetch(`/api/devices/${deviceId}`)
+                .then(res => res.json())
+                .then(device => {
+                    alert(`Device: ${device.device_id}\nCustomer: ${device.customer_id}\nStatus: ${device.status}\nPaid: $${device.amount_paid}\nTotal: $${device.total_amount}`);
+                })
+                .catch(err => alert('Error: ' + err.message));
         }
-
-        renderDevices();
     </script>
 </body>
 </html>
