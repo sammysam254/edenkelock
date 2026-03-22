@@ -12,10 +12,16 @@ ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 RUN npm run build
 
-# Python runtime
+# Python runtime with Node.js
 FROM python:3.11-slim
 
 WORKDIR /app
+
+# Install Node.js
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy Python requirements
 COPY requirements.txt .
