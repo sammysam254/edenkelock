@@ -4,13 +4,19 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
+import org.json.JSONObject
 
 class SetupWizardActivity : AppCompatActivity() {
     
@@ -18,6 +24,7 @@ class SetupWizardActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var welcomeText: TextView
     private lateinit var instructionText: TextView
+    private lateinit var qrCodeImage: ImageView
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,10 +32,10 @@ class SetupWizardActivity : AppCompatActivity() {
         
         welcomeText = findViewById(R.id.welcomeText)
         instructionText = findViewById(R.id.instructionText)
+        qrCodeImage = findViewById(R.id.qrCodeImage)
         
         // Check if already device owner
         val devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
         
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
             // Already setup, go to main activity
@@ -48,15 +55,14 @@ class SetupWizardActivity : AppCompatActivity() {
         
         when (tapCount) {
             1 -> {
-                instructionText.text = "Tap 2 more times..."
+                instructionText.text = "Tap 2 more times to show QR code..."
                 instructionText.visibility = View.VISIBLE
             }
             2 -> {
                 instructionText.text = "Tap 1 more time..."
             }
             3 -> {
-                instructionText.text = "Activating Device Owner..."
-                activateDeviceOwner()
+                showQRCode()
             }
         }
         
@@ -70,74 +76,62 @@ class SetupWizardActivity : AppCompatActivity() {
         }, 3000)
     }
     
-    private fun activateDeviceOwner() {
+    private fun showQRCode() {
         try {
-            val devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            val adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
-            
-            // This requires the device to be factory reset and the app to be installed
-            // via adb with device owner provisioning
-            // Command: adb shell dpm set-device-owner com.eden.mkopa/.DeviceAdminReceiver
-            
-            if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-                setupDeviceOwner()
-                Toast.makeText(this, "Device Owner Activated!", Toast.LENGTH_LONG).show()
-                
-                handler.postDelayed({
-                    startMainActivity()
-                }, 2000)
-            } else {
-                // Show instructions for manual activation
-                instructionText.text = """
-                    Device Owner Setup Required
-                    
-                    Connect device to computer and run:
-                    adb shell dpm set-device-owner com.eden.mkopa/.DeviceAdminReceiver
-                    
-                    Then restart this app.
-                """.trimIndent()
-                
-                Toast.makeText(this, "Manual setup required via ADB", Toast.LENGTH_LONG).show()
+            // Generate provisioning QR code
+            val provisioningData = JSONObject().apply {
+                put("android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME", 
+                    "com.eden.mkopa/.DeviceAdminReceiver")
+                put("android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION",
+                    "https://eden-mkopa.onrender.com/download/eden.apk")
+                put("android.app.extra.PROVISIONING_SKIP_ENCRYPTION", true)
+                put("android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED", true)
+                put("android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE", JSONObject().apply {
+                    put("device_id", android.os.Build.SERIAL)
+                    put("setup_time", System.currentTimeMillis())
+                })
             }
+            
+            val qrContent = provisioningData.toString()
+            val qrBitmap = generateQRCode(qrContent, 512, 512)
+            
+            qrCodeImage.setImageBitmap(qrBitmap)
+            qrCodeImage.visibility = View.VISIBLE
+            welcomeText.visibility = View.GONE
+            instructionText.text = """
+                Administrator: Scan this QR code
+                
+                1. Open device enrollment app
+                2. Scan this QR code
+                3. Device will provision automatically
+                
+                After provisioning, device will:
+                • Block factory reset
+                • Block ADB access
+                • Block uninstall
+                • Survive factory reset
+            """.trimIndent()
+            
+            Toast.makeText(this, "QR Code Ready - Administrator should scan now", Toast.LENGTH_LONG).show()
+            
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error generating QR code: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
-    private fun setupDeviceOwner() {
-        val devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
+    private fun generateQRCode(content: String, width: Int, height: Int): Bitmap {
+        val writer = QRCodeWriter()
+        val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, width, height)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
         
-        try {
-            // Block uninstall
-            devicePolicyManager.setUninstallBlocked(adminComponent, packageName, true)
-            
-            // Add user restrictions
-            devicePolicyManager.addUserRestriction(adminComponent, "no_factory_reset")
-            devicePolicyManager.addUserRestriction(adminComponent, "no_safe_boot")
-            devicePolicyManager.addUserRestriction(adminComponent, "no_debugging_features")
-            devicePolicyManager.addUserRestriction(adminComponent, "no_usb_file_transfer")
-            
-            // Set lock task packages
-            devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf(packageName))
-            
-            // Enable factory reset protection
-            devicePolicyManager.setFactoryResetProtectionPolicy(
-                adminComponent,
-                android.app.admin.FactoryResetProtectionPolicy.Builder()
-                    .setFactoryResetProtectionEnabled(true)
-                    .setFactoryResetProtectionAccounts(listOf())
-                    .build()
-            )
-            
-            // Save setup complete flag
-            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-            prefs.edit().putBoolean("device_owner_setup", true).apply()
-            
-        } catch (e: Exception) {
-            e.printStackTrace()
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                bitmap.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
+            }
         }
+        
+        return bitmap
     }
     
     private fun startMainActivity() {

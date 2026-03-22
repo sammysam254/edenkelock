@@ -18,6 +18,13 @@
             android:src="@mipmap/ic_launcher"
             android:layout_marginBottom="32dp"/>
 
+        <ImageView
+            android:id="@+id/qrCodeImage"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:visibility="gone"
+            android:layout_marginBottom="24dp"/>
+
         <TextView
             android:id="@+id/welcomeText"
             android:layout_width="wrap_content"
