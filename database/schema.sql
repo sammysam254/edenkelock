@@ -286,3 +286,21 @@ COMMENT ON TABLE administrators IS 'Field agents who enroll customers and proces
 COMMENT ON TABLE customers IS 'Device buyers';
 COMMENT ON TABLE devices IS 'Enrolled devices with payment tracking';
 COMMENT ON TABLE payment_transactions IS 'All payment records';
+
+-- Admins table
+CREATE TABLE IF NOT EXISTS admins (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    role VARCHAR(50) DEFAULT 'admin',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Admin sessions table
+CREATE TABLE IF NOT EXISTS admin_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    admin_id UUID REFERENCES admins(id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
