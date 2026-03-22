@@ -17,12 +17,18 @@ if %errorlevel% neq 0 (
 echo Java found!
 echo.
 
-REM Check if Android SDK is installed
-if not defined ANDROID_HOME (
-    echo WARNING: ANDROID_HOME is not set
-    echo Please install Android Studio or Android SDK
+REM Check if local.properties exists
+if not exist "local.properties" (
+    echo ERROR: local.properties not found!
     echo.
+    echo Please run setup-sdk.bat first to configure Android SDK
+    echo.
+    pause
+    exit /b 1
 )
+
+echo Android SDK configured!
+echo.
 
 echo Building APK...
 echo.
