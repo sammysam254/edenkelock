@@ -513,17 +513,11 @@
         }
 
         function generateProvisioningQR(deviceId, serialNumber) {
-            // Generate provisioning QR code with correct Android format
+            // Generate provisioning QR code WITHOUT APK download
+            // APK must be installed manually BEFORE factory reset
             const provisioningData = {
                 "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.eden.mkopa/.DeviceAdminReceiver",
-                "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/download/eden.apk",
-                "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true,
-                "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
-                "android.app.extra.PROVISIONING_WIFI_SSID": "",
-                "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
-                    "device_id": deviceId,
-                    "serial_number": serialNumber
-                }
+                "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true
             };
             
             const qrContent = JSON.stringify(provisioningData);
@@ -554,16 +548,23 @@
             // Show device info
             document.getElementById('qrDeviceInfo').innerHTML = `
                 <strong>Device ID:</strong> ${deviceId}<br>
-                <strong>Serial Number:</strong> ${serialNumber}<br>
+                <strong>Customer Phone:</strong> ${serialNumber}<br>
                 <br>
-                <strong>Instructions:</strong><br>
-                1. Factory reset the device<br>
-                2. During setup, tap screen 6 times<br>
-                3. Device will show QR scanner<br>
-                4. Scan this QR code<br>
-                5. Device will provision automatically<br>
+                <strong>⚠️ BEFORE Scanning:</strong><br>
+                1. Download and install Eden APK on device<br>
+                2. Factory reset device<br>
+                3. Connect to WiFi during setup<br>
+                4. Do NOT add Google account<br>
                 <br>
-                <strong>Note:</strong> Ensure device has WiFi connection during setup
+                <strong>📱 Provisioning Steps:</strong><br>
+                1. On welcome screen, tap 6 times<br>
+                2. QR scanner appears<br>
+                3. Scan this QR code<br>
+                4. Device provisions as Device Owner<br>
+                5. Eden app launches automatically<br>
+                <br>
+                <strong>✅ After Provisioning:</strong><br>
+                Customer logs in with phone: <strong>${serialNumber}</strong>
             `;
         }
 
