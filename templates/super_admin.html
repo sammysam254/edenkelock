@@ -514,10 +514,10 @@
 
         function generateProvisioningQR(deviceId, serialNumber) {
             // Generate provisioning QR code WITH APK download URL
-            // Android will download and install APK automatically during provisioning
+            // Using the same download URL as homepage for consistency
             const provisioningData = {
                 "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.eden.mkopa/.DeviceAdminReceiver",
-                "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/download/eden.apk",
+                "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/static/apk/eden.apk",
                 "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true
             };
             
@@ -567,7 +567,7 @@
                 <br>
                 <strong>⚠️ If "Can't set up device" error:</strong><br>
                 • Ensure device has internet connection<br>
-                • Check APK is accessible: <a href="https://eden-mkopa.onrender.com/download/eden.apk" target="_blank" style="color: #059669;">Test Download</a><br>
+                • Test APK download: <a href="https://eden-mkopa.onrender.com/static/apk/eden.apk" target="_blank" style="color: #059669;">Click Here</a><br>
                 • Try using ADB method instead
             `;
         }
