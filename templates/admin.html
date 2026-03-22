@@ -27,28 +27,30 @@
             <div style="background: #f3f4f6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                 <h3 style="color: #059669; margin-bottom: 15px;">Setup Steps:</h3>
                 <ol style="color: #374151; line-height: 1.8;">
-                    <li><strong>Download APK:</strong> <a href="/download/eden.apk" style="color: #059669;">eden.apk</a></li>
-                    <li><strong>Install APK</strong> on the device manually</li>
                     <li><strong>Factory Reset Device</strong> (Settings → System → Reset)</li>
                     <li><strong>During setup wizard:</strong>
                         <ul style="margin-top: 5px;">
                             <li>Connect to WiFi</li>
-                            <li>Tap welcome screen 6 times</li>
+                            <li>Do NOT add Google account</li>
+                            <li>Tap welcome screen 6 times quickly</li>
                             <li>QR scanner will appear</li>
                         </ul>
                     </li>
                     <li><strong>Click "Generate QR"</strong> button below for enrolled device</li>
                     <li><strong>Scan QR code</strong> with device camera</li>
-                    <li><strong>Device provisions automatically</strong> as Device Owner</li>
+                    <li><strong>Device downloads and installs Eden APK automatically</strong></li>
+                    <li><strong>Device provisions as Device Owner</strong></li>
+                    <li><strong>Eden app launches</strong> - Customer can login</li>
                 </ol>
             </div>
             
             <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 20px;">
                 <strong style="color: #92400e;">⚠️ Important:</strong>
                 <ul style="color: #78350f; margin-top: 10px; line-height: 1.6;">
-                    <li>Install APK BEFORE factory reset</li>
+                    <li>Device must be factory reset FIRST</li>
                     <li>Do NOT add Google account during setup</li>
                     <li>Device must have WiFi connection</li>
+                    <li>APK downloads automatically from server</li>
                     <li>After provisioning, device locks automatically</li>
                 </ul>
             </div>
@@ -391,10 +393,11 @@
         }
 
         function generateProvisioningQR(deviceId, serialNumber) {
-            // Generate provisioning QR code WITHOUT APK download
-            // APK must be installed manually BEFORE factory reset
+            // Generate provisioning QR code WITH APK download
+            // Android will download and install APK during provisioning
             const provisioningData = {
                 "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.eden.mkopa/.DeviceAdminReceiver",
+                "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/download/eden.apk",
                 "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true
             };
             
@@ -415,7 +418,7 @@
                     height: 280,
                     colorDark: '#000000',
                     colorLight: '#FFFFFF',
-                    correctLevel: QRCode.CorrectLevel.M
+                    correctLevel: QRCode.CorrectLevel.L
                 });
             } catch (error) {
                 alert('Error generating QR code: ' + error);
@@ -428,21 +431,26 @@
                 <strong>Device ID:</strong> ${deviceId}<br>
                 <strong>Customer Phone:</strong> ${serialNumber}<br>
                 <br>
-                <strong>⚠️ BEFORE Scanning:</strong><br>
-                1. Download and install Eden APK on device<br>
-                2. Factory reset device<br>
-                3. Connect to WiFi during setup<br>
-                4. Do NOT add Google account<br>
-                <br>
                 <strong>📱 Provisioning Steps:</strong><br>
-                1. On welcome screen, tap 6 times<br>
-                2. QR scanner appears<br>
-                3. Scan this QR code<br>
-                4. Device provisions as Device Owner<br>
-                5. Eden app launches automatically<br>
+                1. Factory reset device<br>
+                2. Connect to WiFi during setup<br>
+                3. Do NOT add Google account<br>
+                4. Tap welcome screen 6 times<br>
+                5. QR scanner appears<br>
+                6. Scan this QR code<br>
+                7. Device downloads Eden APK<br>
+                8. Device provisions as Device Owner<br>
+                9. Eden launches automatically<br>
                 <br>
                 <strong>✅ After Provisioning:</strong><br>
-                Customer logs in with phone: <strong>${serialNumber}</strong>
+                Customer logs in with phone: <strong>${serialNumber}</strong><br>
+                <br>
+                <strong>⚠️ Troubleshooting:</strong><br>
+                If "Can't set up device" error appears:<br>
+                • Ensure device has strong WiFi<br>
+                • Verify APK URL is accessible<br>
+                • Try using error correction level L<br>
+                • Ensure no Google account added
             `;
         }
 

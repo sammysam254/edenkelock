@@ -513,10 +513,11 @@
         }
 
         function generateProvisioningQR(deviceId, serialNumber) {
-            // Generate provisioning QR code WITHOUT APK download
-            // APK must be installed manually BEFORE factory reset
+            // Generate provisioning QR code WITH APK download URL
+            // Android will download and install APK automatically during provisioning
             const provisioningData = {
                 "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.eden.mkopa/.DeviceAdminReceiver",
+                "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://eden-mkopa.onrender.com/download/eden.apk",
                 "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true
             };
             
@@ -537,7 +538,7 @@
                     height: 280,
                     colorDark: '#000000',
                     colorLight: '#FFFFFF',
-                    correctLevel: QRCode.CorrectLevel.M
+                    correctLevel: QRCode.CorrectLevel.L
                 });
             } catch (error) {
                 alert('Error generating QR code: ' + error);
@@ -550,21 +551,24 @@
                 <strong>Device ID:</strong> ${deviceId}<br>
                 <strong>Customer Phone:</strong> ${serialNumber}<br>
                 <br>
-                <strong>⚠️ BEFORE Scanning:</strong><br>
-                1. Download and install Eden APK on device<br>
-                2. Factory reset device<br>
-                3. Connect to WiFi during setup<br>
-                4. Do NOT add Google account<br>
-                <br>
                 <strong>📱 Provisioning Steps:</strong><br>
-                1. On welcome screen, tap 6 times<br>
-                2. QR scanner appears<br>
-                3. Scan this QR code<br>
-                4. Device provisions as Device Owner<br>
-                5. Eden app launches automatically<br>
+                1. Factory reset device<br>
+                2. Connect to WiFi during setup<br>
+                3. Do NOT add Google account<br>
+                4. Tap welcome screen 6 times quickly<br>
+                5. QR scanner appears automatically<br>
+                6. Scan this QR code<br>
+                7. Android downloads Eden APK<br>
+                8. Android installs Eden as Device Owner<br>
+                9. Device restarts and Eden launches<br>
                 <br>
                 <strong>✅ After Provisioning:</strong><br>
-                Customer logs in with phone: <strong>${serialNumber}</strong>
+                Customer logs in with phone: <strong>${serialNumber}</strong><br>
+                <br>
+                <strong>⚠️ If "Can't set up device" error:</strong><br>
+                • Ensure device has internet connection<br>
+                • Check APK is accessible: <a href="https://eden-mkopa.onrender.com/download/eden.apk" target="_blank" style="color: #059669;">Test Download</a><br>
+                • Try using ADB method instead
             `;
         }
 
