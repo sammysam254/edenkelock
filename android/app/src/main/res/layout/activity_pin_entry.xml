@@ -34,7 +34,7 @@
 
     <!-- Phone Number Input (shown first time only) -->
     <LinearLayout
-        android:id="@+id/phoneInputLayout"
+        android:id="@+id/phoneNumberLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -43,28 +43,29 @@
         <EditText
             android:id="@+id/phoneInput"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="72dp"
             android:hint="0706499848"
             android:inputType="phone"
-            android:maxLength="10"
-            android:textSize="18sp"
+            android:maxLength="13"
+            android:textSize="24sp"
             android:padding="16dp"
+            android:gravity="center"
             android:background="@drawable/pin_box_background"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/continueButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Continue"
-            android:textSize="16sp"
-            android:backgroundTint="@color/primary"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This will be saved for future logins"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 
     <!-- PIN Display (4 big boxes) -->
     <LinearLayout
-        android:id="@+id/pinDisplayLayout"
+        android:id="@+id/pinLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -73,53 +74,53 @@
 
         <EditText
             android:id="@+id/pinBox1"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_margin="8dp"
             android:background="@drawable/pin_box_background"
             android:gravity="center"
             android:inputType="numberPassword"
             android:maxLength="1"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"/>
 
         <EditText
             android:id="@+id/pinBox2"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_margin="8dp"
             android:background="@drawable/pin_box_background"
             android:gravity="center"
             android:inputType="numberPassword"
             android:maxLength="1"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"/>
 
         <EditText
             android:id="@+id/pinBox3"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_margin="8dp"
             android:background="@drawable/pin_box_background"
             android:gravity="center"
             android:inputType="numberPassword"
             android:maxLength="1"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"/>
 
         <EditText
             android:id="@+id/pinBox4"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_margin="8dp"
             android:background="@drawable/pin_box_background"
             android:gravity="center"
             android:inputType="numberPassword"
             android:maxLength="1"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"/>
 

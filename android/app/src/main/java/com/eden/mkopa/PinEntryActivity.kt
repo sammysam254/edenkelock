@@ -8,7 +8,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -17,16 +16,17 @@ import androidx.appcompat.app.AppCompatActivity
 class PinEntryActivity : AppCompatActivity() {
     
     private var pinCode = ""
-    private val correctPin = "1234" // Default PIN, should be configurable
+    private val correctPin = "1234" // Default PIN
     
-    private lateinit var titleText: TextView
-    private lateinit var subtitleText: TextView
-    private lateinit var phoneInputLayout: LinearLayout
+    private lateinit var phoneNumberLayout: LinearLayout
+    private lateinit var pinLayout: LinearLayout
     private lateinit var phoneInput: EditText
-    private lateinit var continueButton: Button
-    private lateinit var pinDisplayLayout: LinearLayout
-    private lateinit var pinBoxes: List<EditText>
+    private lateinit var pinBox1: EditText
+    private lateinit var pinBox2: EditText
+    private lateinit var pinBox3: EditText
+    private lateinit var pinBox4: EditText
     private lateinit var errorText: TextView
+    private lateinit var titleText: TextView
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,184 +34,138 @@ class PinEntryActivity : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_pin_entry)
             
-            titleText = findViewById(R.id.titleText)
-            subtitleText = findViewById(R.id.subtitleText)
-            phoneInputLayout = findViewById(R.id.phoneInputLayout)
+            // Initialize views
+            phoneNumberLayout = findViewById(R.id.phoneNumberLayout)
+            pinLayout = findViewById(R.id.pinLayout)
             phoneInput = findViewById(R.id.phoneInput)
-            continueButton = findViewById(R.id.continueButton)
-            pinDisplayLayout = findViewById(R.id.pinDisplayLayout)
+            pinBox1 = findViewById(R.id.pinBox1)
+            pinBox2 = findViewById(R.id.pinBox2)
+            pinBox3 = findViewById(R.id.pinBox3)
+            pinBox4 = findViewById(R.id.pinBox4)
             errorText = findViewById(R.id.errorText)
+            titleText = findViewById(R.id.titleText)
             
-            pinBoxes = listOf(
-                findViewById(R.id.pinBox1),
-                findViewById(R.id.pinBox2),
-                findViewById(R.id.pinBox3),
-                findViewById(R.id.pinBox4)
-            )
+            // Check if phone number is already saved
+            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+            val savedPhone = prefs.getString("customer_phone", null)
             
-            checkPhoneNumber()
-            
-            continueButton.setOnClickListener {
-                savePhoneNumber()
+            if (savedPhone != null) {
+                // Phone already saved, show PIN entry
+                showPinEntry()
+            } else {
+                // Show phone number entry first
+                showPhoneEntry()
             }
             
-            setupPinBoxes()
         } catch (e: Exception) {
             e.printStackTrace()
-            // If there's an error, go directly to MainActivity
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            // If anything fails, go to MainActivity
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
     }
     
-    private fun checkPhoneNumber() {
-        val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-        val savedPhone = prefs.getString("device_phone", null)
+    private fun showPhoneEntry() {
+        phoneNumberLayout.visibility = View.VISIBLE
+        pinLayout.visibility = View.GONE
+        titleText.text = "Enter Your Phone Number"
         
-        if (savedPhone == null) {
-            // First time - show phone input
-            showPhoneInput()
-        } else {
-            // Phone saved - show PIN input
-            showPinInput()
-        }
-    }
-    
-    private fun showPhoneInput() {
-        titleText.text = "Enter Phone Number"
-        subtitleText.text = "Enter your phone number to continue"
-        phoneInputLayout.visibility = View.VISIBLE
-        pinDisplayLayout.visibility = View.GONE
-        
-        // Auto-open keyboard
+        // Auto-focus and show keyboard
         phoneInput.requestFocus()
         phoneInput.postDelayed({
-            try {
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(phoneInput, InputMethodManager.SHOW_IMPLICIT)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(phoneInput, InputMethodManager.SHOW_IMPLICIT)
         }, 200)
-    }
-    
-    private fun showPinInput() {
-        titleText.text = "Enter PIN"
-        subtitleText.text = "Enter your 4-digit PIN to continue"
-        phoneInputLayout.visibility = View.GONE
-        pinDisplayLayout.visibility = View.VISIBLE
         
-        // Auto-open keyboard on first box
-        pinBoxes[0].requestFocus()
-        pinBoxes[0].postDelayed({
-            try {
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(pinBoxes[0], InputMethodManager.SHOW_IMPLICIT)
-            } catch (e: Exception) {
-                e.printStackTrace()
+        phoneInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val phone = s.toString()
+                if (phone.length >= 10) {
+                    // Save phone and move to PIN
+                    val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                    prefs.edit().putString("customer_phone", phone).apply()
+                    showPinEntry()
+                }
             }
+        })
+    }
+    
+    private fun showPinEntry() {
+        phoneNumberLayout.visibility = View.GONE
+        pinLayout.visibility = View.VISIBLE
+        titleText.text = "Enter Your PIN"
+        
+        setupPinBoxes()
+        
+        // Auto-focus first box and show keyboard
+        pinBox1.requestFocus()
+        pinBox1.postDelayed({
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(pinBox1, InputMethodManager.SHOW_IMPLICIT)
         }, 200)
-    }
-    
-    private fun savePhoneNumber() {
-        val phone = phoneInput.text.toString().trim()
-        
-        if (phone.isEmpty()) {
-            errorText.text = "Please enter your phone number"
-            errorText.visibility = View.VISIBLE
-            return
-        }
-        
-        if (phone.length < 10) {
-            errorText.text = "Please enter a valid phone number"
-            errorText.visibility = View.VISIBLE
-            return
-        }
-        
-        // Format phone number
-        val formattedPhone = formatPhoneNumber(phone)
-        
-        // Save phone number
-        val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putString("device_phone", formattedPhone).apply()
-        
-        // Show PIN input
-        errorText.visibility = View.GONE
-        showPinInput()
-    }
-    
-    private fun formatPhoneNumber(phone: String): String {
-        var cleaned = phone.replace(Regex("[^0-9]"), "")
-        
-        return when {
-            cleaned.startsWith("07") -> "+254${cleaned.substring(1)}"
-            cleaned.startsWith("7") && cleaned.length == 9 -> "+254$cleaned"
-            cleaned.startsWith("254") -> "+$cleaned"
-            cleaned.startsWith("+254") -> cleaned
-            else -> cleaned
-        }
     }
     
     private fun setupPinBoxes() {
-        pinBoxes.forEachIndexed { index, editText ->
-            editText.addTextChangedListener(object : TextWatcher {
+        val boxes = listOf(pinBox1, pinBox2, pinBox3, pinBox4)
+        
+        boxes.forEachIndexed { index, box ->
+            box.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (s?.length == 1) {
-                        // Animate heartbeat
-                        try {
-                            val anim = AnimationUtils.loadAnimation(this@PinEntryActivity, R.anim.heartbeat)
-                            editText.startAnimation(anim)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    val text = s.toString()
+                    
+                    if (text.length == 1) {
+                        // Animate box
+                        val heartbeat = AnimationUtils.loadAnimation(this@PinEntryActivity, R.anim.heartbeat)
+                        box.startAnimation(heartbeat)
                         
                         // Move to next box
-                        if (index < pinBoxes.size - 1) {
-                            pinBoxes[index + 1].requestFocus()
+                        if (index < 3) {
+                            boxes[index + 1].requestFocus()
                         } else {
-                            // All boxes filled, verify PIN
-                            verifyPin()
+                            // All boxes filled, check PIN
+                            checkPin()
                         }
-                    } else if (s?.isEmpty() == true && index > 0) {
-                        // Move to previous box on delete
-                        pinBoxes[index - 1].requestFocus()
+                    } else if (text.isEmpty() && index > 0) {
+                        // Move back to previous box on delete
+                        boxes[index - 1].requestFocus()
                     }
                 }
-                
-                override fun afterTextChanged(s: Editable?) {}
             })
         }
     }
     
-    private fun verifyPin() {
-        val enteredPin = pinBoxes.joinToString("") { it.text.toString() }
+    private fun checkPin() {
+        val enteredPin = pinBox1.text.toString() + 
+                        pinBox2.text.toString() + 
+                        pinBox3.text.toString() + 
+                        pinBox4.text.toString()
         
         if (enteredPin == correctPin) {
-            // PIN correct, proceed to main activity
+            // Correct PIN, go to MainActivity
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         } else {
-            // PIN incorrect
-            errorText.text = "Incorrect PIN. Please try again."
+            // Wrong PIN, shake and clear
             errorText.visibility = View.VISIBLE
+            errorText.text = "Incorrect PIN. Try again."
             
-            // Clear all boxes
-            pinBoxes.forEach { it.text.clear() }
-            pinBoxes[0].requestFocus()
+            val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
+            pinLayout.startAnimation(shake)
             
-            // Shake animation
-            try {
-                pinBoxes.forEach { box ->
-                    val shakeAnim = AnimationUtils.loadAnimation(this, R.anim.shake)
-                    box.startAnimation(shakeAnim)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            // Clear boxes after animation
+            pinLayout.postDelayed({
+                pinBox1.text.clear()
+                pinBox2.text.clear()
+                pinBox3.text.clear()
+                pinBox4.text.clear()
+                pinBox1.requestFocus()
+                errorText.visibility = View.GONE
+            }, 500)
         }
     }
     

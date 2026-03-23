@@ -98,7 +98,7 @@ class LockMonitorService : Service() {
         return NotificationCompat.Builder(this, "eden_monitor")
             .setContentTitle("Eden")
             .setContentText("Device monitoring active")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .build()

@@ -26,41 +26,58 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         
-        devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
-        
-        webView = findViewById(R.id.webView)
-        progressBar = findViewById(R.id.progressBar)
-        swipeRefresh = findViewById(R.id.swipeRefresh)
-        
-        setupWebView()
-        setupSwipeRefresh()
-        
-        // Check if device owner
-        if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-            setupDeviceOwner()
-            // Start background sync
-            SyncWorker.schedule(this)
-            // Start lock monitor service for instant locking
-            val lockMonitorIntent = Intent(this, LockMonitorService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(lockMonitorIntent)
+        try {
+            setContentView(R.layout.activity_main)
+            
+            devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
+            
+            webView = findViewById(R.id.webView)
+            progressBar = findViewById(R.id.progressBar)
+            swipeRefresh = findViewById(R.id.swipeRefresh)
+            
+            setupWebView()
+            setupSwipeRefresh()
+            
+            // Check if device owner
+            if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+                try {
+                    setupDeviceOwner()
+                    // Start background sync
+                    SyncWorker.schedule(this)
+                    // Start lock monitor service for instant locking
+                    try {
+                        val lockMonitorIntent = Intent(this, LockMonitorService::class.java)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(lockMonitorIntent)
+                        } else {
+                            startService(lockMonitorIntent)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // Continue even if service fails to start
+                    }
+                    // Start in kiosk mode immediately
+                    startLockTask()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Continue even if setup fails
+                }
             } else {
-                startService(lockMonitorIntent)
+                // Show setup instructions
+                val intent = Intent(this, DeviceOwnerSetupActivity::class.java)
+                startActivity(intent)
+                // Don't finish - let user come back after setup
             }
-            // Start in kiosk mode immediately
-            startLockTask()
-        } else {
-            // Show setup instructions
-            val intent = Intent(this, DeviceOwnerSetupActivity::class.java)
-            startActivity(intent)
-            // Don't finish - let user come back after setup
+            
+            // Load customer login page
+            loadCustomerDashboard()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // If anything fails, at least try to show a basic error
+            android.widget.Toast.makeText(this, "Error starting app: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
         }
-        
-        // Load customer login page
-        loadCustomerDashboard()
     }
     
     private fun requestDeviceAdmin() {

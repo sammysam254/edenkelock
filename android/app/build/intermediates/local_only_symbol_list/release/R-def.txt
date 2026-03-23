@@ -31,7 +31,6 @@ id balanceText
 id checkStatusButton
 id commandText
 id contentFrame
-id continueButton
 id copyCommandButton
 id deviceStatusText
 id drawerLayout
@@ -46,12 +45,12 @@ id nav_support
 id navigationView
 id nextPaymentDate
 id phoneInput
-id phoneInputLayout
+id phoneNumberLayout
 id pinBox1
 id pinBox2
 id pinBox3
 id pinBox4
-id pinDisplayLayout
+id pinLayout
 id progressBar
 id refreshButton
 id statusText

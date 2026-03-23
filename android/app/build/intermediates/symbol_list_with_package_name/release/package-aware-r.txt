@@ -3135,7 +3135,6 @@ id content
 id contentFrame
 id contentPanel
 id contiguous
-id continueButton
 id coordinator
 id copyCommandButton
 id cos
@@ -3352,13 +3351,13 @@ id pathRelative
 id peekHeight
 id percent
 id phoneInput
-id phoneInputLayout
+id phoneNumberLayout
 id pin
 id pinBox1
 id pinBox2
 id pinBox3
 id pinBox4
-id pinDisplayLayout
+id pinLayout
 id position
 id postLayout
 id pressed
