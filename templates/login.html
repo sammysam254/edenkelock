@@ -84,18 +84,28 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            fetch('/api/auth/login', {
+            // Use email as username for the API
+            fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ 
+                    username: email, 
+                    password: password 
+                })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Login failed');
+                }
+                return res.json();
+            })
             .then(data => {
                 if (data.success) {
                     localStorage.setItem('eden_token', data.token);
-                    localStorage.setItem('eden_user', JSON.stringify(data.user));
+                    localStorage.setItem('eden_role', data.role);
+                    localStorage.setItem('eden_admin_id', data.admin_id);
                     
-                    if (data.user.role === 'super_admin') {
+                    if (data.role === 'super_admin') {
                         window.location.href = '/super-admin';
                     } else {
                         window.location.href = '/admin';
@@ -105,7 +115,8 @@
                 }
             })
             .catch(err => {
-                alert('Error: ' + err.message);
+                console.error('Login error:', err);
+                alert('Login error: ' + err.message);
             });
         });
     </script>
