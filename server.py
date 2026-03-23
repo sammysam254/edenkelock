@@ -969,8 +969,8 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 9,
-        "version_name": "1.8.0",
+        "version_code": 10,
+        "version_name": "1.8.1",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
@@ -983,7 +983,7 @@ def get_app_version():
             "Automatic Loan Balance Verification",
             "Persistent Device Protection"
         ],
-        "changelog": "Updated for new authentication system with admin registration flow and enhanced security"
+        "changelog": "Fixed server routes and updated for new authentication system with admin registration flow"
     })
 
 # ============================================
