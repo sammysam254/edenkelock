@@ -3129,6 +3129,10 @@ id clockwise
 id collapseActionView
 id commandText
 id compress
+id confirmPinBox1
+id confirmPinBox2
+id confirmPinBox3
+id confirmPinBox4
 id confirm_button
 id container
 id content
@@ -3315,6 +3319,10 @@ id navigation_bar_item_small_label_view
 id navigation_header_container
 id never
 id newPhoneInput
+id newPinBox1
+id newPinBox2
+id newPinBox3
+id newPinBox4
 id newUserLayout
 id nextPaymentDate
 id noScroll
@@ -3639,6 +3647,7 @@ layout design_navigation_menu
 layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
+layout dialog_change_pin
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
 layout m3_alert_dialog

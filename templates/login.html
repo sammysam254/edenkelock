@@ -105,6 +105,12 @@
                     localStorage.setItem('eden_role', data.role);
                     localStorage.setItem('eden_admin_id', data.admin_id);
                     
+                    // Check if password must be changed
+                    if (data.must_change_password) {
+                        window.location.href = '/change-password';
+                        return;
+                    }
+                    
                     if (data.role === 'super_admin') {
                         window.location.href = '/super-admin';
                     } else {

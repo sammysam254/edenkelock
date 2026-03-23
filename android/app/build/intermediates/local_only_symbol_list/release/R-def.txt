@@ -30,6 +30,10 @@ id balanceAmount
 id balanceText
 id checkStatusButton
 id commandText
+id confirmPinBox1
+id confirmPinBox2
+id confirmPinBox3
+id confirmPinBox4
 id contentFrame
 id copyCommandButton
 id deviceStatusText
@@ -44,6 +48,10 @@ id nav_settings
 id nav_support
 id navigationView
 id newPhoneInput
+id newPinBox1
+id newPinBox2
+id newPinBox3
+id newPinBox4
 id newUserLayout
 id nextPaymentDate
 id notYouText
@@ -68,6 +76,7 @@ layout activity_lock_screen
 layout activity_main
 layout activity_main_new
 layout activity_pin_entry
+layout dialog_change_pin
 layout nav_header
 menu drawer_menu
 mipmap ic_launcher

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change PIN - Eden</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 style="color: #059669; text-align: center; margin-bottom: 10px;">🌿 Eden</h1>
+                <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">Change Your PIN</p>
+                <p style="text-align: center; color: #dc2626; margin-bottom: 20px; font-size: 0.9em;">
+                    You must change your default PIN before continuing.
+                </p>
+                
+                <form id="changePinForm">
+                    <div class="form-group">
+                        <label>New PIN</label>
+                        <input type="password" id="newPin" required placeholder="Enter new 4-digit PIN" maxlength="4" pattern="[0-9]{4}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirm PIN</label>
+                        <input type="password" id="confirmPin" required placeholder="Confirm new PIN" maxlength="4" pattern="[0-9]{4}">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Change PIN</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1.5em;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+    </style>
+
+    <script>
+        // Check if user has customer phone stored
+        const customerPhone = localStorage.getItem('eden_customer_phone');
+        if (!customerPhone) {
+            window.location.href = '/customer-login';
+        }
+
+        // Only allow numbers in PIN fields
+        document.getElementById('newPin').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+        
+        document.getElementById('confirmPin').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('changePinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newPin = document.getElementById('newPin').value;
+            const confirmPin = document.getElementById('confirmPin').value;
+            
+            if (newPin !== confirmPin) {
+                alert('PINs do not match');
+                return;
+            }
+            
+            if (newPin.length !== 4) {
+                alert('PIN must be exactly 4 digits');
+                return;
+            }
+            
+            fetch('/api/customer/set-pin', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    phone_number: customerPhone,
+                    pin: newPin
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Failed to change PIN');
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('PIN changed successfully!');
+                    window.location.href = '/customer-dashboard';
+                } else {
+                    alert('Failed to change PIN: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                console.error('Change PIN error:', err);
+                alert('Error: ' + err.message);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -215,9 +215,9 @@
 
     <script>
         const token = localStorage.getItem("eden_token");
-        const user = JSON.parse(localStorage.getItem("eden_user") || "{}");
+        const role = localStorage.getItem("eden_role");
         
-        if (!token || user.role !== "super_admin") {
+        if (!token || role !== "super_admin") {
             window.location.href = "/login";
         }
 
@@ -369,7 +369,8 @@
 
         function logout() {
             localStorage.removeItem("eden_token");
-            localStorage.removeItem("eden_user");
+            localStorage.removeItem("eden_role");
+            localStorage.removeItem("eden_admin_id");
             window.location.href = "/login";
         }
 

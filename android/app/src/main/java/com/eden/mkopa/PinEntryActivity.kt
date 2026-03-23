@@ -236,6 +236,15 @@ class PinEntryActivity : AppCompatActivity() {
                     
                     withContext(Dispatchers.Main) {
                         if (jsonResponse.getBoolean("success")) {
+                            // Check if PIN must be changed
+                            val mustChangePin = jsonResponse.optBoolean("must_change_pin", false)
+                            
+                            if (mustChangePin) {
+                                // Show PIN change dialog
+                                showChangePinDialog(phone)
+                                return@withContext
+                            }
+                            
                             // Login successful
                             val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
                             prefs.edit()
@@ -284,6 +293,135 @@ class PinEntryActivity : AppCompatActivity() {
         pinBox3.text.clear()
         pinBox4.text.clear()
         pinBox1.requestFocus()
+    }
+    
+    private fun showChangePinDialog(phone: String) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Change Your PIN")
+        builder.setMessage("You must change your default PIN before continuing.")
+        builder.setCancelable(false)
+        
+        val dialogView = layoutInflater.inflate(R.layout.dialog_change_pin, null)
+        builder.setView(dialogView)
+        
+        val newPin1 = dialogView.findViewById<EditText>(R.id.newPinBox1)
+        val newPin2 = dialogView.findViewById<EditText>(R.id.newPinBox2)
+        val newPin3 = dialogView.findViewById<EditText>(R.id.newPinBox3)
+        val newPin4 = dialogView.findViewById<EditText>(R.id.newPinBox4)
+        val confirmPin1 = dialogView.findViewById<EditText>(R.id.confirmPinBox1)
+        val confirmPin2 = dialogView.findViewById<EditText>(R.id.confirmPinBox2)
+        val confirmPin3 = dialogView.findViewById<EditText>(R.id.confirmPinBox3)
+        val confirmPin4 = dialogView.findViewById<EditText>(R.id.confirmPinBox4)
+        
+        // Setup PIN box navigation for new PIN
+        setupPinBoxNavigation(listOf(newPin1, newPin2, newPin3, newPin4))
+        setupPinBoxNavigation(listOf(confirmPin1, confirmPin2, confirmPin3, confirmPin4))
+        
+        builder.setPositiveButton("Change PIN") { _, _ ->
+            val newPin = newPin1.text.toString() + newPin2.text.toString() + 
+                        newPin3.text.toString() + newPin4.text.toString()
+            val confirmPin = confirmPin1.text.toString() + confirmPin2.text.toString() + 
+                            confirmPin3.text.toString() + confirmPin4.text.toString()
+            
+            if (newPin.length != 4 || confirmPin.length != 4) {
+                Toast.makeText(this, "Please enter 4 digits for both PINs", Toast.LENGTH_SHORT).show()
+                showChangePinDialog(phone) // Show dialog again
+                return@setPositiveButton
+            }
+            
+            if (newPin != confirmPin) {
+                Toast.makeText(this, "PINs do not match", Toast.LENGTH_SHORT).show()
+                showChangePinDialog(phone) // Show dialog again
+                return@setPositiveButton
+            }
+            
+            changePin(phone, newPin)
+        }
+        
+        val dialog = builder.create()
+        dialog.show()
+        
+        // Focus on first new PIN box
+        newPin1.requestFocus()
+        newPin1.postDelayed({
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(newPin1, InputMethodManager.SHOW_IMPLICIT)
+        }, 200)
+    }
+    
+    private fun setupPinBoxNavigation(boxes: List<EditText>) {
+        boxes.forEachIndexed { index, box ->
+            box.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    val text = s.toString()
+                    
+                    if (text.length == 1) {
+                        if (index < 3) {
+                            boxes[index + 1].requestFocus()
+                        }
+                    } else if (text.isEmpty() && index > 0) {
+                        boxes[index - 1].requestFocus()
+                    }
+                }
+            })
+        }
+    }
+    
+    private fun changePin(phone: String, newPin: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("$BASE_URL/api/customer/set-pin")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+                
+                val jsonBody = JSONObject()
+                jsonBody.put("phone_number", phone)
+                jsonBody.put("pin", newPin)
+                
+                connection.outputStream.write(jsonBody.toString().toByteArray())
+                
+                val responseCode = connection.responseCode
+                if (responseCode == 200) {
+                    val response = connection.inputStream.bufferedReader().readText()
+                    val jsonResponse = JSONObject(response)
+                    
+                    withContext(Dispatchers.Main) {
+                        if (jsonResponse.getBoolean("success")) {
+                            Toast.makeText(this@PinEntryActivity, "PIN changed successfully!", Toast.LENGTH_SHORT).show()
+                            
+                            // Save login state and proceed to MainActivity
+                            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                            prefs.edit()
+                                .putBoolean("pin_completed", true)
+                                .putString("customer_phone", phone)
+                                .apply()
+                            
+                            val intent = Intent(this@PinEntryActivity, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            Toast.makeText(this@PinEntryActivity, "Failed to change PIN: ${jsonResponse.optString("error")}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@PinEntryActivity, "Failed to change PIN. Please try again.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                connection.disconnect()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@PinEntryActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
     
     override fun onBackPressed() {
