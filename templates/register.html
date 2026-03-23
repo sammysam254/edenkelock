@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eden M-Kopa - Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .register-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #2c5530;
+            font-size: 28px;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        
+        .register-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .register-btn:hover {
+            background: #45a049;
+        }
+        
+        .register-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #2e7d32;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .super-admin-notice {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #1976d2;
+        }
+        
+        .super-admin-notice h3 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>🌿 Eden M-Kopa</h1>
+            <p>Device Financing Platform</p>
+        </div>
+        
+        <div class="super-admin-notice">
+            <h3>🔑 Super Admin Registration</h3>
+            <p>If you register with <strong>sammyselth260@gmail.com</strong>, you will automatically receive super admin privileges and can create other administrators.</p>
+        </div>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required minlength="6">
+                <small>Minimum 6 characters</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            
+            <button type="submit" class="register-btn" id="registerBtn">
+                Create Account
+            </button>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+        
+        <div class="login-link">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registerBtn = document.getElementById('registerBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = {
+                full_name: formData.get('full_name'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                confirm_password: formData.get('confirm_password')
+            };
+            
+            // Validate passwords match
+            if (data.password !== data.confirm_password) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Disable button and show loading
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating Account...';
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    successMessage.innerHTML = `
+                        <strong>Account created successfully!</strong><br>
+                        ${result.is_super_admin ? 
+                            '🔑 You have been granted <strong>Super Admin</strong> privileges!' : 
+                            '👤 You have been granted <strong>Admin</strong> privileges.'
+                        }<br>
+                        Redirecting to login...
+                    `;
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect to login after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 3000);
+                } else {
+                    errorMessage.textContent = result.error || 'Registration failed';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Network error. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Create Account';
+            }
+        });
+        
+        // Real-time email validation
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value;
+            const notice = document.querySelector('.super-admin-notice');
+            
+            if (email === 'sammyselth260@gmail.com') {
+                notice.style.background = '#e8f5e8';
+                notice.style.borderColor = '#4CAF50';
+                notice.innerHTML = `
+                    <h3>🔑 Super Admin Detected!</h3>
+                    <p>You will receive <strong>Super Admin</strong> privileges with this email address.</p>
+                `;
+            } else {
+                notice.style.background = '#e3f2fd';
+                notice.style.borderColor = '#2196f3';
+                notice.innerHTML = `
+                    <h3>🔑 Super Admin Registration</h3>
+                    <p>If you register with <strong>sammyselth260@gmail.com</strong>, you will automatically receive super admin privileges and can create other administrators.</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

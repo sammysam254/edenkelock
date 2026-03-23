@@ -85,9 +85,65 @@ def verify_admin_token(token):
 def index():
     return render_template("index.html")
 
-@app.route("/login")
-def login():
-    return render_template("login.html")
+@app.route("/register")
+def register_page():
+    return render_template("register.html")
+
+@app.route("/api/register", methods=["POST"])
+def api_register():
+    try:
+        if supabase is None:
+            return jsonify({"success": False, "error": "Database connection not available"}), 500
+        
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+            
+        email = data.get("email")
+        password = data.get("password")
+        full_name = data.get("full_name")
+        
+        if not email or not password:
+            return jsonify({"success": False, "error": "Email and password required"}), 400
+        
+        if len(password) < 6:
+            return jsonify({"success": False, "error": "Password must be at least 6 characters"}), 400
+        
+        logger.info(f"Registration attempt for email: {email}")
+        
+        # Check if admin already exists
+        existing_admin = supabase.table("admins").select("*").eq("email", email).execute()
+        if existing_admin.data and len(existing_admin.data) > 0:
+            return jsonify({"success": False, "error": "Account already exists"}), 400
+        
+        password_hash = hash_password(password)
+        
+        # Create admin account (trigger will automatically assign super_admin role to sammyselth260@gmail.com)
+        admin_data = {
+            "email": email,
+            "password_hash": password_hash,
+            "full_name": full_name,
+            "role": "admin"  # Will be overridden by trigger for sammyselth260@gmail.com
+        }
+        
+        response = supabase.table("admins").insert(admin_data).execute()
+        
+        if response.data and len(response.data) > 0:
+            admin = response.data[0]
+            logger.info(f"Registration successful for: {email} with role: {admin['role']}")
+            
+            return jsonify({
+                "success": True,
+                "message": "Account created successfully",
+                "role": admin["role"],
+                "is_super_admin": admin["role"] == "super_admin"
+            })
+        else:
+            return jsonify({"success": False, "error": "Failed to create account"}), 500
+            
+    except Exception as e:
+        logger.error(f"Registration error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/dashboard")
 def dashboard():
