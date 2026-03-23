@@ -3,126 +3,165 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp"
-    android:background="@android:color/white">
-
-    <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@mipmap/ic_launcher"
-        android:layout_marginBottom="32dp"/>
+    android:background="@android:color/white"
+    android:padding="24dp"
+    android:gravity="center">
 
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter Phone Number"
-        android:textSize="24sp"
+        android:text="Welcome"
+        android:textSize="28sp"
+        android:textColor="#059669"
         android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="40dp" />
 
-    <TextView
-        android:id="@+id/subtitleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Enter your phone number to continue"
-        android:textSize="14sp"
-        android:textColor="@color/text_secondary"
-        android:layout_marginBottom="32dp"/>
-
-    <!-- Phone Number Input (shown first time only) -->
+    <!-- Returning User Layout (Phone + PIN on same page) -->
     <LinearLayout
-        android:id="@+id/phoneNumberLayout"
+        android:id="@+id/returningUserLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phone Number"
+            android:textSize="14sp"
+            android:textColor="#6b7280"
+            android:layout_marginBottom="8dp" />
+
         <EditText
             android:id="@+id/phoneInput"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:hint="0706499848"
-            android:inputType="phone"
-            android:maxLength="13"
-            android:textSize="24sp"
-            android:padding="16dp"
-            android:gravity="center"
+            android:layout_height="56dp"
             android:background="@drawable/pin_box_background"
-            android:layout_marginBottom="16dp"/>
+            android:inputType="phone"
+            android:textSize="18sp"
+            android:textColor="#111827"
+            android:padding="12dp"
+            android:layout_marginBottom="24dp"
+            android:enabled="false" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="This will be saved for future logins"
+            android:text="Enter Your PIN"
             android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:layout_gravity="center"/>
+            android:textColor="#6b7280"
+            android:layout_marginBottom="16dp" />
+
+        <LinearLayout
+            android:id="@+id/pinLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/pinBox1"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/pin_box_background"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textSize="24sp"
+                android:textColor="#111827"
+                android:layout_margin="8dp" />
+
+            <EditText
+                android:id="@+id/pinBox2"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/pin_box_background"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textSize="24sp"
+                android:textColor="#111827"
+                android:layout_margin="8dp" />
+
+            <EditText
+                android:id="@+id/pinBox3"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/pin_box_background"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textSize="24sp"
+                android:textColor="#111827"
+                android:layout_margin="8dp" />
+
+            <EditText
+                android:id="@+id/pinBox4"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/pin_box_background"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textSize="24sp"
+                android:textColor="#111827"
+                android:layout_margin="8dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/notYouText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Not you? Switch account"
+            android:textSize="14sp"
+            android:textColor="#059669"
+            android:layout_gravity="center"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 
-    <!-- PIN Display (4 big boxes) -->
+    <!-- New User Layout (Phone number entry) -->
     <LinearLayout
-        android:id="@+id/pinLayout"
-        android:layout_width="wrap_content"
+        android:id="@+id/newUserLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="32dp"
+        android:orientation="vertical"
         android:visibility="gone">
 
-        <EditText
-            android:id="@+id/pinBox1"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_box_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter your registered phone number"
+            android:textSize="14sp"
+            android:textColor="#6b7280"
+            android:layout_marginBottom="16dp"
+            android:gravity="center" />
 
         <EditText
-            android:id="@+id/pinBox2"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="8dp"
+            android:id="@+id/newPhoneInput"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
             android:background="@drawable/pin_box_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
+            android:hint="0700000000"
+            android:inputType="phone"
+            android:textSize="18sp"
+            android:textColor="#111827"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
 
-        <EditText
-            android:id="@+id/pinBox3"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_box_background"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="We'll check if your account exists"
+            android:textSize="12sp"
+            android:textColor="#9ca3af"
             android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
-
-        <EditText
-            android:id="@+id/pinBox4"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_box_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
+            android:layout_gravity="center" />
 
     </LinearLayout>
 
@@ -130,10 +169,10 @@
         android:id="@+id/errorText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        android:text="Error message"
         android:textSize="14sp"
-        android:textColor="@color/error"
+        android:textColor="#dc2626"
         android:layout_marginTop="16dp"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </LinearLayout>

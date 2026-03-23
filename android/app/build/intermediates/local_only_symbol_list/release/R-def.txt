@@ -43,9 +43,11 @@ id nav_payments
 id nav_settings
 id nav_support
 id navigationView
+id newPhoneInput
+id newUserLayout
 id nextPaymentDate
+id notYouText
 id phoneInput
-id phoneNumberLayout
 id pinBox1
 id pinBox2
 id pinBox3
@@ -53,8 +55,8 @@ id pinBox4
 id pinLayout
 id progressBar
 id refreshButton
+id returningUserLayout
 id statusText
-id subtitleText
 id swipeRefresh
 id titleText
 id toolbar

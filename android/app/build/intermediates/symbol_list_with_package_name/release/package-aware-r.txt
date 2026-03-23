@@ -3314,10 +3314,13 @@ id navigation_bar_item_large_label_view
 id navigation_bar_item_small_label_view
 id navigation_header_container
 id never
+id newPhoneInput
+id newUserLayout
 id nextPaymentDate
 id noScroll
 id none
 id normal
+id notYouText
 id notification_background
 id notification_main_column
 id notification_main_column_container
@@ -3351,7 +3354,6 @@ id pathRelative
 id peekHeight
 id percent
 id phoneInput
-id phoneNumberLayout
 id pin
 id pinBox1
 id pinBox2
@@ -3369,6 +3371,7 @@ id ratio
 id rectangles
 id refreshButton
 id report_drawn
+id returningUserLayout
 id reverseSawtooth
 id right
 id rightToLeft
@@ -3432,7 +3435,6 @@ id stop
 id stretch
 id submenuarrow
 id submit_area
-id subtitleText
 id swipeRefresh
 id tabMode
 id tag_accessibility_actions
