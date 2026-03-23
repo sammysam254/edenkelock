@@ -44,8 +44,14 @@ class MainActivity : AppCompatActivity() {
             if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
                 try {
                     setupDeviceOwner()
+                    
                     // Start background sync
-                    SyncWorker.schedule(this)
+                    try {
+                        SyncWorker.schedule(this)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    
                     // Start lock monitor service for instant locking
                     try {
                         val lockMonitorIntent = Intent(this, LockMonitorService::class.java)
@@ -58,25 +64,30 @@ class MainActivity : AppCompatActivity() {
                         e.printStackTrace()
                         // Continue even if service fails to start
                     }
+                    
                     // Start in kiosk mode immediately
-                    startLockTask()
+                    try {
+                        startLockTask()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // Continue even if kiosk mode fails
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     // Continue even if setup fails
                 }
-            } else {
-                // Show setup instructions
-                val intent = Intent(this, DeviceOwnerSetupActivity::class.java)
-                startActivity(intent)
-                // Don't finish - let user come back after setup
             }
             
             // Load customer login page
             loadCustomerDashboard()
         } catch (e: Exception) {
             e.printStackTrace()
-            // If anything fails, at least try to show a basic error
-            android.widget.Toast.makeText(this, "Error starting app: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            // If anything fails, show error and try to continue
+            try {
+                android.widget.Toast.makeText(this, "Starting app...", android.widget.Toast.LENGTH_SHORT).show()
+            } catch (te: Exception) {
+                te.printStackTrace()
+            }
         }
     }
     
@@ -105,51 +116,81 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun setupWebView() {
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            databaseEnabled = true
-            cacheMode = WebSettings.LOAD_DEFAULT
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            useWideViewPort = true
-            loadWithOverviewMode = true
-            setSupportZoom(true)
-            builtInZoomControls = false
-        }
-        
-        // Add JavaScript interface for unlock functionality
-        webView.addJavascriptInterface(object {
-            @android.webkit.JavascriptInterface
-            fun unlockDevice() {
-                runOnUiThread {
-                    if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-                        stopLockTask()
+        try {
+            webView.settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                databaseEnabled = true
+                cacheMode = WebSettings.LOAD_DEFAULT
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                useWideViewPort = true
+                loadWithOverviewMode = true
+                setSupportZoom(true)
+                builtInZoomControls = false
+            }
+            
+            // Add JavaScript interface for unlock functionality
+            webView.addJavascriptInterface(object {
+                @android.webkit.JavascriptInterface
+                fun unlockDevice() {
+                    runOnUiThread {
+                        try {
+                            if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+                                stopLockTask()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }, "AndroidInterface")
+            
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    try {
+                        progressBar.visibility = View.VISIBLE
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    try {
+                        progressBar.visibility = View.GONE
+                        swipeRefresh.isRefreshing = false
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    return false
+                }
+                
+                override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                    super.onReceivedError(view, request, error)
+                    try {
+                        progressBar.visibility = View.GONE
+                        swipeRefresh.isRefreshing = false
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             }
-        }, "AndroidInterface")
-        
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                progressBar.visibility = View.VISIBLE
-            }
             
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                progressBar.visibility = View.GONE
-                swipeRefresh.isRefreshing = false
+            webView.webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    try {
+                        progressBar.progress = newProgress
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
-            
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                return false
-            }
-        }
-        
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                progressBar.progress = newProgress
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
     
@@ -178,28 +219,38 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun loadCustomerDashboard() {
-        val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-        val isLoggedIn = prefs.getBoolean("is_logged_in", false)
-        val deviceId = prefs.getString("device_id", null)
-        val serialNumber = prefs.getString("serial_number", null)
-        
-        if (isLoggedIn) {
-            // Load dashboard with device info
-            var url = "$BASE_URL/dashboard"
-            if (deviceId != null) {
-                url += "?device_id=$deviceId"
+        try {
+            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+            val isLoggedIn = prefs.getBoolean("is_logged_in", false)
+            val deviceId = prefs.getString("device_id", null)
+            val serialNumber = prefs.getString("serial_number", null)
+            
+            if (isLoggedIn) {
+                // Load dashboard with device info
+                var url = "$BASE_URL/dashboard"
+                if (deviceId != null) {
+                    url += "?device_id=$deviceId"
+                }
+                webView.loadUrl(url)
+            } else {
+                // Load login with device info for auto-linking
+                var url = "$BASE_URL/customer-login"
+                if (deviceId != null) {
+                    url += "?device_id=$deviceId"
+                }
+                if (serialNumber != null) {
+                    url += if (deviceId != null) "&serial_number=$serialNumber" else "?serial_number=$serialNumber"
+                }
+                webView.loadUrl(url)
             }
-            webView.loadUrl(url)
-        } else {
-            // Load login with device info for auto-linking
-            var url = "$BASE_URL/customer-login"
-            if (deviceId != null) {
-                url += "?device_id=$deviceId"
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Fallback to basic URL
+            try {
+                webView.loadUrl("$BASE_URL/customer-login")
+            } catch (we: Exception) {
+                we.printStackTrace()
             }
-            if (serialNumber != null) {
-                url += if (deviceId != null) "&serial_number=$serialNumber" else "?serial_number=$serialNumber"
-            }
-            webView.loadUrl(url)
         }
     }
     
