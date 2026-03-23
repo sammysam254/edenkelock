@@ -17,8 +17,8 @@ dashboard/.next/
 dashboard/out/
 android/app/build/
 android/build/
-*.apk
-*.aab
+android/**/*.apk
+android/**/*.aab
 
 # IDE
 .idea/

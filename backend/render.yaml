@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: eden-mkopa-backend
+    name: edenlocke
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py

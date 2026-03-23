@@ -30,29 +30,65 @@ class MainActivity : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_main)
             
-            devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
+            // Initialize device policy manager
+            try {
+                devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+                adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.util.Log.e("MainActivity", "Failed to initialize device policy manager", e)
+            }
             
-            webView = findViewById(R.id.webView)
-            progressBar = findViewById(R.id.progressBar)
-            swipeRefresh = findViewById(R.id.swipeRefresh)
+            // Initialize views
+            try {
+                webView = findViewById(R.id.webView)
+                progressBar = findViewById(R.id.progressBar)
+                swipeRefresh = findViewById(R.id.swipeRefresh)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.util.Log.e("MainActivity", "Failed to initialize views", e)
+                return
+            }
             
-            setupWebView()
-            setupSwipeRefresh()
+            // Setup WebView
+            try {
+                setupWebView()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.util.Log.e("MainActivity", "Failed to setup WebView", e)
+            }
             
-            // Check if device owner
-            if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-                try {
-                    setupDeviceOwner()
+            // Setup SwipeRefresh
+            try {
+                setupSwipeRefresh()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.util.Log.e("MainActivity", "Failed to setup SwipeRefresh", e)
+            }
+            
+            // Check if device owner and setup accordingly
+            try {
+                if (::devicePolicyManager.isInitialized && devicePolicyManager.isDeviceOwnerApp(packageName)) {
+                    android.util.Log.d("MainActivity", "App is device owner, setting up...")
                     
-                    // Start background sync
+                    // Setup device owner restrictions
                     try {
-                        SyncWorker.schedule(this)
+                        setupDeviceOwner()
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        android.util.Log.e("MainActivity", "Failed to setup device owner", e)
                     }
                     
-                    // Start lock monitor service for instant locking
+                    // Start background sync worker
+                    try {
+                        SyncWorker.schedule(this)
+                        android.util.Log.d("MainActivity", "Sync worker scheduled")
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        android.util.Log.e("MainActivity", "Failed to schedule sync worker", e)
+                    }
+                    
+                    // Start lock monitor service
                     try {
                         val lockMonitorIntent = Intent(this, LockMonitorService::class.java)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -60,31 +96,49 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             startService(lockMonitorIntent)
                         }
+                        android.util.Log.d("MainActivity", "Lock monitor service started")
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        // Continue even if service fails to start
+                        android.util.Log.e("MainActivity", "Failed to start lock monitor service", e)
                     }
                     
-                    // Start in kiosk mode immediately
+                    // Start kiosk mode
                     try {
                         startLockTask()
+                        android.util.Log.d("MainActivity", "Kiosk mode started")
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        // Continue even if kiosk mode fails
+                        android.util.Log.e("MainActivity", "Failed to start kiosk mode", e)
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    // Continue even if setup fails
+                } else {
+                    android.util.Log.d("MainActivity", "App is NOT device owner")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.util.Log.e("MainActivity", "Error checking device owner status", e)
+            }
+            
+            // Load customer dashboard
+            try {
+                loadCustomerDashboard()
+                android.util.Log.d("MainActivity", "Loading customer dashboard")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.util.Log.e("MainActivity", "Failed to load customer dashboard", e)
+                // Try to load a basic URL as fallback
+                try {
+                    webView.loadUrl("$BASE_URL/customer-login")
+                } catch (we: Exception) {
+                    we.printStackTrace()
                 }
             }
             
-            // Load customer login page
-            loadCustomerDashboard()
         } catch (e: Exception) {
             e.printStackTrace()
-            // If anything fails, show error and try to continue
+            android.util.Log.e("MainActivity", "Critical error in onCreate", e)
+            // Show error to user
             try {
-                android.widget.Toast.makeText(this, "Starting app...", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "Error starting app: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
             } catch (te: Exception) {
                 te.printStackTrace()
             }

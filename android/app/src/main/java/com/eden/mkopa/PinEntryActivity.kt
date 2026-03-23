@@ -146,10 +146,21 @@ class PinEntryActivity : AppCompatActivity() {
         
         // Accept any 4-digit PIN for now (bypass PIN check)
         if (enteredPin.length == 4) {
-            // Go to MainActivity
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
+            // Save that user has completed PIN entry
+            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putBoolean("pin_completed", true).apply()
+            
+            // Go to MainActivity with proper flags
+            try {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(intent)
+                finish()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                errorText.visibility = View.VISIBLE
+                errorText.text = "Error starting app. Please restart."
+            }
         } else {
             // Not enough digits
             errorText.visibility = View.VISIBLE
