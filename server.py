@@ -103,7 +103,11 @@ def super_admin():
 
 @app.route("/customer-login")
 def customer_login():
-    return render_template("login.html")
+    return render_template("customer_login.html")
+
+@app.route("/customer-dashboard")
+def customer_dashboard_page():
+    return render_template("customer_dashboard.html")
 
 # ============================================
 # API ROUTES - AUTHENTICATION
@@ -257,6 +261,127 @@ def customer_payments():
     except Exception as e:
         logger.error(f"Customer payments error: {e}")
         return jsonify([]), 500
+
+@app.route("/api/customer/check-phone", methods=["POST"])
+def check_customer_phone():
+    try:
+        data = request.json
+        phone = format_phone_number(data.get("phone_number"))
+        
+        if not phone:
+            return jsonify({"exists": False})
+        
+        response = supabase.table("customers").select("*").eq("phone_number", phone).execute()
+        
+        if response.data and len(response.data) > 0:
+            customer = response.data[0]
+            return jsonify({
+                "exists": True,
+                "has_pin": customer.get("pin_hash") is not None
+            })
+        else:
+            return jsonify({"exists": False})
+    except Exception as e:
+        logger.error(f"Check phone error: {e}")
+        return jsonify({"exists": False, "error": str(e)}), 500
+
+@app.route("/api/customer/login", methods=["POST"])
+def customer_login_api():
+    try:
+        data = request.json
+        phone = format_phone_number(data.get("phone_number"))
+        pin = data.get("pin")
+        
+        if not phone or not pin:
+            return jsonify({"success": False, "error": "Phone and PIN required"}), 400
+        
+        pin_hash = hash_password(pin)
+        
+        response = supabase.table("customers").select("*").eq("phone_number", phone).eq("pin_hash", pin_hash).execute()
+        
+        if response.data and len(response.data) > 0:
+            customer = response.data[0]
+            token = generate_token()
+            
+            # Update customer token
+            supabase.table("customers").update({"token": token}).eq("customer_id", customer["customer_id"]).execute()
+            
+            # Link device if device_id provided
+            device_id = data.get("device_id")
+            if device_id:
+                try:
+                    supabase.table("devices").update({
+                        "customer_phone": phone
+                    }).eq("device_id", device_id).execute()
+                except Exception as e:
+                    logger.error(f"Failed to link device: {e}")
+            
+            return jsonify({
+                "success": True,
+                "token": token,
+                "customer_id": customer["customer_id"]
+            })
+        else:
+            return jsonify({"success": False, "error": "Invalid credentials"}), 401
+            
+    except Exception as e:
+        logger.error(f"Customer login error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/customer/set-pin", methods=["POST"])
+def set_customer_pin():
+    try:
+        data = request.json
+        phone = format_phone_number(data.get("phone_number"))
+        pin = data.get("pin")
+        
+        if not phone or not pin:
+            return jsonify({"success": False, "error": "Phone and PIN required"}), 400
+        
+        if len(pin) != 4:
+            return jsonify({"success": False, "error": "PIN must be 4 digits"}), 400
+        
+        pin_hash = hash_password(pin)
+        
+        supabase.table("customers").update({"pin_hash": pin_hash}).eq("phone_number", phone).execute()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"Set PIN error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/customer/dashboard", methods=["GET"])
+def customer_dashboard_api():
+    try:
+        phone = format_phone_number(request.args.get("phone"))
+        
+        if not phone:
+            return jsonify({"success": False, "error": "Phone required"}), 400
+        
+        # Get customer data
+        customer_response = supabase.table("customers").select("*").eq("phone_number", phone).execute()
+        
+        if not customer_response.data or len(customer_response.data) == 0:
+            return jsonify({"success": False, "error": "Customer not found"}), 404
+        
+        customer = customer_response.data[0]
+        
+        # Get device data
+        device_response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+        device = device_response.data[0] if device_response.data and len(device_response.data) > 0 else None
+        
+        # Get payment history
+        payments_response = supabase.table("payments").select("*").eq("customer_phone", phone).order("payment_date", desc=True).limit(10).execute()
+        
+        return jsonify({
+            "success": True,
+            "customer": customer,
+            "device": device,
+            "payments": payments_response.data
+        })
+    except Exception as e:
+        logger.error(f"Customer dashboard error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================
 # APP UPDATE ENDPOINT

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Eden</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #059669;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.1em;
+            color: #374151;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .status-locked {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        .info-value {
+            color: #111827;
+            font-weight: 600;
+        }
+        
+        .amount-large {
+            font-size: 2em;
+            color: #059669;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #047857;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div id="loading" class="loading">
+            <h2>Loading your dashboard...</h2>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="header">
+                <h1>🏠 My Dashboard</h1>
+                <p id="customerName">Welcome back!</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Device Status</div>
+                <div id="deviceStatus" class="status-badge status-active">Active</div>
+                <div class="info-row">
+                    <span class="info-label">Device ID</span>
+                    <span class="info-value" id="deviceId">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Serial Number</span>
+                    <span class="info-value" id="serialNumber">-</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Loan Balance</div>
+                <div class="amount-large" id="loanBalance">KES 0</div>
+                <div class="info-row">
+                    <span class="info-label">Total Loan</span>
+                    <span class="info-value" id="totalLoan">KES 0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Amount Paid</span>
+                    <span class="info-value" id="amountPaid">KES 0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Next Payment</span>
+                    <span class="info-value" id="nextPayment">-</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Payment History</div>
+                <div id="paymentHistory">
+                    <p style="color: #6b7280; text-align: center;">No payments yet</p>
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="error" style="display: none;">
+            <div class="error">
+                <p id="errorMessage">Unable to load dashboard</p>
+            </div>
+            <button class="btn" onclick="location.reload()">Retry</button>
+            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        const customerPhone = localStorage.getItem('eden_customer_phone');
+        const deviceId = localStorage.getItem('eden_device_id');
+        
+        if (!customerPhone) {
+            window.location.href = '/customer-login';
+        }
+        
+        async function loadDashboard() {
+            try {
+                // Fetch customer data
+                const response = await fetch(`/api/customer/dashboard?phone=${encodeURIComponent(customerPhone)}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load dashboard');
+                }
+                
+                // Update UI with customer data
+                document.getElementById('customerName').textContent = `${data.customer.full_name || 'Welcome'}`;
+                
+                // Device info
+                if (data.device) {
+                    document.getElementById('deviceId').textContent = data.device.device_id || '-';
+                    document.getElementById('serialNumber').textContent = data.device.serial_number || '-';
+                    
+                    const statusBadge = document.getElementById('deviceStatus');
+                    if (data.device.is_locked) {
+                        statusBadge.textContent = 'Locked';
+                        statusBadge.className = 'status-badge status-locked';
+                    } else {
+                        statusBadge.textContent = 'Active';
+                        statusBadge.className = 'status-badge status-active';
+                    }
+                }
+                
+                // Loan info
+                const balance = parseFloat(data.customer.loan_balance || 0);
+                const total = parseFloat(data.customer.total_loan_amount || 0);
+                const paid = total - balance;
+                
+                document.getElementById('loanBalance').textContent = `KES ${balance.toLocaleString()}`;
+                document.getElementById('totalLoan').textContent = `KES ${total.toLocaleString()}`;
+                document.getElementById('amountPaid').textContent = `KES ${paid.toLocaleString()}`;
+                document.getElementById('nextPayment').textContent = data.customer.next_payment_date || 'Not set';
+                
+                // Payment history
+                if (data.payments && data.payments.length > 0) {
+                    const historyHTML = data.payments.map(payment => `
+                        <div class="info-row">
+                            <span class="info-label">${new Date(payment.payment_date).toLocaleDateString()}</span>
+                            <span class="info-value">KES ${parseFloat(payment.amount).toLocaleString()}</span>
+                        </div>
+                    `).join('');
+                    document.getElementById('paymentHistory').innerHTML = historyHTML;
+                }
+                
+                // Show dashboard
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message;
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('eden_customer_token');
+            localStorage.removeItem('eden_customer_phone');
+            localStorage.removeItem('eden_device_id');
+            window.location.href = '/customer-login';
+        }
+        
+        // Load dashboard on page load
+        loadDashboard();
+        
+        // Refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+    </script>
+</body>
+</html>
