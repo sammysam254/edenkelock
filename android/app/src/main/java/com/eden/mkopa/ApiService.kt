@@ -15,9 +15,19 @@ data class DeviceStatus(
     val amount_paid: Double
 )
 
+data class AppVersion(
+    val version_code: Int,
+    val version_name: String,
+    val download_url: String,
+    val force_update: Boolean
+)
+
 interface ApiService {
     @GET("api/devices/{device_id}/status")
     fun getDeviceStatus(@Path("device_id") deviceId: String): Call<DeviceStatus>
+    
+    @GET("api/app/version")
+    fun checkAppVersion(): Call<AppVersion>
     
     companion object {
         private const val BASE_URL = "https://eden-mkopa.onrender.com/"

@@ -383,10 +383,10 @@ library {
   maven_library {
     groupId: "androidx.drawerlayout"
     artifactId: "drawerlayout"
-    version: "1.1.1"
+    version: "1.2.0"
   }
   digests {
-    sha256: ",_\r\3127\216\267\214\242\304@?\230\211\307}\2520Y0\"`\362j\a\376\237c\300\211&\376"
+    sha256: "\364\272\026\305\035Q\202I\177\341(\342\230\257\223\017\016\306\275T\227\307D\nLg\004-\025\335w\002"
   }
 }
 library {
@@ -744,16 +744,6 @@ library {
   }
   digests {
     sha256: "\'\274 15\360[\230O\302\030\325\251\307\t\360\224\232\031\244\210a_#I\353\334\331\346\367\"\242"
-  }
-}
-library {
-  maven_library {
-    groupId: "com.google.zxing"
-    artifactId: "core"
-    version: "3.5.2"
-  }
-  digests {
-    sha256: "\373\251\001\"\265\325k\254\214\224|`\265\222R\021\260\330\324\fS\2331\t\2767t\360\217t\376\333"
   }
 }
 library_dependencies {
@@ -1280,12 +1270,13 @@ module_dependencies {
   dependency_index: 5
   dependency_index: 33
   dependency_index: 47
+  dependency_index: 50
+  dependency_index: 39
   dependency_index: 62
   dependency_index: 65
   dependency_index: 67
   dependency_index: 74
   dependency_index: 75
-  dependency_index: 76
 }
 repositories {
   maven_repo {

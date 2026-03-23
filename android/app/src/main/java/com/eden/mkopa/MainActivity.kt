@@ -5,6 +5,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.webkit.*
 import android.view.View
@@ -42,6 +43,13 @@ class MainActivity : AppCompatActivity() {
             setupDeviceOwner()
             // Start background sync
             SyncWorker.schedule(this)
+            // Start lock monitor service for instant locking
+            val lockMonitorIntent = Intent(this, LockMonitorService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(lockMonitorIntent)
+            } else {
+                startService(lockMonitorIntent)
+            }
             // Start in kiosk mode immediately
             startLockTask()
         } else {

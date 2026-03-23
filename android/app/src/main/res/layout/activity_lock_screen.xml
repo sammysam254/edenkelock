@@ -43,7 +43,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Please make your payment to unlock this device"
+            android:text="This device is managed by Eden.\nPlease contact Eden for help."
             android:textSize="16sp"
             android:textColor="#FFFFFF"
             android:gravity="center"

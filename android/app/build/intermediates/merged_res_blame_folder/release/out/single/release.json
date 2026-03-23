@@ -1,19 +1,43 @@
 [
     {
+        "merged": "com.eden.mkopa.app-merged_res-40:/menu_drawer_menu.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/menu/drawer_menu.xml"
+    },
+    {
         "merged": "com.eden.mkopa.app-merged_res-40:/layout_activity_lock_screen.xml.flat",
         "source": "com.eden.mkopa.app-main-41:/layout/activity_lock_screen.xml"
     },
     {
-        "merged": "com.eden.mkopa.app-merged_res-40:/xml_device_admin.xml.flat",
-        "source": "com.eden.mkopa.app-main-41:/xml/device_admin.xml"
+        "merged": "com.eden.mkopa.app-merged_res-40:/drawable_pin_dot_filled.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/drawable/pin_dot_filled.xml"
+    },
+    {
+        "merged": "com.eden.mkopa.app-merged_res-40:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.eden.mkopa.app-merged_res-40:/drawable_pin_dot.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/drawable/pin_dot.xml"
+    },
+    {
+        "merged": "com.eden.mkopa.app-merged_res-40:/layout_nav_header.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/layout/nav_header.xml"
+    },
+    {
+        "merged": "com.eden.mkopa.app-merged_res-40:/layout_activity_pin_entry.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/layout/activity_pin_entry.xml"
     },
     {
         "merged": "com.eden.mkopa.app-merged_res-40:/layout_activity_main.xml.flat",
         "source": "com.eden.mkopa.app-main-41:/layout/activity_main.xml"
     },
     {
-        "merged": "com.eden.mkopa.app-merged_res-40:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "com.eden.mkopa.app-main-41:/drawable/ic_launcher_foreground.xml"
+        "merged": "com.eden.mkopa.app-merged_res-40:/xml_device_admin.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/xml/device_admin.xml"
+    },
+    {
+        "merged": "com.eden.mkopa.app-merged_res-40:/drawable_ic_menu.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/drawable/ic_menu.xml"
     },
     {
         "merged": "com.eden.mkopa.app-merged_res-40:/mipmap-anydpi-v26_ic_launcher.xml.flat",
@@ -22,5 +46,9 @@
     {
         "merged": "com.eden.mkopa.app-merged_res-40:/layout_activity_device_owner_setup.xml.flat",
         "source": "com.eden.mkopa.app-main-41:/layout/activity_device_owner_setup.xml"
+    },
+    {
+        "merged": "com.eden.mkopa.app-merged_res-40:/layout_activity_main_new.xml.flat",
+        "source": "com.eden.mkopa.app-main-41:/layout/activity_main_new.xml"
     }
 ]

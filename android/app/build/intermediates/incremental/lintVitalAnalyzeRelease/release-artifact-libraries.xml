@@ -78,6 +78,19 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
+      name="androidx.drawerlayout:drawerlayout:1.2.0@aar"
+      jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\d23b89be84dbb4745892d00e26451156\transformed\drawerlayout-1.2.0\jars\classes.jar"
+      resolved="androidx.drawerlayout:drawerlayout:1.2.0"
+      folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\d23b89be84dbb4745892d00e26451156\transformed\drawerlayout-1.2.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name="androidx.swiperefreshlayout:swiperefreshlayout:1.1.0@aar"
       jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\fb9e1b54ba0efe65bdd35d97e1779167\transformed\swiperefreshlayout-1.1.0\jars\classes.jar"
       resolved="androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
@@ -108,19 +121,6 @@
       jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\3e12dc78bff8e4a706493c9e795b8073\transformed\jetified-appcompat-resources-1.6.1\jars\classes.jar"
       resolved="androidx.appcompat:appcompat-resources:1.6.1"
       folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\3e12dc78bff8e4a706493c9e795b8073\transformed\jetified-appcompat-resources-1.6.1"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="androidx.drawerlayout:drawerlayout:1.1.1@aar"
-      jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\0666601880932e5ea304de5d3e90f0e6\transformed\drawerlayout-1.1.1\jars\classes.jar"
-      resolved="androidx.drawerlayout:drawerlayout:1.1.1"
-      folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\0666601880932e5ea304de5d3e90f0e6\transformed\drawerlayout-1.1.1"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -407,10 +407,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.cursoradapter:cursoradapter:1.0.0@aar"
-      jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\85595b34daa86b99eb55492d60a7a8a9\transformed\cursoradapter-1.0.0\jars\classes.jar"
-      resolved="androidx.cursoradapter:cursoradapter:1.0.0"
-      folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\85595b34daa86b99eb55492d60a7a8a9\transformed\cursoradapter-1.0.0"
+      name="androidx.cardview:cardview:1.0.0@aar"
+      jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\6b40b1fdfe34d774252d18b3b2d1b697\transformed\cardview-1.0.0\jars\classes.jar"
+      resolved="androidx.cardview:cardview:1.0.0"
+      folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\6b40b1fdfe34d774252d18b3b2d1b697\transformed\cardview-1.0.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -420,10 +420,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.cardview:cardview:1.0.0@aar"
-      jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\6b40b1fdfe34d774252d18b3b2d1b697\transformed\cardview-1.0.0\jars\classes.jar"
-      resolved="androidx.cardview:cardview:1.0.0"
-      folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\6b40b1fdfe34d774252d18b3b2d1b697\transformed\cardview-1.0.0"
+      name="androidx.cursoradapter:cursoradapter:1.0.0@aar"
+      jars="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\85595b34daa86b99eb55492d60a7a8a9\transformed\cursoradapter-1.0.0\jars\classes.jar"
+      resolved="androidx.cursoradapter:cursoradapter:1.0.0"
+      folder="C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\85595b34daa86b99eb55492d60a7a8a9\transformed\cursoradapter-1.0.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -550,10 +550,6 @@
       name="com.squareup.retrofit2:retrofit:2.9.0@jar"
       jars="C:\Users\COLLINS KIBET\.gradle\caches\modules-2\files-2.1\com.squareup.retrofit2\retrofit\2.9.0\d8fdfbd5da952141a665a403348b74538efc05ff\retrofit-2.9.0.jar"
       resolved="com.squareup.retrofit2:retrofit:2.9.0"/>
-  <library
-      name="com.google.zxing:core:3.5.2@jar"
-      jars="C:\Users\COLLINS KIBET\.gradle\caches\modules-2\files-2.1\com.google.zxing\core\3.5.2\baab0f4a47b2052c9393af6af7c47a9dd8d89297\core-3.5.2.jar"
-      resolved="com.google.zxing:core:3.5.2"/>
   <library
       name="org.jetbrains:annotations:23.0.0@jar"
       jars="C:\Users\COLLINS KIBET\.gradle\caches\modules-2\files-2.1\org.jetbrains\annotations\23.0.0\8cc20c07506ec18e0834947b84a864bfc094484e\annotations-23.0.0.jar"
