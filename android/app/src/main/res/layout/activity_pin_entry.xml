@@ -14,171 +14,116 @@
         android:layout_marginBottom="32dp"/>
 
     <TextView
+        android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter PIN"
+        android:text="Enter Phone Number"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
         android:layout_marginBottom="8dp"/>
 
     <TextView
+        android:id="@+id/subtitleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter your 4-digit PIN to continue"
+        android:text="Enter your phone number to continue"
         android:textSize="14sp"
         android:textColor="@color/text_secondary"
         android:layout_marginBottom="32dp"/>
 
-    <!-- PIN Display -->
+    <!-- Phone Number Input (shown first time only) -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/phoneInputLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="32dp">
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <View
-            android:id="@+id/pinDot1"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_dot"/>
+        <EditText
+            android:id="@+id/phoneInput"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:hint="0706499848"
+            android:inputType="phone"
+            android:maxLength="10"
+            android:textSize="18sp"
+            android:padding="16dp"
+            android:background="@drawable/pin_box_background"
+            android:layout_marginBottom="24dp"/>
 
-        <View
-            android:id="@+id/pinDot2"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_dot"/>
-
-        <View
-            android:id="@+id/pinDot3"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_dot"/>
-
-        <View
-            android:id="@+id/pinDot4"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/pin_dot"/>
+        <Button
+            android:id="@+id/continueButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Continue"
+            android:textSize="16sp"
+            android:backgroundTint="@color/primary"/>
 
     </LinearLayout>
 
-    <!-- Number Pad -->
-    <GridLayout
+    <!-- PIN Display (4 big boxes) -->
+    <LinearLayout
+        android:id="@+id/pinDisplayLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:rowCount="4">
+        android:orientation="horizontal"
+        android:layout_marginBottom="32dp"
+        android:visibility="gone">
 
-        <Button
-            android:id="@+id/btn1"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+        <EditText
+            android:id="@+id/pinBox1"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:layout_margin="8dp"
-            android:text="1"
+            android:background="@drawable/pin_box_background"
+            android:gravity="center"
+            android:inputType="numberPassword"
+            android:maxLength="1"
             android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"/>
 
-        <Button
-            android:id="@+id/btn2"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+        <EditText
+            android:id="@+id/pinBox2"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:layout_margin="8dp"
-            android:text="2"
+            android:background="@drawable/pin_box_background"
+            android:gravity="center"
+            android:inputType="numberPassword"
+            android:maxLength="1"
             android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"/>
 
-        <Button
-            android:id="@+id/btn3"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+        <EditText
+            android:id="@+id/pinBox3"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:layout_margin="8dp"
-            android:text="3"
+            android:background="@drawable/pin_box_background"
+            android:gravity="center"
+            android:inputType="numberPassword"
+            android:maxLength="1"
             android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"/>
 
-        <Button
-            android:id="@+id/btn4"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+        <EditText
+            android:id="@+id/pinBox4"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:layout_margin="8dp"
-            android:text="4"
+            android:background="@drawable/pin_box_background"
+            android:gravity="center"
+            android:inputType="numberPassword"
+            android:maxLength="1"
             android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"/>
 
-        <Button
-            android:id="@+id/btn5"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="5"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <Button
-            android:id="@+id/btn6"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="6"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <Button
-            android:id="@+id/btn7"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="7"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <Button
-            android:id="@+id/btn8"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="8"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <Button
-            android:id="@+id/btn9"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="9"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <View
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"/>
-
-        <Button
-            android:id="@+id/btn0"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="0"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <Button
-            android:id="@+id/btnClear"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            android:text="⌫"
-            android:textSize="24sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-    </GridLayout>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/errorText"

@@ -203,6 +203,23 @@
                 </LinearLayout>
 
             </ScrollView>
+            
+            <!-- Scrolling Contact Text -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contact Sam 0706499848 for softwares and AI tools"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:background="@color/primary"
+                android:padding="8dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"
+                android:gravity="center"/>
 
         </FrameLayout>
 

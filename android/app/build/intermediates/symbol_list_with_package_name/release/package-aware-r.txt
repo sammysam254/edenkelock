@@ -28,6 +28,7 @@ anim design_bottom_sheet_slide_out
 anim design_snackbar_in
 anim design_snackbar_out
 anim fragment_fast_out_extra_slow_in
+anim heartbeat
 anim linear_indeterminate_line1_head_interpolator
 anim linear_indeterminate_line1_tail_interpolator
 anim linear_indeterminate_line2_head_interpolator
@@ -43,6 +44,7 @@ anim m3_side_sheet_exit_to_right
 anim mtrl_bottom_sheet_slide_in
 anim mtrl_bottom_sheet_slide_out
 anim mtrl_card_lowers_interpolator
+anim shake
 animator design_appbar_state_list_animator
 animator design_fab_hide_motion_spec
 animator design_fab_show_motion_spec
@@ -3010,6 +3012,7 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable pin_box_background
 drawable pin_dot
 drawable pin_dot_filled
 drawable test_level_drawable
@@ -3105,17 +3108,6 @@ id beginning
 id blocking
 id bottom
 id bounce
-id btn0
-id btn1
-id btn2
-id btn3
-id btn4
-id btn5
-id btn6
-id btn7
-id btn8
-id btn9
-id btnClear
 id buttonPanel
 id cancel_button
 id center
@@ -3143,6 +3135,7 @@ id content
 id contentFrame
 id contentPanel
 id contiguous
+id continueButton
 id coordinator
 id copyCommandButton
 id cos
@@ -3358,11 +3351,14 @@ id path
 id pathRelative
 id peekHeight
 id percent
+id phoneInput
+id phoneInputLayout
 id pin
-id pinDot1
-id pinDot2
-id pinDot3
-id pinDot4
+id pinBox1
+id pinBox2
+id pinBox3
+id pinBox4
+id pinDisplayLayout
 id position
 id postLayout
 id pressed
@@ -3437,6 +3433,7 @@ id stop
 id stretch
 id submenuarrow
 id submit_area
+id subtitleText
 id swipeRefresh
 id tabMode
 id tag_accessibility_actions
@@ -3471,6 +3468,7 @@ id textinput_suffix_text
 id time
 id title
 id titleDividerNoCustom
+id titleText
 id title_template
 id toggle
 id toolbar
