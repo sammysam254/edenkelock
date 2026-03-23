@@ -15,9 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 
 class PinEntryActivity : AppCompatActivity() {
     
-    private var pinCode = ""
-    private val correctPin = "1234" // Default PIN
-    
     private lateinit var phoneNumberLayout: LinearLayout
     private lateinit var pinLayout: LinearLayout
     private lateinit var phoneInput: EditText
@@ -30,38 +27,27 @@ class PinEntryActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_pin_entry)
         
-        try {
-            setContentView(R.layout.activity_pin_entry)
-            
-            // Initialize views
-            phoneNumberLayout = findViewById(R.id.phoneNumberLayout)
-            pinLayout = findViewById(R.id.pinLayout)
-            phoneInput = findViewById(R.id.phoneInput)
-            pinBox1 = findViewById(R.id.pinBox1)
-            pinBox2 = findViewById(R.id.pinBox2)
-            pinBox3 = findViewById(R.id.pinBox3)
-            pinBox4 = findViewById(R.id.pinBox4)
-            errorText = findViewById(R.id.errorText)
-            titleText = findViewById(R.id.titleText)
-            
-            // Check if phone number is already saved
-            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-            val savedPhone = prefs.getString("customer_phone", null)
-            
-            if (savedPhone != null) {
-                // Phone already saved, show PIN entry
-                showPinEntry()
-            } else {
-                // Show phone number entry first
-                showPhoneEntry()
-            }
-            
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // If anything fails, go to MainActivity
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+        // Initialize views
+        phoneNumberLayout = findViewById(R.id.phoneNumberLayout)
+        pinLayout = findViewById(R.id.pinLayout)
+        phoneInput = findViewById(R.id.phoneInput)
+        pinBox1 = findViewById(R.id.pinBox1)
+        pinBox2 = findViewById(R.id.pinBox2)
+        pinBox3 = findViewById(R.id.pinBox3)
+        pinBox4 = findViewById(R.id.pinBox4)
+        errorText = findViewById(R.id.errorText)
+        titleText = findViewById(R.id.titleText)
+        
+        // Check if phone number is already saved
+        val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+        val savedPhone = prefs.getString("customer_phone", null)
+        
+        if (savedPhone != null) {
+            showPinEntry()
+        } else {
+            showPhoneEntry()
         }
     }
     
@@ -70,7 +56,6 @@ class PinEntryActivity : AppCompatActivity() {
         pinLayout.visibility = View.GONE
         titleText.text = "Enter Your Phone Number"
         
-        // Auto-focus and show keyboard
         phoneInput.requestFocus()
         phoneInput.postDelayed({
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -83,7 +68,6 @@ class PinEntryActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 val phone = s.toString()
                 if (phone.length >= 10) {
-                    // Save phone and move to PIN
                     val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
                     prefs.edit().putString("customer_phone", phone).apply()
                     showPinEntry()
@@ -99,7 +83,6 @@ class PinEntryActivity : AppCompatActivity() {
         
         setupPinBoxes()
         
-        // Auto-focus first box and show keyboard
         pinBox1.requestFocus()
         pinBox1.postDelayed({
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -118,19 +101,15 @@ class PinEntryActivity : AppCompatActivity() {
                     val text = s.toString()
                     
                     if (text.length == 1) {
-                        // Animate box
                         val heartbeat = AnimationUtils.loadAnimation(this@PinEntryActivity, R.anim.heartbeat)
                         box.startAnimation(heartbeat)
                         
-                        // Move to next box
                         if (index < 3) {
                             boxes[index + 1].requestFocus()
                         } else {
-                            // All boxes filled, check PIN
                             checkPin()
                         }
                     } else if (text.isEmpty() && index > 0) {
-                        // Move back to previous box on delete
                         boxes[index - 1].requestFocus()
                     }
                 }
@@ -144,32 +123,23 @@ class PinEntryActivity : AppCompatActivity() {
                         pinBox3.text.toString() + 
                         pinBox4.text.toString()
         
-        // Accept any 4-digit PIN for now (bypass PIN check)
         if (enteredPin.length == 4) {
-            // Save that user has completed PIN entry
+            // Save PIN completion
             val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
             prefs.edit().putBoolean("pin_completed", true).apply()
             
-            // Go to MainActivity with proper flags
-            try {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                startActivity(intent)
-                finish()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                errorText.visibility = View.VISIBLE
-                errorText.text = "Error starting app. Please restart."
-            }
+            // Go to MainActivity
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
         } else {
-            // Not enough digits
             errorText.visibility = View.VISIBLE
             errorText.text = "Please enter 4 digits"
             
             val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
             pinLayout.startAnimation(shake)
             
-            // Clear boxes after animation
             pinLayout.postDelayed({
                 pinBox1.text.clear()
                 pinBox2.text.clear()
@@ -182,6 +152,6 @@ class PinEntryActivity : AppCompatActivity() {
     }
     
     override fun onBackPressed() {
-        // Disable back button in kiosk mode
+        // Disable back button
     }
 }
