@@ -30,30 +30,39 @@ class PinEntryActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pin_entry)
         
-        titleText = findViewById(R.id.titleText)
-        subtitleText = findViewById(R.id.subtitleText)
-        phoneInputLayout = findViewById(R.id.phoneInputLayout)
-        phoneInput = findViewById(R.id.phoneInput)
-        continueButton = findViewById(R.id.continueButton)
-        pinDisplayLayout = findViewById(R.id.pinDisplayLayout)
-        errorText = findViewById(R.id.errorText)
-        
-        pinBoxes = listOf(
-            findViewById(R.id.pinBox1),
-            findViewById(R.id.pinBox2),
-            findViewById(R.id.pinBox3),
-            findViewById(R.id.pinBox4)
-        )
-        
-        checkPhoneNumber()
-        
-        continueButton.setOnClickListener {
-            savePhoneNumber()
+        try {
+            setContentView(R.layout.activity_pin_entry)
+            
+            titleText = findViewById(R.id.titleText)
+            subtitleText = findViewById(R.id.subtitleText)
+            phoneInputLayout = findViewById(R.id.phoneInputLayout)
+            phoneInput = findViewById(R.id.phoneInput)
+            continueButton = findViewById(R.id.continueButton)
+            pinDisplayLayout = findViewById(R.id.pinDisplayLayout)
+            errorText = findViewById(R.id.errorText)
+            
+            pinBoxes = listOf(
+                findViewById(R.id.pinBox1),
+                findViewById(R.id.pinBox2),
+                findViewById(R.id.pinBox3),
+                findViewById(R.id.pinBox4)
+            )
+            
+            checkPhoneNumber()
+            
+            continueButton.setOnClickListener {
+                savePhoneNumber()
+            }
+            
+            setupPinBoxes()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // If there's an error, go directly to MainActivity
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         }
-        
-        setupPinBoxes()
     }
     
     private fun checkPhoneNumber() {
@@ -78,8 +87,12 @@ class PinEntryActivity : AppCompatActivity() {
         // Auto-open keyboard
         phoneInput.requestFocus()
         phoneInput.postDelayed({
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(phoneInput, InputMethodManager.SHOW_IMPLICIT)
+            try {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(phoneInput, InputMethodManager.SHOW_IMPLICIT)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }, 200)
     }
     
@@ -92,8 +105,12 @@ class PinEntryActivity : AppCompatActivity() {
         // Auto-open keyboard on first box
         pinBoxes[0].requestFocus()
         pinBoxes[0].postDelayed({
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(pinBoxes[0], InputMethodManager.SHOW_IMPLICIT)
+            try {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(pinBoxes[0], InputMethodManager.SHOW_IMPLICIT)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }, 200)
     }
     
@@ -144,8 +161,12 @@ class PinEntryActivity : AppCompatActivity() {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     if (s?.length == 1) {
                         // Animate heartbeat
-                        val anim = AnimationUtils.loadAnimation(this@PinEntryActivity, R.anim.heartbeat)
-                        editText.startAnimation(anim)
+                        try {
+                            val anim = AnimationUtils.loadAnimation(this@PinEntryActivity, R.anim.heartbeat)
+                            editText.startAnimation(anim)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                         
                         // Move to next box
                         if (index < pinBoxes.size - 1) {
@@ -183,9 +204,13 @@ class PinEntryActivity : AppCompatActivity() {
             pinBoxes[0].requestFocus()
             
             // Shake animation
-            pinBoxes.forEach { box ->
-                val shakeAnim = AnimationUtils.loadAnimation(this, R.anim.shake)
-                box.startAnimation(shakeAnim)
+            try {
+                pinBoxes.forEach { box ->
+                    val shakeAnim = AnimationUtils.loadAnimation(this, R.anim.shake)
+                    box.startAnimation(shakeAnim)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

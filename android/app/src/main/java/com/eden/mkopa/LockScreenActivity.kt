@@ -55,8 +55,16 @@ class LockScreenActivity : AppCompatActivity() {
         refreshButton = findViewById(R.id.refreshButton)
         
         // Register unlock receiver
-        val filter = IntentFilter("com.eden.mkopa.UNLOCK_DEVICE")
-        registerReceiver(unlockReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        try {
+            val filter = IntentFilter("com.eden.mkopa.UNLOCK_DEVICE")
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(unlockReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                registerReceiver(unlockReceiver, filter)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         
         // Start lock task mode (Kiosk mode)
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
