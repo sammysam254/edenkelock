@@ -116,31 +116,47 @@ def customer_dashboard_page():
 @app.route("/api/login", methods=["POST"])
 def api_login():
     try:
+        # Check if supabase is initialized
+        if supabase is None:
+            logger.error("Supabase client not initialized")
+            return jsonify({"success": False, "error": "Database connection not available"}), 500
+        
         data = request.json
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+            
         username = data.get("username")
         password = data.get("password")
         
         if not username or not password:
             return jsonify({"success": False, "error": "Username and password required"}), 400
         
+        logger.info(f"Login attempt for username: {username}")
+        
         password_hash = hash_password(password)
         
-        response = supabase.table("admins").select("*").eq("username", username).eq("password_hash", password_hash).execute()
-        
-        if response.data and len(response.data) > 0:
-            admin = response.data[0]
-            token = generate_token()
+        try:
+            response = supabase.table("admins").select("*").eq("username", username).eq("password_hash", password_hash).execute()
             
-            supabase.table("admins").update({"token": token}).eq("admin_id", admin["admin_id"]).execute()
-            
-            return jsonify({
-                "success": True,
-                "token": token,
-                "role": admin["role"],
-                "admin_id": admin["admin_id"]
-            })
-        else:
-            return jsonify({"success": False, "error": "Invalid credentials"}), 401
+            if response.data and len(response.data) > 0:
+                admin = response.data[0]
+                token = generate_token()
+                
+                supabase.table("admins").update({"token": token}).eq("admin_id", admin["admin_id"]).execute()
+                
+                logger.info(f"Login successful for: {username}")
+                return jsonify({
+                    "success": True,
+                    "token": token,
+                    "role": admin["role"],
+                    "admin_id": admin["admin_id"]
+                })
+            else:
+                logger.warning(f"Invalid credentials for: {username}")
+                return jsonify({"success": False, "error": "Invalid credentials"}), 401
+        except Exception as db_error:
+            logger.error(f"Database error during login: {db_error}")
+            return jsonify({"success": False, "error": "Database error"}), 500
             
     except Exception as e:
         logger.error(f"Login error: {e}")
