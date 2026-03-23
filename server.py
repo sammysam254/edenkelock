@@ -376,7 +376,7 @@ def update_loan_balance():
         supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
         
         # Log the action
-        log_device_action(device_id, "LOAN_BALANCE_UPDATE", admin["admin_id"], {
+        log_device_action(device_id, "LOAN_BALANCE_UPDATE", admin["id"], {
             "old_total": old_values.get("total_amount"),
             "old_paid": old_values.get("amount_paid"),
             "new_total": new_total,
@@ -415,12 +415,12 @@ def delete_device():
         supabase.table("devices").update({
             "is_deleted": True,
             "deleted_at": "now()",
-            "deleted_by": admin["admin_id"],
+            "deleted_by": admin["id"],
             "status": "deleted"
         }).eq("device_id", device_id).execute()
         
         # Log the deletion
-        log_device_action(device_id, "DEVICE_DELETED", admin["admin_id"], {
+        log_device_action(device_id, "DEVICE_DELETED", admin["id"], {
             "customer_name": device.get("customer_name"),
             "customer_phone": device.get("customer_phone"),
             "reason": "Admin deletion"
@@ -529,7 +529,7 @@ def promote_admin():
         # Update admin role
         supabase.table("admins").update({
             "role": new_role
-        }).eq("admin_id", target_admin_id).execute()
+        }).eq("id", target_admin_id).execute()
         
         return jsonify({"success": True, "message": f"Admin promoted to {new_role} successfully"})
         
@@ -559,12 +559,11 @@ def create_admin():
         
         # Create new admin
         new_admin = {
-            "username": username,
+            "email": email,
             "password_hash": password_hash,
             "role": "admin",
             "full_name": full_name,
-            "email": email,
-            "created_by": admin["admin_id"],
+            "created_by": admin["id"],
             "must_change_password": True
         }
         
@@ -923,7 +922,7 @@ def change_admin_password():
         supabase.table("admins").update({
             "password_hash": new_password_hash,
             "must_change_password": False
-        }).eq("admin_id", admin["admin_id"]).execute()
+        }).eq("id", admin["id"]).execute()
         
         return jsonify({"success": True})
     except Exception as e:
@@ -989,8 +988,8 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 10,
-        "version_name": "1.8.1",
+        "version_code": 12,
+        "version_name": "1.8.3",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
@@ -1001,9 +1000,10 @@ def get_app_version():
             "Admin Registration Flow", 
             "Enhanced Security Monitoring",
             "Automatic Loan Balance Verification",
-            "Persistent Device Protection"
+            "Persistent Device Protection",
+            "Fixed Admin Login Issues"
         ],
-        "changelog": "Fixed server routes and updated for new authentication system with admin registration flow"
+        "changelog": "Fixed admin login 500 errors by correcting database column references and enhanced debugging tools"
     })
 
 # ============================================
