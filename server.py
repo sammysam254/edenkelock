@@ -89,6 +89,10 @@ def index():
 def register_page():
     return render_template("register.html")
 
+@app.route("/debug")
+def debug_page():
+    return render_template("debug.html")
+
 @app.route("/login")
 def login():
     return render_template("login.html")
@@ -191,49 +195,65 @@ def api_login():
         
         data = request.json
         if not data:
+            logger.error("No data provided in login request")
             return jsonify({"success": False, "error": "No data provided"}), 400
             
         username = data.get("username")
         password = data.get("password")
         
         if not username or not password:
+            logger.error("Missing username or password")
             return jsonify({"success": False, "error": "Username and password required"}), 400
         
         logger.info(f"Login attempt for username: {username}")
         
         password_hash = hash_password(password)
+        logger.info(f"Password hash generated for: {username}")
         
         try:
-            response = supabase.table("admins").select("*").eq("username", username).eq("password_hash", password_hash).execute()
+            # Query using email instead of username for new auth system
+            response = supabase.table("admins").select("*").eq("email", username).eq("password_hash", password_hash).execute()
+            logger.info(f"Database query executed for: {username}")
             
             if response.data and len(response.data) > 0:
                 admin = response.data[0]
                 token = generate_token()
                 
-                supabase.table("admins").update({"token": token}).eq("admin_id", admin["admin_id"]).execute()
+                # Update last login and token
+                supabase.table("admins").update({
+                    "token": token,
+                    "last_login": "now()"
+                }).eq("id", admin["id"]).execute()
                 
                 logger.info(f"Login successful for: {username}")
                 
-                # Check if admin must change password
+                # Check if admin must change password (always false for new system)
                 must_change = admin.get("must_change_password", False)
                 
                 return jsonify({
                     "success": True,
                     "token": token,
                     "role": admin["role"],
-                    "admin_id": admin["admin_id"],
+                    "admin_id": admin["id"],
                     "must_change_password": must_change
                 })
             else:
                 logger.warning(f"Invalid credentials for: {username}")
                 return jsonify({"success": False, "error": "Invalid credentials"}), 401
+                
         except Exception as db_error:
             logger.error(f"Database error during login: {db_error}")
-            return jsonify({"success": False, "error": "Database error"}), 500
+            # Check if it's a table doesn't exist error
+            if "relation \"admins\" does not exist" in str(db_error):
+                return jsonify({
+                    "success": False, 
+                    "error": "Database not set up. Please run the database setup script first."
+                }), 500
+            return jsonify({"success": False, "error": f"Database error: {str(db_error)}"}), 500
             
     except Exception as e:
         logger.error(f"Login error: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 # ============================================
 # API ROUTES - DEVICES
@@ -1007,6 +1027,55 @@ def download_apk():
 def health():
     from datetime import datetime
     return jsonify({"status": "healthy", "timestamp": str(datetime.now())})
+
+@app.route("/api/setup-check")
+def setup_check():
+    """Check if database is properly set up"""
+    try:
+        if supabase is None:
+            return jsonify({
+                "setup_complete": False,
+                "error": "Supabase client not initialized",
+                "next_step": "Check environment variables"
+            })
+        
+        # Check if admins table exists
+        try:
+            response = supabase.table("admins").select("count", count="exact").execute()
+            admin_count = response.count if response.count is not None else 0
+            
+            # Check if devices table exists
+            devices_response = supabase.table("devices").select("count", count="exact").execute()
+            device_count = devices_response.count if devices_response.count is not None else 0
+            
+            return jsonify({
+                "setup_complete": True,
+                "admin_count": admin_count,
+                "device_count": device_count,
+                "message": "Database is set up and ready",
+                "next_step": "Register super admin at /register" if admin_count == 0 else "System ready for use"
+            })
+            
+        except Exception as db_error:
+            if "relation \"admins\" does not exist" in str(db_error):
+                return jsonify({
+                    "setup_complete": False,
+                    "error": "Database tables not created",
+                    "next_step": "Run FRESH_AUTH_SYSTEM_COMPLETE.sql in Supabase SQL Editor"
+                })
+            else:
+                return jsonify({
+                    "setup_complete": False,
+                    "error": f"Database error: {str(db_error)}",
+                    "next_step": "Check database connection and permissions"
+                })
+                
+    except Exception as e:
+        return jsonify({
+            "setup_complete": False,
+            "error": f"Server error: {str(e)}",
+            "next_step": "Check server logs and configuration"
+        })
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 10000))
