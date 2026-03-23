@@ -609,21 +609,7 @@ def log_device_event():
         logger.error(f"Device logging error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route("/api/admin/security-violations", methods=["GET"])
-def get_security_violations():
-    try:
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        admin = verify_admin_token(token)
-        
-        if not admin:
-            return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
-        response = supabase.table("security_violations").select("*").order("created_at", desc=True).limit(100).execute()
-        return jsonify({"success": True, "violations": response.data})
-        
-    except Exception as e:
-        logger.error(f"Get security violations error: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+# Duplicate function removed - keeping the first definition
 
 # ============================================
 # API ROUTES - DEVICE ENROLLMENT
