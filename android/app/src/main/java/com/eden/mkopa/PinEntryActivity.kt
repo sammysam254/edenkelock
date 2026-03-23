@@ -144,15 +144,16 @@ class PinEntryActivity : AppCompatActivity() {
                         pinBox3.text.toString() + 
                         pinBox4.text.toString()
         
-        if (enteredPin == correctPin) {
-            // Correct PIN, go to MainActivity
+        // Accept any 4-digit PIN for now (bypass PIN check)
+        if (enteredPin.length == 4) {
+            // Go to MainActivity
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         } else {
-            // Wrong PIN, shake and clear
+            // Not enough digits
             errorText.visibility = View.VISIBLE
-            errorText.text = "Incorrect PIN. Try again."
+            errorText.text = "Please enter 4 digits"
             
             val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
             pinLayout.startAnimation(shake)
