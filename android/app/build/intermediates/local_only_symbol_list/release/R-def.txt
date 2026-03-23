@@ -35,8 +35,10 @@ id confirmPinBox2
 id confirmPinBox3
 id confirmPinBox4
 id contentFrame
+id continueButton
 id copyCommandButton
 id deviceStatusText
+id downloadButton
 id drawerLayout
 id errorText
 id instructionsText

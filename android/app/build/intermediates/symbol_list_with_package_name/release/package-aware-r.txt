@@ -3139,6 +3139,7 @@ id content
 id contentFrame
 id contentPanel
 id contiguous
+id continueButton
 id coordinator
 id copyCommandButton
 id cos
@@ -3166,6 +3167,7 @@ id disableHome
 id disablePostScroll
 id disableScroll
 id disjoint
+id downloadButton
 id dragDown
 id dragEnd
 id dragLeft

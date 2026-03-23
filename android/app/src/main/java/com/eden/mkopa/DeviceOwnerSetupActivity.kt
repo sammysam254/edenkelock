@@ -1,128 +1,209 @@
 package com.eden.mkopa
 
 import android.app.admin.DevicePolicyManager
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class DeviceOwnerSetupActivity : AppCompatActivity() {
     
-    private lateinit var devicePolicyManager: DevicePolicyManager
-    private lateinit var adminComponent: ComponentName
+    private lateinit var statusText: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var webView: WebView
+    private lateinit var downloadButton: Button
+    private lateinit var continueButton: Button
+    
+    private val BASE_URL = "https://eden-mkopa.onrender.com"
+    private var isFactoryResetRecovery = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_owner_setup)
         
-        devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        adminComponent = ComponentName(this, DeviceAdminReceiver::class.java)
+        statusText = findViewById(R.id.statusText)
+        progressBar = findViewById(R.id.progressBar)
+        webView = findViewById(R.id.webView)
+        downloadButton = findViewById(R.id.downloadButton)
+        continueButton = findViewById(R.id.continueButton)
         
-        val statusText = findViewById<TextView>(R.id.statusText)
-        val instructionsText = findViewById<TextView>(R.id.instructionsText)
-        val commandText = findViewById<TextView>(R.id.commandText)
-        val copyButton = findViewById<Button>(R.id.copyCommandButton)
-        val checkButton = findViewById<Button>(R.id.checkStatusButton)
+        // Check if this is a factory reset recovery
+        checkFactoryResetRecovery()
+    }
+    
+    private fun checkFactoryResetRecovery() {
+        val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+        val deviceOwnerSetup = prefs.getBoolean("device_owner_setup", false)
+        val factoryResetProtection = prefs.getBoolean("factory_reset_protection_enabled", false)
         
-        // Check current status
-        updateStatus(statusText)
+        // If device owner was setup but protection flag is missing, this is likely a factory reset recovery
+        if (!deviceOwnerSetup || !factoryResetProtection) {
+            isFactoryResetRecovery = true
+            showFactoryResetRecovery()
+        } else {
+            // Normal device owner setup - check loan balance
+            checkLoanBalance()
+        }
+    }
+    
+    private fun showFactoryResetRecovery() {
+        statusText.text = "⚠️ UNAUTHORIZED FACTORY RESET DETECTED"
+        progressBar.visibility = View.GONE
         
-        // Setup instructions
-        instructionsText.text = """
-            To enable device locking, Eden must be set as Device Owner.
-            
-            Choose one of these methods:
-            
-            ═══════════════════════════════════════
-            METHOD 1: QR Code Provisioning (Recommended)
-            ═══════════════════════════════════════
-            
-            1. Install this app on the device
-            2. Factory reset the device
-            3. During setup, tap screen 6 times
-            4. QR scanner appears
-            5. Admin scans QR from dashboard
-            6. Device auto-configures as Device Owner
-            7. Done! Device locks automatically
-            
-            ═══════════════════════════════════════
-            METHOD 2: ADB Command (For Testing)
-            ═══════════════════════════════════════
-            
-            1. Enable USB Debugging:
-               Settings → About Phone → Tap Build Number 7 times
-               Settings → Developer Options → USB Debugging ON
-            
-            2. Connect device to computer via USB
-            
-            3. Copy the command below
-            
-            4. Open Command Prompt/Terminal on computer
-            
-            5. Paste and run the command
-            
-            6. Click "Check Status" below
-            
-            After setup with either method, device will lock automatically.
-        """.trimIndent()
+        // Show website to download app
+        webView.visibility = View.VISIBLE
+        downloadButton.visibility = View.VISIBLE
         
-        // ADB command
-        val adbCommand = "adb shell dpm set-device-owner com.eden.mkopa/.DeviceAdminReceiver"
-        commandText.text = adbCommand
-        
-        // Copy button
-        copyButton.setOnClickListener {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("ADB Command", adbCommand)
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "Command copied to clipboard", Toast.LENGTH_SHORT).show()
+        webView.settings.javaScriptEnabled = true
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                if (url?.contains("eden.apk") == true) {
+                    // APK download detected
+                    downloadButton.text = "✅ APK Downloaded - Continue Setup"
+                    downloadButton.setBackgroundColor(getColor(android.R.color.holo_green_dark))
+                    continueButton.visibility = View.VISIBLE
+                    return false
+                }
+                return false
+            }
         }
         
-        // Check status button
-        checkButton.setOnClickListener {
-            updateStatus(statusText)
+        // Load Eden website
+        webView.loadUrl(BASE_URL)
+        
+        downloadButton.setOnClickListener {
+            // Open APK download directly
+            val downloadIntent = Intent(Intent.ACTION_VIEW, Uri.parse("$BASE_URL/download/eden.apk"))
+            startActivity(downloadIntent)
+        }
+        
+        continueButton.setOnClickListener {
+            // After APK download, proceed to login
+            webView.visibility = View.GONE
+            downloadButton.visibility = View.GONE
+            continueButton.visibility = View.GONE
             
-            if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-                Toast.makeText(this, "✓ Device Owner setup complete! Restarting app...", Toast.LENGTH_LONG).show()
+            statusText.text = "✅ App Downloaded - Please Login to Continue"
+            
+            // Start PIN entry for customer login
+            val intent = Intent(this, PinEntryActivity::class.java)
+            intent.putExtra("factory_reset_recovery", true)
+            startActivity(intent)
+            finish()
+        }
+    }
+    
+    private fun checkLoanBalance() {
+        statusText.text = "🔍 Checking loan balance..."
+        progressBar.visibility = View.VISIBLE
+        
+        val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+        val customerPhone = prefs.getString("customer_phone", null)
+        
+        if (customerPhone == null) {
+            // No customer logged in - go to PIN entry
+            startPinEntry()
+            return
+        }
+        
+        // Check loan balance via API
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("$BASE_URL/api/customer/dashboard?phone=${Uri.encode(customerPhone)}")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
                 
-                // Apply restrictions
-                try {
-                    devicePolicyManager.addUserRestriction(adminComponent, "no_factory_reset")
-                    devicePolicyManager.addUserRestriction(adminComponent, "no_safe_boot")
-                    devicePolicyManager.addUserRestriction(adminComponent, "no_debugging_features")
-                    devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf(packageName))
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                val responseCode = connection.responseCode
+                if (responseCode == 200) {
+                    val response = connection.inputStream.bufferedReader().readText()
+                    val jsonResponse = JSONObject(response)
+                    
+                    withContext(Dispatchers.Main) {
+                        if (jsonResponse.getBoolean("success")) {
+                            val customer = jsonResponse.getJSONObject("customer")
+                            val loanBalance = customer.getDouble("loan_balance")
+                            
+                            if (loanBalance > 0) {
+                                // Outstanding balance - LOCK DEVICE IMMEDIATELY
+                                lockDeviceForNonPayment(loanBalance, customerPhone)
+                            } else {
+                                // Loan paid - allow access
+                                statusText.text = "✅ Loan Paid - Access Granted"
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    startMainActivity()
+                                }, 2000)
+                            }
+                        } else {
+                            // Customer not found - go to login
+                            startPinEntry()
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        startPinEntry()
+                    }
                 }
                 
-                // Restart to main activity
-                android.os.Handler().postDelayed({
-                    val intent = packageManager.getLaunchIntentForPackage(packageName)
-                    intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(intent)
-                    finish()
-                }, 2000)
-            } else {
-                Toast.makeText(this, "Device Owner not set yet. Follow the steps above.", Toast.LENGTH_LONG).show()
+                connection.disconnect()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    startPinEntry()
+                }
             }
         }
     }
     
-    private fun updateStatus(statusText: TextView) {
-        if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-            statusText.text = "✓ STATUS: Device Owner (Device locking enabled)"
-            statusText.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
-        } else if (devicePolicyManager.isAdminActive(adminComponent)) {
-            statusText.text = "⚠ STATUS: Device Admin (Device locking NOT enabled)"
-            statusText.setTextColor(resources.getColor(android.R.color.holo_orange_dark, null))
-        } else {
-            statusText.text = "✗ STATUS: Not configured (Device locking NOT enabled)"
-            statusText.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
-        }
+    private fun lockDeviceForNonPayment(balance: Double, phone: String) {
+        statusText.text = "🔒 DEVICE LOCKED - Outstanding Balance: KES ${balance.toInt()}"
+        progressBar.visibility = View.GONE
+        
+        // Show lock message with payment instructions
+        val lockIntent = Intent(this, LockScreenActivity::class.java)
+        lockIntent.putExtra("lock_reason", "OUTSTANDING_BALANCE")
+        lockIntent.putExtra("balance_amount", balance)
+        lockIntent.putExtra("customer_phone", phone)
+        lockIntent.putExtra("website_url", BASE_URL)
+        lockIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(lockIntent)
+        finish()
+    }
+    
+    private fun startPinEntry() {
+        statusText.text = "🔐 Please Login to Continue"
+        Handler(Looper.getMainLooper()).postDelayed({
+            val intent = Intent(this, PinEntryActivity::class.java)
+            intent.putExtra("check_balance_after_login", true)
+            startActivity(intent)
+            finish()
+        }, 1500)
+    }
+    
+    private fun startMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+    
+    override fun onBackPressed() {
+        // Disable back button during setup
     }
 }

@@ -259,6 +259,443 @@ def unlock_device(device_id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================
+# API ROUTES - ADVANCED ADMIN FEATURES
+# ============================================
+
+@app.route("/api/admin/update-loan-balance", methods=["POST"])
+def update_loan_balance():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        data = request.json
+        device_id = data.get("device_id")
+        new_total = data.get("total_amount")
+        new_paid = data.get("amount_paid")
+        
+        if not device_id or new_total is None or new_paid is None:
+            return jsonify({"success": False, "error": "Missing required fields"}), 400
+        
+        # Get current values for logging
+        current_device = supabase.table("devices").select("*").eq("device_id", device_id).execute()
+        if not current_device.data:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+        old_values = current_device.data[0]
+        
+        # Update loan balance
+        update_data = {
+            "total_amount": float(new_total),
+            "amount_paid": float(new_paid),
+            "updated_at": "now()"
+        }
+        
+        supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+        
+        # Log the action
+        log_device_action(device_id, "LOAN_BALANCE_UPDATE", admin["admin_id"], {
+            "old_total": old_values.get("total_amount"),
+            "old_paid": old_values.get("amount_paid"),
+            "new_total": new_total,
+            "new_paid": new_paid
+        })
+        
+        return jsonify({"success": True, "message": "Loan balance updated successfully"})
+        
+    except Exception as e:
+        logger.error(f"Update loan balance error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/admin/delete-device", methods=["POST"])
+def delete_device():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        data = request.json
+        device_id = data.get("device_id")
+        
+        if not device_id:
+            return jsonify({"success": False, "error": "Device ID required"}), 400
+        
+        # Get device info before deletion
+        device_response = supabase.table("devices").select("*").eq("device_id", device_id).execute()
+        if not device_response.data:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+        device = device_response.data[0]
+        
+        # Mark device as deleted (soft delete)
+        supabase.table("devices").update({
+            "is_deleted": True,
+            "deleted_at": "now()",
+            "deleted_by": admin["admin_id"],
+            "status": "deleted"
+        }).eq("device_id", device_id).execute()
+        
+        # Log the deletion
+        log_device_action(device_id, "DEVICE_DELETED", admin["admin_id"], {
+            "customer_name": device.get("customer_name"),
+            "customer_phone": device.get("customer_phone"),
+            "reason": "Admin deletion"
+        })
+        
+        # Send uninstall command to device (this will trigger app removal)
+        send_device_notification(device_id, device.get("customer_phone"), 
+                                "Device Removed", 
+                                "This device has been removed from the system. The Eden app will be uninstalled automatically.",
+                                "system")
+        
+        return jsonify({"success": True, "message": "Device deleted successfully. App will be uninstalled from device."})
+        
+    except Exception as e:
+        logger.error(f"Delete device error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/admin/security-violations", methods=["GET"])
+def get_security_violations():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        # Get recent security violations
+        violations = supabase.table("security_violations").select("*").order("created_at", desc=True).limit(50).execute()
+        
+        return jsonify({"success": True, "violations": violations.data})
+        
+    except Exception as e:
+        logger.error(f"Get security violations error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/admin/send-security-warning", methods=["POST"])
+def send_security_warning():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        data = request.json
+        device_id = data.get("device_id")
+        customer_phone = data.get("customer_phone")
+        
+        if not device_id and not customer_phone:
+            return jsonify({"success": False, "error": "Device ID or customer phone required"}), 400
+        
+        # Send security warning notification
+        title = "⚠️ SECURITY VIOLATION DETECTED"
+        message = """
+ILLEGAL ACTIVITY DETECTED
+
+We have detected unauthorized attempts to factory reset or tamper with this device. 
+
+⚠️ WARNING: Such activities are ILLEGAL and may result in:
+• Criminal charges for device tampering
+• Immediate legal action
+• Device confiscation
+• Additional penalties
+
+This device is legally protected under our financing agreement. Any attempts to bypass security measures violate the terms of service and applicable laws.
+
+If you have payment issues, contact our support team immediately instead of attempting to tamper with the device.
+
+STOP IMMEDIATELY - You are being monitored.
+        """.strip()
+        
+        send_device_notification(device_id, customer_phone, title, message, "security_warning")
+        
+        # Mark violation as notified
+        if device_id:
+            supabase.table("security_violations").update({
+                "admin_notified": True,
+                "notification_sent_at": "now()"
+            }).eq("device_id", device_id).execute()
+        
+        return jsonify({"success": True, "message": "Security warning sent successfully"})
+        
+    except Exception as e:
+        logger.error(f"Send security warning error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/admin/promote-admin", methods=["POST"])
+def promote_admin():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin or admin["role"] != "super_admin":
+            return jsonify({"success": False, "error": "Only super admins can promote users"}), 403
+        
+        data = request.json
+        target_admin_id = data.get("admin_id")
+        new_role = data.get("new_role")
+        
+        if not target_admin_id or not new_role:
+            return jsonify({"success": False, "error": "Admin ID and new role required"}), 400
+        
+        if new_role not in ["admin", "super_admin"]:
+            return jsonify({"success": False, "error": "Invalid role"}), 400
+        
+        # Update admin role
+        supabase.table("admins").update({
+            "role": new_role
+        }).eq("admin_id", target_admin_id).execute()
+        
+        return jsonify({"success": True, "message": f"Admin promoted to {new_role} successfully"})
+        
+    except Exception as e:
+        logger.error(f"Promote admin error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/admin/create-admin", methods=["POST"])
+def create_admin():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin or admin["role"] != "super_admin":
+            return jsonify({"success": False, "error": "Only super admins can create admins"}), 403
+        
+        data = request.json
+        username = data.get("username")
+        password = data.get("password")
+        full_name = data.get("full_name")
+        email = data.get("email")
+        
+        if not username or not password:
+            return jsonify({"success": False, "error": "Username and password required"}), 400
+        
+        password_hash = hash_password(password)
+        
+        # Create new admin
+        new_admin = {
+            "username": username,
+            "password_hash": password_hash,
+            "role": "admin",
+            "full_name": full_name,
+            "email": email,
+            "created_by": admin["admin_id"],
+            "must_change_password": True
+        }
+        
+        response = supabase.table("admins").insert(new_admin).execute()
+        
+        if response.data:
+            return jsonify({"success": True, "message": "Admin created successfully"})
+        else:
+            return jsonify({"success": False, "error": "Failed to create admin"}), 500
+        
+    except Exception as e:
+        logger.error(f"Create admin error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Helper functions
+def log_device_action(device_id, action, admin_id, details):
+    try:
+        log_entry = {
+            "device_id": device_id,
+            "action": action,
+            "performed_by": admin_id,
+            "new_values": details
+        }
+        supabase.table("device_logs").insert(log_entry).execute()
+    except Exception as e:
+        logger.error(f"Failed to log device action: {e}")
+
+def send_device_notification(device_id, customer_phone, title, message, notification_type):
+    try:
+        notification = {
+            "device_id": device_id,
+            "customer_phone": customer_phone,
+            "title": title,
+            "message": message,
+            "notification_type": notification_type
+        }
+        supabase.table("notifications").insert(notification).execute()
+    except Exception as e:
+        logger.error(f"Failed to send notification: {e}")
+
+@app.route("/api/report-security-violation", methods=["POST"])
+def report_security_violation():
+    try:
+        data = request.json
+        device_id = data.get("device_id")
+        customer_phone = data.get("customer_phone")
+        violation_type = data.get("violation_type", "FACTORY_RESET_ATTEMPT")
+        violation_details = data.get("details", "")
+        
+        # Get client IP and user agent
+        ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', ''))
+        user_agent = request.headers.get('User-Agent', '')
+        
+        # Record security violation
+        violation = {
+            "device_id": device_id,
+            "customer_phone": customer_phone,
+            "violation_type": violation_type,
+            "violation_details": violation_details,
+            "ip_address": ip_address,
+            "user_agent": user_agent
+        }
+        
+        supabase.table("security_violations").insert(violation).execute()
+        
+        return jsonify({"success": True, "message": "Security violation reported"})
+        
+    except Exception as e:
+        logger.error(f"Report security violation error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================
+# API ROUTES - SECURITY LOGGING
+# ============================================
+
+@app.route("/api/security/log-violation", methods=["POST"])
+def log_security_violation():
+    try:
+        data = request.json
+        
+        violation_data = {
+            "device_id": data.get("device_id"),
+            "customer_phone": data.get("customer_phone"),
+            "violation_type": data.get("violation_type", "UNKNOWN"),
+            "violation_details": data.get("violation_details"),
+            "ip_address": request.remote_addr,
+            "user_agent": request.headers.get("User-Agent")
+        }
+        
+        response = supabase.table("security_violations").insert(violation_data).execute()
+        
+        if response.data:
+            logger.warning(f"Security violation logged: {violation_data['violation_type']} for device {violation_data['device_id']}")
+            return jsonify({"success": True, "violation_id": response.data[0]["id"]})
+        else:
+            return jsonify({"success": False, "error": "Failed to log violation"}), 500
+            
+    except Exception as e:
+        logger.error(f"Security logging error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/device/log-event", methods=["POST"])
+def log_device_event():
+    try:
+        data = request.json
+        
+        log_data = {
+            "device_id": data.get("device_id"),
+            "action": data.get("action"),
+            "old_values": data.get("old_values"),
+            "new_values": data.get("new_values")
+        }
+        
+        response = supabase.table("device_logs").insert(log_data).execute()
+        
+        if response.data:
+            return jsonify({"success": True, "log_id": response.data[0]["id"]})
+        else:
+            return jsonify({"success": False, "error": "Failed to log event"}), 500
+            
+    except Exception as e:
+        logger.error(f"Device logging error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/admin/security-violations", methods=["GET"])
+def get_security_violations():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        response = supabase.table("security_violations").select("*").order("created_at", desc=True).limit(100).execute()
+        return jsonify({"success": True, "violations": response.data})
+        
+    except Exception as e:
+        logger.error(f"Get security violations error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================
+# API ROUTES - DEVICE ENROLLMENT
+# ============================================
+
+@app.route("/api/devices/enroll", methods=["POST"])
+def enroll_device():
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        data = request.json
+        
+        # Required fields
+        required_fields = ["serial_number", "national_id", "customer_name", "customer_phone", "total_amount"]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
+        
+        # Generate device ID
+        device_id = f"EDN{data['serial_number'][-6:].upper()}"
+        
+        # Format phone number
+        customer_phone = format_phone_number(data["customer_phone"])
+        
+        # Admin sets customer default password (PIN)
+        default_pin = data.get("default_pin", "1234")  # Admin can set custom PIN
+        if len(default_pin) != 4 or not default_pin.isdigit():
+            return jsonify({"success": False, "error": "Default PIN must be exactly 4 digits"}), 400
+        
+        pin_hash = hash_password(default_pin)
+        
+        # Create device record
+        device_data = {
+            "device_id": device_id,
+            "customer_id": data["national_id"],
+            "serial_number": data["serial_number"],
+            "national_id": data["national_id"],
+            "customer_name": data["customer_name"],
+            "customer_phone": customer_phone,
+            "total_amount": float(data["total_amount"]),
+            "amount_paid": float(data.get("amount_paid", 0)),
+            "status": "active",
+            "pin_hash": pin_hash,
+            "must_change_pin": True,  # Force PIN change on first login
+            "is_locked": False,
+            "id_front_url": data.get("id_front", ""),
+            "id_back_url": data.get("id_back", ""),
+            "passport_photo_url": data.get("passport_photo", "")
+        }
+        
+        response = supabase.table("devices").insert(device_data).execute()
+        
+        if response.data:
+            return jsonify({
+                "success": True,
+                "device_id": device_id,
+                "customer_phone": customer_phone,
+                "default_pin": default_pin,
+                "message": f"Device enrolled successfully. Customer can login with phone {customer_phone} and PIN {default_pin}"
+            })
+        else:
+            return jsonify({"success": False, "error": "Failed to enroll device"}), 500
+            
+    except Exception as e:
+        logger.error(f"Device enrollment error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================
 # API ROUTES - CUSTOMERS
 # ============================================
 
@@ -486,10 +923,20 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 3,
-        "version_name": "1.2.0",
+        "version_code": 8,
+        "version_name": "1.7.0",
         "download_url": f"{request.host_url}download/eden.apk",
-        "force_update": False
+        "force_update": True,
+        "security_level": "MAXIMUM",
+        "factory_reset_protection": True,
+        "features": [
+            "Maximum Factory Reset Protection",
+            "Admin-Controlled Customer PINs", 
+            "Automatic Loan Balance Verification",
+            "Security Violation Monitoring",
+            "Persistent Device Protection"
+        ],
+        "changelog": "Added maximum factory reset protection and comprehensive security features"
     })
 
 # ============================================

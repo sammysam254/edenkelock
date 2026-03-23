@@ -133,6 +133,12 @@
                     <label>Customer Phone Number *</label>
                     <input type="tel" id="customerPhone" required placeholder="+254700000000">
                 </div>
+                
+                <div class="form-group">
+                    <label>Default PIN for Customer *</label>
+                    <input type="text" id="defaultPin" required placeholder="1234" maxlength="4" pattern="[0-9]{4}">
+                    <small style="color: #6b7280;">4-digit PIN customer will use for first login (they must change it)</small>
+                </div>
 
                 <h3 style="color: #059669; margin: 30px 0 15px 0;">KYC Documents</h3>
                 <div class="form-group">
@@ -290,6 +296,14 @@
             }
         }
 
+        // Only allow numbers in default PIN field
+        document.getElementById('defaultPin').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            if (e.target.value.length > 4) {
+                e.target.value = e.target.value.slice(0, 4);
+            }
+        });
+
         // Load recent devices
         fetch('/api/devices', {
             headers: { 'Authorization': 'Bearer ' + token }
@@ -348,6 +362,7 @@
                     national_id: document.getElementById('nationalId').value,
                     customer_name: document.getElementById('customerName').value,
                     customer_phone: document.getElementById('customerPhone').value,
+                    default_pin: document.getElementById('defaultPin').value,
                     total_amount: parseFloat(document.getElementById('totalAmount').value),
                     amount_paid: parseFloat(document.getElementById('initialPayment').value),
                     id_front: idFrontBase64,
@@ -367,7 +382,7 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Device enrolled successfully!\nDevice ID: ' + data.device_id);
+                    alert(`Device enrolled successfully!\nDevice ID: ${data.device_id}\nCustomer Phone: ${data.customer_phone}\nDefault PIN: ${data.default_pin}\n\nCustomer must change PIN on first login.`);
                     document.getElementById('enrollDeviceForm').reset();
                     
                     // Show provisioning QR code

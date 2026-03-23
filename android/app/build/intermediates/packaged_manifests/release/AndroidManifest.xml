@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.eden.mkopa"
-    android:versionCode="7"
-    android:versionName="1.6.0" >
+    android:versionCode="8"
+    android:versionName="1.7.0" >
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -22,14 +22,38 @@
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- MAXIMUM SECURITY PERMISSIONS -->
+    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN" />
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
+    <!-- FACTORY RESET PROTECTION -->
+    <uses-permission android:name="android.permission.MASTER_CLEAR" />
+    <uses-permission android:name="android.permission.RECOVERY" />
+    <uses-permission android:name="android.permission.REBOOT" />
+
+    <!-- SYSTEM LEVEL PERMISSIONS -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+
+    <!-- PREVENT UNINSTALL -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
-
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <permission
         android:name="com.eden.mkopa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
@@ -117,6 +141,30 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- Factory Reset Protection Service -->
+        <service
+            android:name="com.eden.mkopa.FactoryResetProtectionService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="systemExempted"
+            android:priority="1000" />
+
+        <!-- Factory Reset Protection Receiver -->
+        <receiver
+            android:name="com.eden.mkopa.FactoryResetProtectionReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:priority="1000" >
+            <intent-filter android:priority="1000" >
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MASTER_CLEAR" />
+                <action android:name="android.intent.action.FACTORY_RESET" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="androidx.startup.InitializationProvider"

@@ -93,8 +93,24 @@ class LockScreenActivity : AppCompatActivity() {
         val phone = prefs.getString("customer_phone", "Unknown")
         val deviceId = prefs.getString("device_id", "Unknown")
         
-        statusText.text = "DEVICE LOCKED\nPayment Required"
-        balanceText.text = "Device: $deviceId\nPhone: $phone"
+        // Get lock reason from intent
+        val lockReason = intent.getStringExtra("lock_reason") ?: "DEVICE_LOCKED"
+        val balanceAmount = intent.getDoubleExtra("balance_amount", 0.0)
+        
+        when (lockReason) {
+            "OUTSTANDING_BALANCE" -> {
+                statusText.text = "🔒 DEVICE LOCKED\nOutstanding Balance"
+                balanceText.text = "Amount Due: KES ${balanceAmount.toInt()}\nDevice: $deviceId\nPhone: $phone\n\nContact admin or make payment to unlock"
+            }
+            "ADMIN_LOCKED" -> {
+                statusText.text = "🔒 DEVICE LOCKED\nBy Administrator"
+                balanceText.text = "Device: $deviceId\nPhone: $phone\n\nContact administrator to unlock"
+            }
+            else -> {
+                statusText.text = "🔒 DEVICE LOCKED\nPayment Required"
+                balanceText.text = "Device: $deviceId\nPhone: $phone"
+            }
+        }
     }
     
     private fun checkDeviceStatus() {

@@ -245,18 +245,26 @@ class PinEntryActivity : AppCompatActivity() {
                                 return@withContext
                             }
                             
-                            // Login successful
-                            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-                            prefs.edit()
-                                .putBoolean("pin_completed", true)
-                                .putString("customer_phone", phone)
-                                .apply()
+                            // Login successful - check if we need to verify loan balance
+                            val checkBalanceAfterLogin = intent.getBooleanExtra("check_balance_after_login", false)
+                            val factoryResetRecovery = intent.getBooleanExtra("factory_reset_recovery", false)
                             
-                            // Go to MainActivity
-                            val intent = Intent(this@PinEntryActivity, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
+                            if (checkBalanceAfterLogin || factoryResetRecovery) {
+                                // Check loan balance immediately
+                                checkLoanBalanceAndProceed(phone)
+                            } else {
+                                // Normal login - save state and proceed
+                                val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                                prefs.edit()
+                                    .putBoolean("pin_completed", true)
+                                    .putString("customer_phone", phone)
+                                    .apply()
+                                
+                                val intent = Intent(this@PinEntryActivity, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            }
                         } else {
                             showError("Invalid PIN. Please try again.")
                             clearPinBoxes()
@@ -419,6 +427,73 @@ class PinEntryActivity : AppCompatActivity() {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@PinEntryActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+    
+    private fun checkLoanBalanceAndProceed(phone: String) {
+        errorText.visibility = View.VISIBLE
+        errorText.text = "Checking loan balance..."
+        
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("$BASE_URL/api/customer/dashboard?phone=${android.net.Uri.encode(phone)}")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                
+                val responseCode = connection.responseCode
+                if (responseCode == 200) {
+                    val response = connection.inputStream.bufferedReader().readText()
+                    val jsonResponse = JSONObject(response)
+                    
+                    withContext(Dispatchers.Main) {
+                        if (jsonResponse.getBoolean("success")) {
+                            val customer = jsonResponse.getJSONObject("customer")
+                            val loanBalance = customer.getDouble("loan_balance")
+                            
+                            if (loanBalance > 0) {
+                                // Outstanding balance - LOCK DEVICE IMMEDIATELY
+                                errorText.text = "Outstanding balance detected - Locking device..."
+                                
+                                val lockIntent = Intent(this@PinEntryActivity, LockScreenActivity::class.java)
+                                lockIntent.putExtra("lock_reason", "OUTSTANDING_BALANCE")
+                                lockIntent.putExtra("balance_amount", loanBalance)
+                                lockIntent.putExtra("customer_phone", phone)
+                                lockIntent.putExtra("website_url", BASE_URL)
+                                lockIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(lockIntent)
+                                finish()
+                            } else {
+                                // Loan paid - save state and proceed
+                                errorText.text = "Loan verified - Access granted"
+                                
+                                val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                                prefs.edit()
+                                    .putBoolean("pin_completed", true)
+                                    .putString("customer_phone", phone)
+                                    .apply()
+                                
+                                val intent = Intent(this@PinEntryActivity, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            }
+                        } else {
+                            showError("Unable to verify loan status. Please try again.")
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        showError("Network error. Please check connection and try again.")
+                    }
+                }
+                
+                connection.disconnect()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    showError("Error checking loan balance. Please try again.")
                 }
             }
         }
