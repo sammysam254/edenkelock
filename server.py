@@ -1832,7 +1832,6 @@ def get_app_version():
             "Automatic Factory Reset Recovery",
             "Maximum Security Restrictions",
             "Admin Remote Device Control"
-        ]
         ],
         "changelog": "Improved phone number entry flow: After Eden logo, phone entry appears first, waits for complete 10-digit number, uses 07 format for display but submits +254 format to server, better user experience with enhanced validation."
     })
