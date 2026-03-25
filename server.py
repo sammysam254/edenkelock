@@ -825,12 +825,23 @@ def device_persistent_login():
             logger.warning(f"Failed to create persistent session (table may not exist): {session_error}")
             # Continue without persistent session for now
         
-        # Update device with last login
-        supabase.table("devices").update({
-            "token": persistent_token,
-            "last_login": "now()",
-            "device_fingerprint": device_fingerprint
-        }).eq("id", device["id"]).execute()
+        # Update device with last login (handle missing columns gracefully)
+        update_data = {"token": persistent_token}
+        
+        # Add optional columns if they exist
+        try:
+            supabase.table("devices").select("last_login").limit(1).execute()
+            update_data["last_login"] = "now()"
+        except:
+            logger.info("last_login column not found, skipping")
+        
+        try:
+            supabase.table("devices").select("device_fingerprint").limit(1).execute()
+            update_data["device_fingerprint"] = device_fingerprint
+        except:
+            logger.info("device_fingerprint column not found, skipping")
+        
+        supabase.table("devices").update(update_data).eq("id", device["id"]).execute()
         
         return jsonify({
             "success": True,
@@ -1379,19 +1390,25 @@ def customer_register():
     try:
         data = request.json
         if not data:
+            logger.error("Customer registration: No data provided")
             return jsonify({"success": False, "error": "No data provided"}), 400
         
         raw_phone = data.get("phone_number")
         pin = data.get("pin")
         confirm_pin = data.get("confirm_pin")
         
+        logger.info(f"Registration attempt - Phone: {raw_phone}, PIN length: {len(pin) if pin else 0}")
+        
         if not raw_phone or not pin or not confirm_pin:
+            logger.error("Customer registration: Missing required fields")
             return jsonify({"success": False, "error": "Phone number, PIN, and PIN confirmation required"}), 400
         
         if len(pin) != 4 or not pin.isdigit():
+            logger.error(f"Customer registration: Invalid PIN format - Length: {len(pin)}, IsDigit: {pin.isdigit()}")
             return jsonify({"success": False, "error": "PIN must be exactly 4 digits"}), 400
         
         if pin != confirm_pin:
+            logger.error("Customer registration: PINs do not match")
             return jsonify({"success": False, "error": "PINs do not match"}), 400
         
         # Format phone number consistently
@@ -1409,6 +1426,7 @@ def customer_register():
             }), 404
         
         device = response.data[0]
+        logger.info(f"Found device for registration: {device.get('device_id', 'unknown')}")
         
         # Check if customer has already registered
         if device.get("pin_hash") is not None:
@@ -1420,23 +1438,51 @@ def customer_register():
         
         # Hash the PIN and update device
         pin_hash = hash_password(pin)
+        logger.info(f"Generated PIN hash for device: {device.get('device_id', 'unknown')}")
         
+        # Prepare update data with only columns that exist
         update_data = {
             "pin_hash": pin_hash,
             "status": "active",
-            "is_locked": False,
-            "registered_at": "now()"
+            "is_locked": False
         }
         
+        # Add optional columns if they exist
+        try:
+            # Check if registered_at column exists
+            supabase.table("devices").select("registered_at").limit(1).execute()
+            update_data["registered_at"] = "now()"
+            logger.info("Added registered_at to update")
+        except Exception as e:
+            logger.info(f"registered_at column not found: {e}")
+        
         # Update device with customer's PIN
-        supabase.table("devices").update(update_data).eq("id", device["id"]).execute()
+        logger.info(f"Updating device with data: {update_data}")
+        update_response = supabase.table("devices").update(update_data).eq("id", device["id"]).execute()
+        
+        if not update_response.data:
+            logger.error(f"Failed to update device during registration: {phone} - Response: {update_response}")
+            return jsonify({"success": False, "error": "Registration failed. Please try again."}), 500
+        
+        logger.info(f"Device updated successfully: {device.get('device_id', 'unknown')}")
         
         # Generate token for immediate login
         token = generate_token()
-        supabase.table("devices").update({
-            "token": token,
-            "last_login": "now()"
-        }).eq("id", device["id"]).execute()
+        token_update = {"token": token}
+        
+        # Add last_login if column exists
+        try:
+            supabase.table("devices").select("last_login").limit(1).execute()
+            token_update["last_login"] = "now()"
+            logger.info("Added last_login to token update")
+        except Exception as e:
+            logger.info(f"last_login column not found: {e}")
+        
+        logger.info(f"Updating device with token: {token_update}")
+        token_response = supabase.table("devices").update(token_update).eq("id", device["id"]).execute()
+        
+        if not token_response.data:
+            logger.warning(f"Failed to update token, but registration succeeded: {phone}")
         
         logger.info(f"Customer registration successful for phone: {phone}")
         
@@ -1452,7 +1498,9 @@ def customer_register():
         
     except Exception as e:
         logger.error(f"Customer registration error: {e}")
-        return jsonify({"success": False, "error": "Registration failed. Please try again."}), 500
+        import traceback
+        logger.error(f"Registration traceback: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": f"Registration failed: {str(e)}"}), 500
 
 @app.route("/api/customer/check-phone", methods=["POST"])
 def check_customer_phone():
@@ -1808,15 +1856,19 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 20,
-        "version_name": "1.9.2",
+        "version_code": 21,
+        "version_name": "1.9.3",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
         "factory_reset_protection": True,
         "customer_self_registration": True,
         "improved_phone_flow": True,
+        "registration_fixes": True,
         "features": [
+            "Fixed customer registration issues",
+            "Enhanced error handling and logging",
+            "Database column compatibility fixes",
             "Improved phone number entry flow",
             "Better 07 format display with +254 server submission",
             "Enhanced phone number validation",
@@ -1833,7 +1885,7 @@ def get_app_version():
             "Maximum Security Restrictions",
             "Admin Remote Device Control"
         ],
-        "changelog": "Improved phone number entry flow: After Eden logo, phone entry appears first, waits for complete 10-digit number, uses 07 format for display but submits +254 format to server, better user experience with enhanced validation."
+        "changelog": "Fixed customer registration issues: Enhanced error handling, database column compatibility, better logging for debugging registration failures. Improved phone number flow and validation."
     })
 
 # ============================================

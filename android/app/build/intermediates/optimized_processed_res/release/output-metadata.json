@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 20,
-      "versionName": "1.9.2",
+      "versionCode": 21,
+      "versionName": "1.9.3",
       "outputFile": "resources-release-optimize.ap_"
     }
   ],
