@@ -420,7 +420,8 @@
                     <label class="form-label">Payment Amount (KES)</label>
                     <input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount" min="1" step="0.01">
                     <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
-                        Daily payment: KES <span id="modalDailyPayment">100</span>
+                        <div>💰 Full daily payment: KES <span id="modalDailyPayment">80</span> = 24 hours</div>
+                        <div>⏰ Partial payment: KES <span id="modalPartialPayment">50</span> = 12 hours</div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -442,6 +443,26 @@
                         <span id="paymentBtnText">Submit Payment</span>
                         <span id="paymentBtnSpinner" class="loading-spinner" style="display: none;"></span>
                     </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment History Modal -->
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">📋 Payment History</div>
+                <div id="historyContent">
+                    <div id="historyLoading" style="text-align: center; padding: 20px;">
+                        <div class="loading-spinner"></div>
+                        <div>Loading payment history...</div>
+                    </div>
+                    <div id="historyList" style="display: none;"></div>
+                    <div id="historyEmpty" style="display: none; text-align: center; padding: 20px; color: #6b7280;">
+                        No payment history found
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-modal btn-modal-secondary" onclick="closeHistoryModal()">Close</button>
                 </div>
             </div>
         </div>
@@ -535,8 +556,11 @@
                     
                     // Update daily payment display
                     const dailyPayment = parseFloat(data.daily_payment_amount || 80);
+                    const partialPayment = (dailyPayment / 2) + 10;
+                    
                     document.getElementById('dailyPayment').innerHTML = `KES ${dailyPayment.toLocaleString()}`;
                     document.getElementById('modalDailyPayment').textContent = dailyPayment.toLocaleString();
+                    document.getElementById('modalPartialPayment').textContent = partialPayment.toLocaleString();
                     
                     // Update payment balance and days available
                     const paymentBalance = parseFloat(data.payment_balance || 0);
@@ -634,11 +658,22 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    const daysText = data.days_purchased ? `📅 ${data.days_purchased} day${data.days_purchased !== 1 ? 's' : ''} purchased` : '';
+                    let unlockInfo = '';
+                    if (data.device_unlocked) {
+                        if (data.unlock_type === 'full_days') {
+                            unlockInfo = `🔓 ${data.unlock_message || 'Device unlocked for full days!'}`;
+                        } else if (data.unlock_type === 'partial_12h') {
+                            unlockInfo = '🔓 Device unlocked for 12 hours (partial payment)';
+                        } else {
+                            unlockInfo = '🔓 Device has been unlocked!';
+                        }
+                    } else {
+                        unlockInfo = `⏳ ${data.unlock_message || 'Payment received but insufficient for unlock'}`;
+                    }
+                    
                     document.getElementById('paymentSuccess').innerHTML = 
                         `✅ Payment of KES ${amount.toLocaleString()} processed successfully!<br>
-                        ${daysText}<br>
-                        ${data.device_unlocked ? `🔓 ${data.unlock_message || 'Device has been unlocked!'}` : '⏳ Device will unlock when sufficient payment is made.'}`;
+                        ${unlockInfo}`;
                     document.getElementById('paymentSuccess').style.display = 'block';
                     
                     // Refresh dashboard after payment
@@ -703,7 +738,77 @@
         }
         
         function showHistory() {
-            alert('Payment history feature coming soon.');
+            loadPaymentHistory();
+        }
+        
+        async function loadPaymentHistory() {
+            document.getElementById('historyModal').style.display = 'block';
+            document.getElementById('historyLoading').style.display = 'block';
+            document.getElementById('historyList').style.display = 'none';
+            document.getElementById('historyEmpty').style.display = 'none';
+            
+            try {
+                const response = await fetch(`/api/customer/payment-history?phone=${encodeURIComponent(customerPhone)}`);
+                const data = await response.json();
+                
+                document.getElementById('historyLoading').style.display = 'none';
+                
+                if (data.success && data.payments && data.payments.length > 0) {
+                    displayPaymentHistory(data.payments);
+                } else {
+                    document.getElementById('historyEmpty').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Payment history error:', error);
+                document.getElementById('historyLoading').style.display = 'none';
+                document.getElementById('historyEmpty').style.display = 'block';
+            }
+        }
+        
+        function displayPaymentHistory(payments) {
+            const historyList = document.getElementById('historyList');
+            let historyHTML = '';
+            
+            payments.forEach((payment, index) => {
+                const date = new Date(payment.payment_date).toLocaleDateString('en-KE');
+                const time = new Date(payment.payment_date).toLocaleTimeString('en-KE', {hour: '2-digit', minute: '2-digit'});
+                
+                let unlockInfo = '';
+                if (payment.device_unlocked) {
+                    if (payment.unlock_type === 'full_days') {
+                        const days = Math.floor(payment.unlock_hours / 24);
+                        const hours = payment.unlock_hours % 24;
+                        unlockInfo = days > 0 ? `${days}d ${hours}h` : `${hours}h`;
+                    } else if (payment.unlock_type === 'partial_12h') {
+                        unlockInfo = '12h (partial)';
+                    } else {
+                        unlockInfo = `${payment.unlock_hours}h`;
+                    }
+                }
+                
+                historyHTML += `
+                    <div style="border-bottom: 1px solid #e5e7eb; padding: 12px 0; ${index === 0 ? 'border-top: 1px solid #e5e7eb;' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <div style="font-weight: 600; color: #10b981;">KES ${payment.amount.toLocaleString()}</div>
+                            <div style="font-size: 12px; color: #6b7280;">${date} ${time}</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 12px; color: #374151;">
+                                ${payment.payment_method.replace('_', ' ').toUpperCase()}
+                                ${payment.reference ? ` • ${payment.reference}` : ''}
+                            </div>
+                            ${unlockInfo ? `<div style="font-size: 11px; color: #059669; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">🔓 ${unlockInfo}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyList.innerHTML = historyHTML;
+            historyList.style.display = 'block';
+        }
+        
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
         }
         
         function logout() {
@@ -715,9 +820,13 @@
         
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('paymentModal');
-            if (event.target === modal) {
+            const paymentModal = document.getElementById('paymentModal');
+            const historyModal = document.getElementById('historyModal');
+            if (event.target === paymentModal) {
                 closePaymentModal();
+            }
+            if (event.target === historyModal) {
+                closeHistoryModal();
             }
         }
         

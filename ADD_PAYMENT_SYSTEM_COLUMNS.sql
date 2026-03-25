@@ -120,6 +120,71 @@ BEGIN
     END IF;
 END $$;
 
+DO $$
+BEGIN
+    -- Add trial_period column
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'devices' 
+        AND column_name = 'trial_period'
+    ) THEN
+        ALTER TABLE devices ADD COLUMN trial_period BOOLEAN DEFAULT FALSE;
+        RAISE NOTICE '✓ Added trial_period column';
+    ELSE
+        RAISE NOTICE '✓ trial_period column already exists';
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    -- Add downpayment column (separate from payment_balance)
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'devices' 
+        AND column_name = 'downpayment'
+    ) THEN
+        ALTER TABLE devices ADD COLUMN downpayment DECIMAL(10,2) DEFAULT 0;
+        RAISE NOTICE '✓ Added downpayment column';
+    ELSE
+        RAISE NOTICE '✓ downpayment column already exists';
+    END IF;
+END $$;
+
+-- Update payments table to include new unlock tracking columns
+DO $$
+BEGIN
+    -- Add unlock_type column to payments table
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'payments' 
+        AND column_name = 'unlock_type'
+    ) THEN
+        ALTER TABLE payments ADD COLUMN unlock_type TEXT DEFAULT 'none';
+        RAISE NOTICE '✓ Added unlock_type column to payments table';
+    ELSE
+        RAISE NOTICE '✓ unlock_type column already exists in payments table';
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    -- Add unlock_hours column to payments table
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'payments' 
+        AND column_name = 'unlock_hours'
+    ) THEN
+        ALTER TABLE payments ADD COLUMN unlock_hours DECIMAL(5,2) DEFAULT 0;
+        RAISE NOTICE '✓ Added unlock_hours column to payments table';
+    ELSE
+        RAISE NOTICE '✓ unlock_hours column already exists in payments table';
+    END IF;
+END $$;
+
 -- Create payments table if it doesn't exist
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
@@ -128,9 +193,10 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     payment_method TEXT DEFAULT 'mobile_money',
     reference TEXT,
-    status TEXT DEFAULT 'completed',
-    days_purchased DECIMAL(5,2) DEFAULT 0,
+    unlock_type TEXT DEFAULT 'none',
+    unlock_hours DECIMAL(5,2) DEFAULT 0,
     device_unlocked BOOLEAN DEFAULT FALSE,
+    status TEXT DEFAULT 'completed',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

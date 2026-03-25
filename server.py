@@ -288,10 +288,48 @@ def get_devices():
         admin = verify_admin_token(token)
         
         if not admin:
+            logger.warning("Unauthorized devices access attempt")
             return jsonify({"success": False, "error": "Unauthorized"}), 403
         
-        response = supabase.table("devices").select("*").execute()
-        return jsonify(response.data)
+        logger.info(f"Admin {admin.get('email', 'unknown')} requesting devices list")
+        
+        # Get devices with error handling for missing columns
+        try:
+            response = supabase.table("devices").select("*").execute()
+            devices = response.data if response.data else []
+            
+            # Ensure all devices have required fields with defaults
+            processed_devices = []
+            for device in devices:
+                processed_device = {
+                    "device_id": device.get("device_id", "Unknown"),
+                    "customer_id": device.get("customer_id", device.get("national_id", "Unknown")),
+                    "customer_name": device.get("customer_name", "Unknown"),
+                    "customer_phone": device.get("customer_phone", "Unknown"),
+                    "total_amount": float(device.get("total_amount", 0)),
+                    "daily_payment_amount": float(device.get("daily_payment_amount", 80)),
+                    "amount_paid": float(device.get("amount_paid", 0)),
+                    "downpayment": float(device.get("downpayment", 0)),
+                    "payment_balance": float(device.get("payment_balance", 0)),
+                    "status": device.get("status", "unknown"),
+                    "is_locked": device.get("is_locked", True),
+                    "created_at": device.get("created_at", ""),
+                    "serial_number": device.get("serial_number", ""),
+                    "imei": device.get("imei", ""),
+                    "last_payment_date": device.get("last_payment_date"),
+                    "last_payment_amount": float(device.get("last_payment_amount", 0)),
+                    "unlock_until": device.get("unlock_until"),
+                    "trial_period": device.get("trial_period", False)
+                }
+                processed_devices.append(processed_device)
+            
+            logger.info(f"Successfully retrieved {len(processed_devices)} devices")
+            return jsonify(processed_devices)
+            
+        except Exception as db_error:
+            logger.error(f"Database error retrieving devices: {db_error}")
+            return jsonify({"success": False, "error": f"Database error: {str(db_error)}"}), 500
+        
     except Exception as e:
         logger.error(f"Get devices error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
@@ -494,7 +532,7 @@ Your device is now fully functional.
 
 @app.route("/api/customer/make-payment", methods=["POST"])
 def make_payment():
-    """Customer makes a payment and device auto-unlocks based on daily payment logic"""
+    """Customer makes a payment with new logic: downpayment as deposit, partial payments for 12h unlock"""
     try:
         data = request.json
         phone = format_phone_number(data.get("phone_number"))
@@ -515,34 +553,43 @@ def make_payment():
         
         # Calculate current amounts
         total_amount = float(device.get("total_amount", 0))
-        current_paid = float(device.get("amount_paid", 0))
+        current_paid = float(device.get("amount_paid", 0))  # This includes downpayment (deposit)
         daily_payment = float(device.get("daily_payment_amount", 80))
-        current_payment_balance = float(device.get("payment_balance", 0))
+        current_payment_balance = float(device.get("payment_balance", 0))  # Only actual payments, not downpayment
+        downpayment = float(device.get("downpayment", 0))  # Separate downpayment tracking
         
         if daily_payment <= 0:
             return jsonify({"success": False, "error": "Daily payment amount not set. Contact administrator."}), 400
         
-        # Add payment to totals
+        # Add payment to totals (this goes to loan repayment)
         new_amount_paid = current_paid + payment_amount
         remaining_loan_balance = total_amount - new_amount_paid
         
-        # Calculate days purchased with this payment
-        days_purchased = payment_amount / daily_payment
-        
-        # Add to payment balance (prepaid amount)
+        # Add to payment balance (this is for device unlock, separate from downpayment)
         new_payment_balance = current_payment_balance + payment_amount
         
-        # Calculate unlock duration
-        total_days_available = new_payment_balance / daily_payment
+        # Calculate unlock logic
+        half_daily_plus_10 = (daily_payment / 2) + 10
+        unlock_type = "none"
+        unlock_duration_hours = 0
+        unlock_until = None
         
-        # Determine if device should be unlocked
-        should_unlock = total_days_available >= 1.0
+        if payment_amount >= daily_payment:
+            # Full daily payment = full day unlock
+            days_purchased = payment_amount / daily_payment
+            unlock_type = "full_days"
+            unlock_duration_hours = days_purchased * 24
+        elif payment_amount >= half_daily_plus_10:
+            # Partial payment (half + 10) = 12 hours unlock
+            unlock_type = "partial_12h"
+            unlock_duration_hours = 12
+        
+        should_unlock = unlock_duration_hours > 0
         
         # Calculate unlock_until timestamp
-        unlock_until = None
         if should_unlock:
             from datetime import datetime, timedelta
-            unlock_until = datetime.now() + timedelta(days=int(total_days_available))
+            unlock_until = datetime.now() + timedelta(hours=unlock_duration_hours)
         
         # Update device with new payment
         update_data = {
@@ -570,8 +617,10 @@ def make_payment():
                 "payment_date": "now()",
                 "payment_method": data.get("payment_method", "mobile_money"),
                 "reference": data.get("reference", f"PAY_{int(time.time())}"),
-                "days_purchased": days_purchased,
-                "device_unlocked": should_unlock
+                "unlock_type": unlock_type,
+                "unlock_hours": unlock_duration_hours,
+                "device_unlocked": should_unlock,
+                "status": "completed"
             }
             supabase.table("payments").insert(payment_record).execute()
             logger.info(f"Payment recorded in payments table")
@@ -585,15 +634,17 @@ def make_payment():
         # Send unlock notification if device should be unlocked
         unlock_message = ""
         if should_unlock:
-            days_remaining = int(total_days_available)
-            hours_remaining = int((total_days_available - days_remaining) * 24)
-            
-            if days_remaining > 0:
-                unlock_message = f"Device unlocked for {days_remaining} day{'s' if days_remaining != 1 else ''}"
-                if hours_remaining > 0:
-                    unlock_message += f" and {hours_remaining} hour{'s' if hours_remaining != 1 else ''}"
-            else:
-                unlock_message = f"Device unlocked for {hours_remaining} hour{'s' if hours_remaining != 1 else ''}"
+            if unlock_type == "full_days":
+                days = int(unlock_duration_hours / 24)
+                hours = int(unlock_duration_hours % 24)
+                if days > 0:
+                    unlock_message = f"Device unlocked for {days} day{'s' if days != 1 else ''}"
+                    if hours > 0:
+                        unlock_message += f" and {hours} hour{'s' if hours != 1 else ''}"
+                else:
+                    unlock_message = f"Device unlocked for {hours} hour{'s' if hours != 1 else ''}"
+            else:  # partial_12h
+                unlock_message = "Device unlocked for 12 hours (partial payment)"
             
             try:
                 send_device_notification(
@@ -604,13 +655,13 @@ def make_payment():
 PAYMENT SUCCESSFULLY PROCESSED
 
 💰 Payment: KES {payment_amount:,.2f}
-📅 Days Purchased: {days_purchased:.1f}
+⏰ Unlock Duration: {unlock_message}
 💳 Total Paid: KES {new_amount_paid:,.2f}
 💵 Loan Remaining: KES {remaining_loan_balance:,.2f}
 💰 Payment Balance: KES {new_payment_balance:,.2f}
 
 ✅ {unlock_message.upper()}
-Your device is now fully functional.
+Your device is now functional.
 
 Thank you for your payment!
                     """.strip(),
@@ -618,18 +669,22 @@ Thank you for your payment!
                 )
             except Exception as notification_error:
                 logger.warning(f"Failed to send unlock notification: {notification_error}")
+        else:
+            unlock_message = f"Payment received but insufficient for unlock. Need KES {half_daily_plus_10:,.2f} minimum."
         
         return jsonify({
             "success": True,
             "message": "Payment processed successfully",
             "payment_amount": payment_amount,
-            "days_purchased": round(days_purchased, 1),
+            "unlock_type": unlock_type,
+            "unlock_hours": unlock_duration_hours,
             "total_paid": new_amount_paid,
             "remaining_loan_balance": remaining_loan_balance,
             "payment_balance": new_payment_balance,
             "device_unlocked": should_unlock,
             "unlock_message": unlock_message,
             "daily_payment_amount": daily_payment,
+            "minimum_partial_payment": half_daily_plus_10,
             "unlock_until": unlock_until.isoformat() if unlock_until else None
         })
         
@@ -801,6 +856,55 @@ def payment_status():
         
     except Exception as e:
         logger.error(f"Payment status error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/customer/payment-history", methods=["GET"])
+def payment_history():
+    """Get customer's last 10 payment transactions"""
+    try:
+        phone = format_phone_number(request.args.get("phone"))
+        
+        if not phone:
+            return jsonify({"success": False, "error": "Phone number required"}), 400
+        
+        # Get last 10 payments for this customer
+        try:
+            payments_response = supabase.table("payments").select("*").eq("customer_phone", phone).order("payment_date", desc=True).limit(10).execute()
+            payments = payments_response.data if payments_response.data else []
+            
+            # Format payment data for display
+            formatted_payments = []
+            for payment in payments:
+                formatted_payment = {
+                    "id": payment.get("id"),
+                    "amount": float(payment.get("amount", 0)),
+                    "payment_date": payment.get("payment_date"),
+                    "payment_method": payment.get("payment_method", "mobile_money"),
+                    "reference": payment.get("reference", ""),
+                    "unlock_type": payment.get("unlock_type", "none"),
+                    "unlock_hours": float(payment.get("unlock_hours", 0)),
+                    "device_unlocked": payment.get("device_unlocked", False),
+                    "status": payment.get("status", "completed")
+                }
+                formatted_payments.append(formatted_payment)
+            
+            return jsonify({
+                "success": True,
+                "payments": formatted_payments,
+                "total_payments": len(formatted_payments)
+            })
+            
+        except Exception as payments_error:
+            logger.warning(f"Could not fetch payments: {payments_error}")
+            return jsonify({
+                "success": True,
+                "payments": [],
+                "total_payments": 0,
+                "message": "Payment history not available"
+            })
+        
+    except Exception as e:
+        logger.error(f"Payment history error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================
@@ -1644,11 +1748,15 @@ def enroll_device():
         # Format phone number
         customer_phone = format_phone_number(data["customer_phone"])
         
-        # No PIN set during enrollment - customer will set it during registration
-        # Device starts without PIN (customer must register first)
+        # Get downpayment (initial payment) - this is separate from daily payments
+        downpayment = float(data.get("amount_paid", 0))
         
         # Get IMEI if provided
         imei = data.get("imei")
+        
+        # Calculate 3-hour trial period from enrollment
+        from datetime import datetime, timedelta
+        trial_until = datetime.now() + timedelta(hours=3)
         
         # Create device record - start with essential fields only
         device_data = {
@@ -1660,11 +1768,15 @@ def enroll_device():
             "customer_phone": customer_phone,
             "total_amount": float(data["total_amount"]),
             "daily_payment_amount": float(data["daily_payment_amount"]),
-            "amount_paid": float(data.get("amount_paid", 0)),
+            "amount_paid": downpayment,  # This is the downpayment (deposit)
+            "downpayment": downpayment,  # Track downpayment separately
+            "payment_balance": 0,  # No payment balance yet (only actual payments count)
             "status": "pending_registration",  # Customer must register first
             "pin_hash": None,  # No PIN until customer registers
-            "is_locked": True,  # Locked until customer registers
-            "must_change_pin": False  # Customer sets their own PIN
+            "is_locked": False,  # Unlocked for 3-hour trial
+            "must_change_pin": False,  # Customer sets their own PIN
+            "unlock_until": trial_until.isoformat(),  # 3-hour trial period
+            "trial_period": True  # Mark as trial period
         }
         
         # Add optional fields only if they exist in the schema

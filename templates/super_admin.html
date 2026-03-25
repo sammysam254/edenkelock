@@ -485,10 +485,24 @@ Customer must complete registration to use the device.`);
         fetch('/api/devices', {
             headers: { 'Authorization': 'Bearer ' + token }
         })
-        .then(res => res.json())
-        .then(devices => {
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
             const tbody = document.getElementById('devicesBody');
-            if (!devices || devices.length === 0) {
+            
+            // Handle error response
+            if (data.success === false) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Error: ${data.error}</td></tr>`;
+                return;
+            }
+            
+            // Handle empty or no devices
+            const devices = Array.isArray(data) ? data : [];
+            if (devices.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No devices enrolled yet</td></tr>';
                 return;
             }
@@ -497,23 +511,24 @@ Customer must complete registration to use the device.`);
             const recentDevices = devices.slice(-10).reverse();
             tbody.innerHTML = recentDevices.map(device => `
                 <tr>
-                    <td>${device.device_id}</td>
-                    <td>${device.customer_id}</td>
-                    <td>KES ${parseFloat(device.total_amount).toLocaleString()}</td>
-                    <td><span class="status-badge status-${device.status === 'active' ? 'active' : 'locked'}">${device.status.toUpperCase()}</span></td>
-                    <td>${new Date(device.created_at).toLocaleDateString('en-KE', {timeZone: 'Africa/Nairobi'})}</td>
+                    <td>${device.device_id || 'Unknown'}</td>
+                    <td>${device.customer_name || device.customer_id || 'Unknown'}</td>
+                    <td>KES ${parseFloat(device.total_amount || 0).toLocaleString()}</td>
+                    <td><span class="status-badge status-${device.status === 'active' ? 'active' : 'locked'}">${(device.status || 'unknown').toUpperCase()}</span></td>
+                    <td>${device.created_at ? new Date(device.created_at).toLocaleDateString('en-KE', {timeZone: 'Africa/Nairobi'}) : 'Unknown'}</td>
                     <td>
-                        ${device.status === 'locked' 
+                        ${device.is_locked !== false
                             ? `<button class="btn btn-primary btn-small" onclick="unlockDevice('${device.device_id}')">🔓 Unlock</button>`
                             : `<button class="btn btn-danger btn-small" onclick="lockDevice('${device.device_id}')">🔒 Lock</button>`
                         }
-                        <button class="btn btn-small" style="background: #0d9488; color: white; margin-left: 5px;" onclick="generateProvisioningQR('${device.device_id}', '${device.serial_number}')">📱 Generate QR</button>
+                        <button class="btn btn-small" style="background: #0d9488; color: white; margin-left: 5px;" onclick="generateProvisioningQR('${device.device_id}', '${device.serial_number || ''}')">📱 Generate QR</button>
                     </td>
                 </tr>
             `).join('');
         })
         .catch(err => {
-            document.getElementById('devicesBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #ef4444;">Error loading devices</td></tr>';
+            console.error('Device loading error:', err);
+            document.getElementById('devicesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Error loading devices: ${err.message}</td></tr>`;
         });
 
         function lockDevice(deviceId) {
