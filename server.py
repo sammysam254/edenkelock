@@ -1178,7 +1178,7 @@ def enroll_device():
         # Get IMEI if provided
         imei = data.get("imei")
         
-        # Create device record with IMEI tracking
+        # Create device record - start with essential fields only
         device_data = {
             "device_id": device_id,
             "customer_id": data["national_id"],
@@ -1190,14 +1190,28 @@ def enroll_device():
             "amount_paid": float(data.get("amount_paid", 0)),
             "status": "active",
             "pin_hash": pin_hash,
-            "must_change_pin": True,  # Force PIN change on first login
-            "is_locked": False,
-            "enrolled_by": admin["id"],
-            "id_front_url": data.get("id_front", ""),
-            "id_back_url": data.get("id_back", ""),
-            "passport_photo_url": data.get("passport_photo", ""),
-            "imei": imei  # Store IMEI for tracking
+            "is_locked": False
         }
+        
+        # Add optional fields only if they exist in the schema
+        try:
+            # Test if optional columns exist by checking schema
+            optional_fields = {
+                "must_change_pin": True,
+                "enrolled_by": admin["id"],
+                "id_front_url": data.get("id_front", ""),
+                "id_back_url": data.get("id_back", ""),
+                "passport_photo_url": data.get("passport_photo", ""),
+                "imei": imei
+            }
+            
+            # Add optional fields to device_data
+            device_data.update(optional_fields)
+            logger.info(f"Using full device enrollment with all fields")
+            
+        except Exception as schema_error:
+            logger.warning(f"Some optional columns may not exist, using basic enrollment: {schema_error}")
+            # Continue with basic fields only
         
         response = supabase.table("devices").insert(device_data).execute()
         
@@ -1215,6 +1229,15 @@ def enroll_device():
             
     except Exception as e:
         logger.error(f"Device enrollment error: {e}")
+        
+        # If it's a column not found error, provide specific guidance
+        if "could not find" in str(e).lower() and "column" in str(e).lower():
+            return jsonify({
+                "success": False, 
+                "error": "Database schema needs update. Please run the enrollment fix SQL script.",
+                "fix_required": "Run QUICK_ENROLLMENT_FIX.sql in your database"
+            }), 500
+        
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================
