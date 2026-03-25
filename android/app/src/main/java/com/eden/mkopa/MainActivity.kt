@@ -190,6 +190,14 @@ class MainActivity : AppCompatActivity() {
                 return
             }
             
+            // Whitelist this app for lock task mode first
+            try {
+                devicePolicyManager?.setLockTaskPackages(adminComponent, arrayOf(packageName))
+                Log.d(TAG, "App whitelisted for lock task mode")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to whitelist app for lock task", e)
+            }
+            
             startLockTask()
             Log.d(TAG, "Kiosk mode activated successfully")
             Toast.makeText(this, "Device secured in kiosk mode", Toast.LENGTH_SHORT).show()

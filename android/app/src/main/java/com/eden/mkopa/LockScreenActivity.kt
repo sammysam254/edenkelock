@@ -68,8 +68,19 @@ class LockScreenActivity : AppCompatActivity() {
         
         // APPLY COMPLETE LOCKDOWN - BLOCKS EVERYTHING INCLUDING CALLS
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
-            DeviceAdminReceiver.applyCompleteLockdown(this)
-            startLockTask()
+            try {
+                // Whitelist this app for lock task mode first
+                devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf(packageName))
+                
+                // Apply complete lockdown
+                DeviceAdminReceiver.applyCompleteLockdown(this)
+                
+                // Start lock task mode
+                startLockTask()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Continue without lock task if it fails
+            }
         }
         
         refreshButton.setOnClickListener {

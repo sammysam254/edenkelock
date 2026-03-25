@@ -11,6 +11,15 @@ import android.util.Log
 class FactoryResetProtectionReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
+        // ============================================
+        // FRP DISABLED FOR TESTING
+        // TODO: Enable for production by uncommenting below
+        // ============================================
+        
+        Log.i("EdenSecurity", "FRP Receiver triggered but DISABLED for testing: ${intent.action}")
+        return
+        
+        /* COMMENTED OUT FOR TESTING - ENABLE FOR PRODUCTION
         when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED -> {
                 Log.i("EdenSecurity", "Boot completed - enforcing security")
@@ -41,6 +50,7 @@ class FactoryResetProtectionReceiver : BroadcastReceiver() {
                 }
             }
         }
+        */
     }
     
     private fun enforceMaximumSecurity(context: Context) {
