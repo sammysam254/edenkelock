@@ -34,7 +34,7 @@ CREATE TABLE admins (
     is_active BOOLEAN DEFAULT true
 );
 
--- DEVICES TABLE - Contains all customer and device info
+-- DEVICES TABLE - Contains all customer and device info with IMEI tracking
 CREATE TABLE devices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     device_id TEXT UNIQUE NOT NULL,
@@ -56,6 +56,18 @@ CREATE TABLE devices (
     -- Device Status
     status TEXT DEFAULT 'active',
     is_locked BOOLEAN DEFAULT false,
+    lock_reason TEXT,
+    locked_by UUID REFERENCES admins(id),
+    locked_at TIMESTAMP WITH TIME ZONE,
+    
+    -- IMEI Tracking for Factory Reset Protection
+    imei TEXT,
+    device_model TEXT,
+    device_brand TEXT,
+    android_version TEXT,
+    app_version TEXT,
+    last_seen TIMESTAMP WITH TIME ZONE,
+    ip_address TEXT,
     
     -- Metadata
     enrolled_by UUID REFERENCES admins(id),
@@ -107,6 +119,7 @@ CREATE INDEX idx_devices_device_id ON devices(device_id);
 CREATE INDEX idx_devices_customer_phone ON devices(customer_phone);
 CREATE INDEX idx_devices_pin_hash ON devices(pin_hash);
 CREATE INDEX idx_devices_token ON devices(token);
+CREATE INDEX idx_devices_imei ON devices(imei);
 CREATE INDEX idx_security_violations_device_id ON security_violations(device_id);
 CREATE INDEX idx_device_logs_device_id ON device_logs(device_id);
 CREATE INDEX idx_payments_customer_phone ON payments(customer_phone);

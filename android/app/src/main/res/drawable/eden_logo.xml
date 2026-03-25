@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#4CAF50"
+        android:strokeWidth="4"
+        android:pathData="M100,10 A90,90 0 1,1 100,190 A90,90 0 1,1 100,10 Z" />
+
+    <!-- Eden "E" Letter -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M60,60 L60,140 L130,140 L130,125 L75,125 L75,105 L120,105 L120,90 L75,90 L75,75 L130,75 L130,60 Z" />
+
+    <!-- Leaf Icon -->
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M140,50 Q160,50 160,70 Q160,90 140,90 Q130,80 130,70 Q130,60 140,50 Z" />
+
+    <!-- Small Leaf -->
+    <path
+        android:fillColor="#81C784"
+        android:pathData="M145,55 Q155,55 155,65 Q155,75 145,75 Q140,70 140,65 Q140,60 145,55 Z" />
+
+</vector>

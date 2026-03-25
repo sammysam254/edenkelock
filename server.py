@@ -691,7 +691,162 @@ def log_device_event():
 # Duplicate function removed - keeping the first definition
 
 # ============================================
-# API ROUTES - DEVICE ENROLLMENT
+# API ROUTES - IMEI TRACKING & DEVICE LOCKING
+# ============================================
+
+@app.route("/api/device/report-imei", methods=["POST"])
+def report_device_imei():
+    """Report device IMEI for tracking and security"""
+    try:
+        data = request.json
+        imei = data.get("imei")
+        device_model = data.get("device_model")
+        device_brand = data.get("device_brand")
+        android_version = data.get("android_version")
+        app_version = data.get("app_version")
+        
+        if not imei:
+            return jsonify({"success": False, "error": "IMEI required"}), 400
+        
+        # Get client IP
+        ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', ''))
+        
+        # Check if device exists by IMEI
+        existing_device = supabase.table("devices").select("*").eq("imei", imei).execute()
+        
+        if existing_device.data and len(existing_device.data) > 0:
+            # Update existing device
+            supabase.table("devices").update({
+                "device_model": device_model,
+                "device_brand": device_brand,
+                "android_version": android_version,
+                "app_version": app_version,
+                "last_seen": "now()",
+                "ip_address": ip_address
+            }).eq("imei", imei).execute()
+            
+            logger.info(f"IMEI updated: {imei[:4]}****")
+        else:
+            # Log unregistered device
+            logger.warning(f"Unregistered device IMEI reported: {imei[:4]}****")
+            
+            # Store in security violations for tracking
+            violation_data = {
+                "device_id": None,
+                "customer_phone": None,
+                "violation_type": "UNREGISTERED_DEVICE",
+                "violation_details": f"Unregistered device with IMEI {imei[:4]}**** reported",
+                "ip_address": ip_address,
+                "user_agent": request.headers.get("User-Agent")
+            }
+            supabase.table("security_violations").insert(violation_data).execute()
+        
+        return jsonify({"success": True, "message": "IMEI reported successfully"})
+        
+    except Exception as e:
+        logger.error(f"Report IMEI error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/device/check-imei-lock", methods=["GET"])
+def check_imei_lock():
+    """Check if device is locked by IMEI"""
+    try:
+        imei = request.args.get("imei")
+        
+        if not imei:
+            return jsonify({"is_locked": False, "error": "IMEI required"}), 400
+        
+        # Check if device exists and is locked
+        response = supabase.table("devices").select("*").eq("imei", imei).execute()
+        
+        if response.data and len(response.data) > 0:
+            device = response.data[0]
+            is_locked = device.get("is_locked", False)
+            
+            # Check loan balance - if outstanding, device should be locked
+            total_amount = float(device.get("total_amount", 0))
+            amount_paid = float(device.get("amount_paid", 0))
+            loan_balance = total_amount - amount_paid
+            
+            if loan_balance > 0:
+                is_locked = True
+                # Update device lock status
+                supabase.table("devices").update({
+                    "is_locked": True,
+                    "status": "locked"
+                }).eq("imei", imei).execute()
+            
+            return jsonify({
+                "is_locked": is_locked,
+                "device_id": device["device_id"],
+                "customer_phone": device["customer_phone"],
+                "loan_balance": loan_balance,
+                "lock_reason": "OUTSTANDING_BALANCE" if loan_balance > 0 else None
+            })
+        else:
+            # Unknown IMEI - lock by default for security
+            logger.warning(f"Unknown IMEI lock check: {imei[:4]}****")
+            return jsonify({
+                "is_locked": True,
+                "lock_reason": "UNREGISTERED_DEVICE"
+            })
+        
+    except Exception as e:
+        logger.error(f"Check IMEI lock error: {e}")
+        return jsonify({"is_locked": True, "error": str(e)}), 500
+
+@app.route("/api/admin/lock-device-by-imei", methods=["POST"])
+def lock_device_by_imei():
+    """Admin endpoint to lock device by IMEI"""
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        data = request.json
+        imei = data.get("imei")
+        lock_reason = data.get("lock_reason", "ADMIN_LOCK")
+        
+        if not imei:
+            return jsonify({"success": False, "error": "IMEI required"}), 400
+        
+        # Find and lock device by IMEI
+        response = supabase.table("devices").select("*").eq("imei", imei).execute()
+        
+        if response.data and len(response.data) > 0:
+            device = response.data[0]
+            
+            # Lock the device
+            supabase.table("devices").update({
+                "is_locked": True,
+                "status": "locked",
+                "lock_reason": lock_reason,
+                "locked_by": admin["id"],
+                "locked_at": "now()"
+            }).eq("imei", imei).execute()
+            
+            # Log the action
+            log_device_action(device["device_id"], "DEVICE_LOCKED_BY_IMEI", admin["id"], {
+                "imei": imei[:4] + "****",
+                "lock_reason": lock_reason
+            })
+            
+            return jsonify({
+                "success": True,
+                "message": f"Device locked successfully",
+                "device_id": device["device_id"]
+            })
+        else:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+    except Exception as e:
+        logger.error(f"Lock device by IMEI error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================
+# API ROUTES - DEVICE ENROLLMENT (UPDATED)
 # ============================================
 
 @app.route("/api/devices/enroll", methods=["POST"])
@@ -724,7 +879,10 @@ def enroll_device():
         
         pin_hash = hash_password(default_pin)
         
-        # Create device record
+        # Get IMEI if provided
+        imei = data.get("imei")
+        
+        # Create device record with IMEI tracking
         device_data = {
             "device_id": device_id,
             "customer_id": data["national_id"],
@@ -738,9 +896,11 @@ def enroll_device():
             "pin_hash": pin_hash,
             "must_change_pin": True,  # Force PIN change on first login
             "is_locked": False,
+            "enrolled_by": admin["id"],
             "id_front_url": data.get("id_front", ""),
             "id_back_url": data.get("id_back", ""),
-            "passport_photo_url": data.get("passport_photo", "")
+            "passport_photo_url": data.get("passport_photo", ""),
+            "imei": imei  # Store IMEI for tracking
         }
         
         response = supabase.table("devices").insert(device_data).execute()
@@ -751,6 +911,7 @@ def enroll_device():
                 "device_id": device_id,
                 "customer_phone": customer_phone,
                 "default_pin": default_pin,
+                "imei_tracking": "enabled" if imei else "disabled",
                 "message": f"Device enrolled successfully. Customer can login with phone {customer_phone} and PIN {default_pin}"
             })
         else:
@@ -840,24 +1001,61 @@ def check_customer_phone():
 @app.route("/api/customer/login", methods=["POST"])
 def customer_login_api():
     try:
+        if supabase is None:
+            logger.error("Supabase client not initialized")
+            return jsonify({"success": False, "error": "Database connection not available"}), 500
+        
         data = request.json
+        if not data:
+            logger.error("No data provided in customer login request")
+            return jsonify({"success": False, "error": "No data provided"}), 400
+            
         phone = format_phone_number(data.get("phone_number"))
         pin = data.get("pin")
         
         if not phone or not pin:
+            logger.error(f"Missing phone or PIN. Phone: {phone}, PIN: {'*' * len(pin) if pin else 'None'}")
             return jsonify({"success": False, "error": "Phone and PIN required"}), 400
         
+        if len(pin) != 4 or not pin.isdigit():
+            logger.error(f"Invalid PIN format for phone: {phone}")
+            return jsonify({"success": False, "error": "PIN must be exactly 4 digits"}), 400
+        
+        logger.info(f"Customer login attempt for phone: {phone}")
+        
         pin_hash = hash_password(pin)
+        logger.info(f"PIN hash generated for: {phone}")
         
-        # Query devices table instead of customers
-        response = supabase.table("devices").select("*").eq("customer_phone", phone).eq("pin_hash", pin_hash).execute()
-        
-        if response.data and len(response.data) > 0:
-            device = response.data[0]
-            token = generate_token()
+        try:
+            # Query devices table for customer authentication
+            response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+            logger.info(f"Database query executed for phone: {phone}")
             
-            # Store token in device record
-            supabase.table("devices").update({"token": token}).eq("id", device["id"]).execute()
+            if not response.data or len(response.data) == 0:
+                logger.warning(f"No device found for phone: {phone}")
+                return jsonify({"success": False, "error": "Account not found. Please contact support."}), 404
+            
+            device = response.data[0]
+            logger.info(f"Device found for phone: {phone}, checking PIN...")
+            
+            # Check PIN hash
+            if device.get("pin_hash") != pin_hash:
+                logger.warning(f"Invalid PIN for phone: {phone}")
+                return jsonify({"success": False, "error": "Invalid PIN. Please try again."}), 401
+            
+            # Check if device is locked
+            if device.get("is_locked", False):
+                logger.warning(f"Device is locked for phone: {phone}")
+                return jsonify({"success": False, "error": "Device is locked. Please contact support."}), 403
+            
+            # Generate and store token
+            token = generate_token()
+            supabase.table("devices").update({
+                "token": token,
+                "last_login": "now()"
+            }).eq("id", device["id"]).execute()
+            
+            logger.info(f"Customer login successful for phone: {phone}")
             
             # Check if customer must change PIN
             must_change = device.get("must_change_pin", False)
@@ -865,16 +1063,24 @@ def customer_login_api():
             return jsonify({
                 "success": True,
                 "token": token,
-                "customer_id": device["customer_id"],
+                "customer_id": device.get("customer_id", device.get("national_id")),
                 "device_id": device["device_id"],
+                "customer_name": device.get("customer_name"),
                 "must_change_pin": must_change
             })
-        else:
-            return jsonify({"success": False, "error": "Invalid credentials"}), 401
+            
+        except Exception as db_error:
+            logger.error(f"Database error during customer login: {db_error}")
+            if "relation \"devices\" does not exist" in str(db_error):
+                return jsonify({
+                    "success": False, 
+                    "error": "Database not set up. Please contact support."
+                }), 500
+            return jsonify({"success": False, "error": "Database error. Please try again."}), 500
             
     except Exception as e:
         logger.error(f"Customer login error: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": "Server error. Please try again."}), 500
 
 @app.route("/api/customer/set-pin", methods=["POST"])
 def set_customer_pin():
@@ -988,22 +1194,22 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 12,
-        "version_name": "1.8.3",
+        "version_code": 13,
+        "version_name": "1.8.4",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
         "factory_reset_protection": True,
         "features": [
-            "Maximum Factory Reset Protection",
-            "New Authentication System",
-            "Admin Registration Flow", 
-            "Enhanced Security Monitoring",
-            "Automatic Loan Balance Verification",
-            "Persistent Device Protection",
-            "Fixed Admin Login Issues"
+            "Eden Logo Boot Screen for Device Owner",
+            "Fixed Customer Login Authentication",
+            "IMEI Tracking & Device Locking",
+            "Enhanced Device Admin Capabilities",
+            "Automatic Factory Reset Recovery",
+            "Maximum Security Restrictions",
+            "Admin Remote Device Control"
         ],
-        "changelog": "Fixed admin login 500 errors by correcting database column references and enhanced debugging tools"
+        "changelog": "Added Eden boot screen, fixed customer login, implemented IMEI tracking, enhanced device admin with full remote control capabilities"
     })
 
 # ============================================

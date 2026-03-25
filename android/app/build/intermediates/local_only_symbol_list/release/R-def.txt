@@ -21,8 +21,11 @@ color text_primary
 color text_secondary
 color warning
 color white
+drawable badge_background
+drawable eden_logo
 drawable ic_launcher_foreground
 drawable ic_menu
+drawable ic_security
 drawable pin_box_background
 drawable pin_dot
 drawable pin_dot_filled
@@ -42,6 +45,7 @@ id downloadButton
 id drawerLayout
 id errorText
 id instructionsText
+id logoImageView
 id makePaymentButton
 id nav_device
 id nav_home
@@ -78,6 +82,7 @@ layout activity_lock_screen
 layout activity_main
 layout activity_main_new
 layout activity_pin_entry
+layout activity_splash
 layout dialog_change_pin
 layout nav_header
 menu drawer_menu
