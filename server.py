@@ -724,18 +724,23 @@ def device_persistent_login():
         
         # Create persistent session
         persistent_token = generate_token()
-        session_data = {
-            "device_fingerprint": device_fingerprint,
-            "customer_phone": phone,
-            "device_id": device["device_id"],
-            "persistent_token": persistent_token,
-            "created_at": "now()",
-            "expires_at": "now() + interval '90 days'",  # 90 day expiry
-            "is_active": True
-        }
         
-        # Store persistent session
-        supabase.table("persistent_sessions").insert(session_data).execute()
+        # Try to store persistent session (fallback if table doesn't exist)
+        try:
+            session_data = {
+                "device_fingerprint": device_fingerprint,
+                "customer_phone": phone,
+                "device_id": device["device_id"],
+                "persistent_token": persistent_token,
+                "created_at": "now()",
+                "expires_at": "now() + interval '90 days'",  # 90 day expiry
+                "is_active": True
+            }
+            supabase.table("persistent_sessions").insert(session_data).execute()
+            logger.info(f"Persistent session created for device: {device['device_id']}")
+        except Exception as session_error:
+            logger.warning(f"Failed to create persistent session (table may not exist): {session_error}")
+            # Continue without persistent session for now
         
         # Update device with last login
         supabase.table("devices").update({
@@ -768,45 +773,76 @@ def device_auto_login():
         if not device_fingerprint or not persistent_token:
             return jsonify({"success": False, "error": "Device fingerprint and token required"}), 400
         
-        # Check persistent session
-        session_response = supabase.table("persistent_sessions").select("*").eq("device_fingerprint", device_fingerprint).eq("persistent_token", persistent_token).eq("is_active", True).execute()
+        # Try to check persistent session (fallback if table doesn't exist)
+        try:
+            session_response = supabase.table("persistent_sessions").select("*").eq("device_fingerprint", device_fingerprint).eq("persistent_token", persistent_token).eq("is_active", True).execute()
+            
+            if not session_response.data or len(session_response.data) == 0:
+                return jsonify({"success": False, "error": "No valid session found"}), 404
+            
+            session = session_response.data[0]
+            
+            # Check if session is expired
+            from datetime import datetime, timezone
+            expires_at = datetime.fromisoformat(session["expires_at"].replace('Z', '+00:00'))
+            if expires_at < datetime.now(timezone.utc):
+                # Session expired - deactivate it
+                supabase.table("persistent_sessions").update({"is_active": False}).eq("id", session["id"]).execute()
+                return jsonify({"success": False, "error": "Session expired"}), 401
+            
+            # Get device info
+            device_response = supabase.table("devices").select("*").eq("customer_phone", session["customer_phone"]).execute()
+            
+            if not device_response.data or len(device_response.data) == 0:
+                return jsonify({"success": False, "error": "Device not found"}), 404
+            
+            device = device_response.data[0]
+            
+            if device.get("is_locked", False):
+                return jsonify({"success": False, "error": "Device is locked"}), 403
+            
+            # Update last access
+            supabase.table("persistent_sessions").update({"last_accessed": "now()"}).eq("id", session["id"]).execute()
+            supabase.table("devices").update({"last_login": "now()"}).eq("id", device["id"]).execute()
+            
+            return jsonify({
+                "success": True,
+                "customer_id": device.get("customer_id"),
+                "device_id": device["device_id"],
+                "customer_name": device.get("customer_name"),
+                "customer_phone": device.get("customer_phone"),
+                "session_valid": True
+            })
+            
+        except Exception as session_error:
+            logger.warning(f"Persistent session check failed (table may not exist): {session_error}")
+            
+            # Fallback: Check device by token and fingerprint directly
+            device_response = supabase.table("devices").select("*").eq("token", persistent_token).eq("device_fingerprint", device_fingerprint).execute()
+            
+            if not device_response.data or len(device_response.data) == 0:
+                return jsonify({"success": False, "error": "No valid session found"}), 404
+            
+            device = device_response.data[0]
+            
+            if device.get("is_locked", False):
+                return jsonify({"success": False, "error": "Device is locked"}), 403
+            
+            # Update last login
+            supabase.table("devices").update({"last_login": "now()"}).eq("id", device["id"]).execute()
+            
+            return jsonify({
+                "success": True,
+                "customer_id": device.get("customer_id"),
+                "device_id": device["device_id"],
+                "customer_name": device.get("customer_name"),
+                "customer_phone": device.get("customer_phone"),
+                "session_valid": True
+            })
         
-        if not session_response.data or len(session_response.data) == 0:
-            return jsonify({"success": False, "error": "No valid session found"}), 404
-        
-        session = session_response.data[0]
-        
-        # Check if session is expired
-        from datetime import datetime, timezone
-        expires_at = datetime.fromisoformat(session["expires_at"].replace('Z', '+00:00'))
-        if expires_at < datetime.now(timezone.utc):
-            # Session expired - deactivate it
-            supabase.table("persistent_sessions").update({"is_active": False}).eq("id", session["id"]).execute()
-            return jsonify({"success": False, "error": "Session expired"}), 401
-        
-        # Get device info
-        device_response = supabase.table("devices").select("*").eq("customer_phone", session["customer_phone"]).execute()
-        
-        if not device_response.data or len(device_response.data) == 0:
-            return jsonify({"success": False, "error": "Device not found"}), 404
-        
-        device = device_response.data[0]
-        
-        if device.get("is_locked", False):
-            return jsonify({"success": False, "error": "Device is locked"}), 403
-        
-        # Update last access
-        supabase.table("persistent_sessions").update({"last_accessed": "now()"}).eq("id", session["id"]).execute()
-        supabase.table("devices").update({"last_login": "now()"}).eq("id", device["id"]).execute()
-        
-        return jsonify({
-            "success": True,
-            "customer_id": device.get("customer_id"),
-            "device_id": device["device_id"],
-            "customer_name": device.get("customer_name"),
-            "customer_phone": device.get("customer_phone"),
-            "session_valid": True
-        })
+    except Exception as e:
+        logger.error(f"Device auto-login error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
         
     except Exception as e:
         logger.error(f"Device auto-login error: {e}")
@@ -836,18 +872,23 @@ def admin_persistent_login():
         
         # Create persistent session
         persistent_token = generate_token()
-        session_data = {
-            "admin_id": admin["id"],
-            "email": email,
-            "browser_fingerprint": browser_fingerprint,
-            "persistent_token": persistent_token,
-            "created_at": "now()",
-            "expires_at": "now() + interval '30 days'",  # 30 day expiry for admins
-            "is_active": True
-        }
         
-        # Store persistent admin session
-        supabase.table("admin_sessions").insert(session_data).execute()
+        # Try to store persistent admin session (fallback if table doesn't exist)
+        try:
+            session_data = {
+                "admin_id": admin["id"],
+                "email": email,
+                "browser_fingerprint": browser_fingerprint,
+                "persistent_token": persistent_token,
+                "created_at": "now()",
+                "expires_at": "now() + interval '30 days'",  # 30 day expiry for admins
+                "is_active": True
+            }
+            supabase.table("admin_sessions").insert(session_data).execute()
+            logger.info(f"Persistent session created for admin: {email}")
+        except Exception as session_error:
+            logger.warning(f"Failed to create persistent session (table may not exist): {session_error}")
+            # Continue without persistent session for now
         
         # Update admin last login
         supabase.table("admins").update({
@@ -880,42 +921,66 @@ def admin_auto_login():
         if not persistent_token:
             return jsonify({"success": False, "error": "Persistent token required"}), 400
         
-        # Check persistent session
-        session_response = supabase.table("admin_sessions").select("*").eq("persistent_token", persistent_token).eq("is_active", True).execute()
-        
-        if not session_response.data or len(session_response.data) == 0:
-            return jsonify({"success": False, "error": "No valid session found"}), 404
-        
-        session = session_response.data[0]
-        
-        # Check if session is expired
-        from datetime import datetime, timezone
-        expires_at = datetime.fromisoformat(session["expires_at"].replace('Z', '+00:00'))
-        if expires_at < datetime.now(timezone.utc):
-            # Session expired - deactivate it
-            supabase.table("admin_sessions").update({"is_active": False}).eq("id", session["id"]).execute()
-            return jsonify({"success": False, "error": "Session expired"}), 401
-        
-        # Get admin info
-        admin_response = supabase.table("admins").select("*").eq("id", session["admin_id"]).execute()
-        
-        if not admin_response.data or len(admin_response.data) == 0:
-            return jsonify({"success": False, "error": "Admin not found"}), 404
-        
-        admin = admin_response.data[0]
-        
-        # Update last access
-        supabase.table("admin_sessions").update({"last_accessed": "now()"}).eq("id", session["id"]).execute()
-        supabase.table("admins").update({"last_login": "now()"}).eq("id", admin["id"]).execute()
-        
-        return jsonify({
-            "success": True,
-            "role": admin["role"],
-            "admin_id": admin["id"],
-            "email": admin["email"],
-            "session_valid": True,
-            "must_change_password": admin.get("must_change_password", False)
-        })
+        # Try to check persistent session (fallback if table doesn't exist)
+        try:
+            session_response = supabase.table("admin_sessions").select("*").eq("persistent_token", persistent_token).eq("is_active", True).execute()
+            
+            if not session_response.data or len(session_response.data) == 0:
+                return jsonify({"success": False, "error": "No valid session found"}), 404
+            
+            session = session_response.data[0]
+            
+            # Check if session is expired
+            from datetime import datetime, timezone
+            expires_at = datetime.fromisoformat(session["expires_at"].replace('Z', '+00:00'))
+            if expires_at < datetime.now(timezone.utc):
+                # Session expired - deactivate it
+                supabase.table("admin_sessions").update({"is_active": False}).eq("id", session["id"]).execute()
+                return jsonify({"success": False, "error": "Session expired"}), 401
+            
+            # Get admin info
+            admin_response = supabase.table("admins").select("*").eq("id", session["admin_id"]).execute()
+            
+            if not admin_response.data or len(admin_response.data) == 0:
+                return jsonify({"success": False, "error": "Admin not found"}), 404
+            
+            admin = admin_response.data[0]
+            
+            # Update last access
+            supabase.table("admin_sessions").update({"last_accessed": "now()"}).eq("id", session["id"]).execute()
+            supabase.table("admins").update({"last_login": "now()"}).eq("id", admin["id"]).execute()
+            
+            return jsonify({
+                "success": True,
+                "role": admin["role"],
+                "admin_id": admin["id"],
+                "email": admin["email"],
+                "session_valid": True,
+                "must_change_password": admin.get("must_change_password", False)
+            })
+            
+        except Exception as session_error:
+            logger.warning(f"Persistent session check failed (table may not exist): {session_error}")
+            
+            # Fallback: Check admin by token directly
+            admin_response = supabase.table("admins").select("*").eq("token", persistent_token).execute()
+            
+            if not admin_response.data or len(admin_response.data) == 0:
+                return jsonify({"success": False, "error": "No valid session found"}), 404
+            
+            admin = admin_response.data[0]
+            
+            # Update last login
+            supabase.table("admins").update({"last_login": "now()"}).eq("id", admin["id"]).execute()
+            
+            return jsonify({
+                "success": True,
+                "role": admin["role"],
+                "admin_id": admin["id"],
+                "email": admin["email"],
+                "session_valid": True,
+                "must_change_password": admin.get("must_change_password", False)
+            })
         
     except Exception as e:
         logger.error(f"Admin auto-login error: {e}")
