@@ -40,29 +40,45 @@ def generate_token():
     return secrets.token_urlsafe(32)
 
 def format_phone_number(phone):
-    """Convert phone numbers starting with 07 to international format +254"""
+    """Convert phone numbers to consistent +254 format"""
     if not phone:
         return phone
     
+    # Convert to string and strip whitespace
     phone = str(phone).strip()
     
-    # Remove any spaces, dashes, or parentheses
-    phone = phone.replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+    # Remove all non-digits first
+    digits = ''.join(filter(str.isdigit, phone))
     
-    # If starts with 07, replace with +254
-    if phone.startswith("07"):
-        phone = "+254" + phone[1:]
-    # If starts with 7 (without 0), add +254
-    elif phone.startswith("7") and len(phone) == 9:
-        phone = "+254" + phone
-    # If starts with 254, add +
-    elif phone.startswith("254"):
-        phone = "+" + phone
-    # If doesn't start with +, assume it needs +254
-    elif not phone.startswith("+"):
-        phone = "+254" + phone
+    # Handle different input formats
+    if not digits:
+        return phone  # Return original if no digits found
     
-    return phone
+    # Format based on digit patterns
+    if digits.startswith("254"):
+        # Already in 254 format
+        if len(digits) >= 12:
+            return f"+{digits[:12]}"  # Limit to 12 digits (254 + 9 digits)
+        else:
+            return f"+{digits}"
+    elif digits.startswith("07"):
+        # Kenyan format starting with 07
+        if len(digits) >= 10:
+            return f"+254{digits[1:10]}"  # Remove the 0, take next 9 digits
+        else:
+            return f"+254{digits[1:]}"
+    elif digits.startswith("7") and len(digits) >= 9:
+        # Format starting with 7 (without 0)
+        return f"+254{digits[:9]}"  # Take first 9 digits
+    elif len(digits) >= 9:
+        # Assume it's a Kenyan number without country code
+        return f"+254{digits[:9]}"
+    else:
+        # Too short, return with + if it looks like it should have one
+        if phone.startswith("+"):
+            return phone
+        else:
+            return f"+254{digits}"
 
 def verify_admin_token(token):
     """Verify admin authentication token"""
@@ -1235,12 +1251,8 @@ def enroll_device():
         # Format phone number
         customer_phone = format_phone_number(data["customer_phone"])
         
-        # Admin sets customer default password (PIN)
-        default_pin = data.get("default_pin", "1234")  # Admin can set custom PIN
-        if len(default_pin) != 4 or not default_pin.isdigit():
-            return jsonify({"success": False, "error": "Default PIN must be exactly 4 digits"}), 400
-        
-        pin_hash = hash_password(default_pin)
+        # No PIN set during enrollment - customer will set it during registration
+        # Device starts without PIN (customer must register first)
         
         # Get IMEI if provided
         imei = data.get("imei")
@@ -1255,16 +1267,16 @@ def enroll_device():
             "customer_phone": customer_phone,
             "total_amount": float(data["total_amount"]),
             "amount_paid": float(data.get("amount_paid", 0)),
-            "status": "active",
-            "pin_hash": pin_hash,
-            "is_locked": False
+            "status": "pending_registration",  # Customer must register first
+            "pin_hash": None,  # No PIN until customer registers
+            "is_locked": True,  # Locked until customer registers
+            "must_change_pin": False  # Customer sets their own PIN
         }
         
         # Add optional fields only if they exist in the schema
         try:
             # Test if optional columns exist by checking schema
             optional_fields = {
-                "must_change_pin": True,
                 "enrolled_by": admin["id"],
                 "id_front_url": data.get("id_front", ""),
                 "id_back_url": data.get("id_back", ""),
@@ -1287,9 +1299,10 @@ def enroll_device():
                 "success": True,
                 "device_id": device_id,
                 "customer_phone": customer_phone,
-                "default_pin": default_pin,
                 "imei_tracking": "enabled" if imei else "disabled",
-                "message": f"Device enrolled successfully. Customer can login with phone {customer_phone} and PIN {default_pin}"
+                "message": f"Device enrolled successfully. Customer must register in the app using phone {customer_phone}",
+                "important": f"⚠️ CUSTOMER REGISTRATION REQUIRED:\nPhone: {customer_phone}\n\nCustomer must download the Eden app and register with this phone number to set their PIN and activate the device.",
+                "status": "pending_registration"
             })
         else:
             return jsonify({"success": False, "error": "Failed to enroll device"}), 500
@@ -1360,6 +1373,87 @@ def customer_payments():
         logger.error(f"Customer payments error: {e}")
         return jsonify([]), 500
 
+@app.route("/api/customer/register", methods=["POST"])
+def customer_register():
+    """Customer registration - check if phone is enrolled and set PIN"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        raw_phone = data.get("phone_number")
+        pin = data.get("pin")
+        confirm_pin = data.get("confirm_pin")
+        
+        if not raw_phone or not pin or not confirm_pin:
+            return jsonify({"success": False, "error": "Phone number, PIN, and PIN confirmation required"}), 400
+        
+        if len(pin) != 4 or not pin.isdigit():
+            return jsonify({"success": False, "error": "PIN must be exactly 4 digits"}), 400
+        
+        if pin != confirm_pin:
+            return jsonify({"success": False, "error": "PINs do not match"}), 400
+        
+        # Format phone number consistently
+        phone = format_phone_number(raw_phone)
+        logger.info(f"Customer registration attempt - Raw: {raw_phone}, Formatted: {phone}")
+        
+        # Check if phone number is enrolled for a device
+        response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+        
+        if not response.data or len(response.data) == 0:
+            logger.warning(f"Registration failed - phone not enrolled: {phone}")
+            return jsonify({
+                "success": False, 
+                "error": "Phone number not found. Please contact support to enroll your device first."
+            }), 404
+        
+        device = response.data[0]
+        
+        # Check if customer has already registered
+        if device.get("pin_hash") is not None:
+            logger.warning(f"Registration failed - customer already registered: {phone}")
+            return jsonify({
+                "success": False,
+                "error": "Account already registered. Please use the login option."
+            }), 400
+        
+        # Hash the PIN and update device
+        pin_hash = hash_password(pin)
+        
+        update_data = {
+            "pin_hash": pin_hash,
+            "status": "active",
+            "is_locked": False,
+            "registered_at": "now()"
+        }
+        
+        # Update device with customer's PIN
+        supabase.table("devices").update(update_data).eq("id", device["id"]).execute()
+        
+        # Generate token for immediate login
+        token = generate_token()
+        supabase.table("devices").update({
+            "token": token,
+            "last_login": "now()"
+        }).eq("id", device["id"]).execute()
+        
+        logger.info(f"Customer registration successful for phone: {phone}")
+        
+        return jsonify({
+            "success": True,
+            "message": "Registration successful! You can now use the app.",
+            "token": token,
+            "customer_id": device.get("customer_id", device.get("national_id")),
+            "device_id": device["device_id"],
+            "customer_name": device.get("customer_name"),
+            "phone": phone
+        })
+        
+    except Exception as e:
+        logger.error(f"Customer registration error: {e}")
+        return jsonify({"success": False, "error": "Registration failed. Please try again."}), 500
+
 @app.route("/api/customer/check-phone", methods=["POST"])
 def check_customer_phone():
     try:
@@ -1367,22 +1461,122 @@ def check_customer_phone():
         phone = format_phone_number(data.get("phone_number"))
         
         if not phone:
-            return jsonify({"exists": False})
+            return jsonify({"exists": False, "enrolled": False})
         
-        # Query devices table instead of customers
+        # Query devices table to check enrollment and registration status
         response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
         
         if response.data and len(response.data) > 0:
             device = response.data[0]
+            has_pin = device.get("pin_hash") is not None
+            
             return jsonify({
                 "exists": True,
-                "has_pin": device.get("pin_hash") is not None
+                "enrolled": True,
+                "registered": has_pin,
+                "has_pin": has_pin,
+                "status": device.get("status", "unknown"),
+                "customer_name": device.get("customer_name"),
+                "action": "login" if has_pin else "register"
             })
         else:
-            return jsonify({"exists": False})
+            return jsonify({
+                "exists": False,
+                "enrolled": False,
+                "registered": False,
+                "action": "contact_support"
+            })
     except Exception as e:
         logger.error(f"Check phone error: {e}")
-        return jsonify({"exists": False, "error": str(e)}), 500
+        return jsonify({"exists": False, "enrolled": False, "error": str(e)}), 500
+
+@app.route("/api/admin/reset-customer-pin", methods=["POST"])
+def reset_customer_pin():
+    """Admin endpoint to reset a customer's PIN"""
+    try:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        admin = verify_admin_token(token)
+        
+        if not admin:
+            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        
+        data = request.json
+        phone = format_phone_number(data.get("phone_number", ""))
+        new_pin = data.get("new_pin", "1234")
+        
+        if not phone:
+            return jsonify({"success": False, "error": "Phone number required"}), 400
+        
+        if len(new_pin) != 4 or not new_pin.isdigit():
+            return jsonify({"success": False, "error": "PIN must be exactly 4 digits"}), 400
+        
+        # Hash the new PIN
+        pin_hash = hash_password(new_pin)
+        
+        # Update the device record
+        response = supabase.table("devices").update({
+            "pin_hash": pin_hash,
+            "must_change_pin": True
+        }).eq("customer_phone", phone).execute()
+        
+        if response.data:
+            logger.info(f"PIN reset for customer: {phone} by admin: {admin['email']}")
+            return jsonify({
+                "success": True,
+                "message": f"PIN reset successfully for {phone}",
+                "new_pin": new_pin,
+                "customer_phone": phone
+            })
+        else:
+            return jsonify({"success": False, "error": "Customer not found"}), 404
+        
+    except Exception as e:
+        logger.error(f"Reset customer PIN error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/debug/device-pin", methods=["POST"])
+def debug_device_pin():
+    """Debug endpoint to check device PIN information"""
+    try:
+        data = request.json
+        phone = format_phone_number(data.get("phone_number", ""))
+        
+        if not phone:
+            return jsonify({"error": "Phone number required"}), 400
+        
+        # Get device info
+        response = supabase.table("devices").select("customer_phone, pin_hash, must_change_pin, enrolled_by, created_at").eq("customer_phone", phone).execute()
+        
+        if not response.data:
+            return jsonify({"error": "Device not found"}), 404
+        
+        device = response.data[0]
+        
+        # Test common PINs
+        common_pins = ["1234", "0000", "1111", "2222", "3333", "4444", "5555", "6666", "7777", "8888", "9999"]
+        matching_pin = None
+        
+        stored_hash = device.get("pin_hash")
+        if stored_hash:
+            for test_pin in common_pins:
+                if hash_password(test_pin) == stored_hash:
+                    matching_pin = test_pin
+                    break
+        
+        return jsonify({
+            "phone": phone,
+            "has_pin_hash": bool(stored_hash),
+            "pin_hash_preview": stored_hash[:10] + "..." if stored_hash else None,
+            "must_change_pin": device.get("must_change_pin", False),
+            "enrolled_by": device.get("enrolled_by"),
+            "created_at": device.get("created_at"),
+            "matching_common_pin": matching_pin,
+            "suggested_action": "Use PIN: " + matching_pin if matching_pin else "Contact admin for correct PIN"
+        })
+        
+    except Exception as e:
+        logger.error(f"Debug device PIN error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/customer/login", methods=["POST"])
 def customer_login_api():
@@ -1396,18 +1590,20 @@ def customer_login_api():
             logger.error("No data provided in customer login request")
             return jsonify({"success": False, "error": "No data provided"}), 400
             
-        phone = format_phone_number(data.get("phone_number"))
+        raw_phone = data.get("phone_number")
         pin = data.get("pin")
         
-        if not phone or not pin:
-            logger.error(f"Missing phone or PIN. Phone: {phone}, PIN: {'*' * len(pin) if pin else 'None'}")
+        if not raw_phone or not pin:
+            logger.error(f"Missing phone or PIN. Phone: {raw_phone}, PIN: {'*' * len(pin) if pin else 'None'}")
             return jsonify({"success": False, "error": "Phone and PIN required"}), 400
+        
+        # Format phone number consistently
+        phone = format_phone_number(raw_phone)
+        logger.info(f"Customer login attempt - Raw: {raw_phone}, Formatted: {phone}")
         
         if len(pin) != 4 or not pin.isdigit():
             logger.error(f"Invalid PIN format for phone: {phone}")
             return jsonify({"success": False, "error": "PIN must be exactly 4 digits"}), 400
-        
-        logger.info(f"Customer login attempt for phone: {phone}")
         
         pin_hash = hash_password(pin)
         logger.info(f"PIN hash generated for: {phone}")
@@ -1415,19 +1611,51 @@ def customer_login_api():
         try:
             # Query devices table for customer authentication
             response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
-            logger.info(f"Database query executed for phone: {phone}")
+            logger.info(f"Database query executed for phone: {phone}, found {len(response.data) if response.data else 0} records")
             
             if not response.data or len(response.data) == 0:
                 logger.warning(f"No device found for phone: {phone}")
+                
+                # Try alternative phone formats for debugging
+                alt_formats = [
+                    raw_phone,
+                    raw_phone.replace("+254", "0"),
+                    f"0{raw_phone.replace('+254', '')}" if raw_phone.startswith("+254") else raw_phone
+                ]
+                
+                for alt_phone in alt_formats:
+                    if alt_phone != phone:
+                        alt_response = supabase.table("devices").select("customer_phone").eq("customer_phone", alt_phone).execute()
+                        if alt_response.data:
+                            logger.info(f"Found device with alternative format: {alt_phone}")
+                            break
+                
                 return jsonify({"success": False, "error": "Account not found. Please contact support."}), 404
             
             device = response.data[0]
             logger.info(f"Device found for phone: {phone}, checking PIN...")
             
             # Check PIN hash
-            if device.get("pin_hash") != pin_hash:
+            stored_pin_hash = device.get("pin_hash")
+            if stored_pin_hash != pin_hash:
                 logger.warning(f"Invalid PIN for phone: {phone}")
-                return jsonify({"success": False, "error": "Invalid PIN. Please try again."}), 401
+                logger.debug(f"Stored hash: {stored_pin_hash[:10] if stored_pin_hash else 'None'}..., Provided hash: {pin_hash[:10]}...")
+                
+                # Check if this might be a default PIN issue
+                default_pins = ["1234", "0000"]
+                suggested_pin = None
+                for test_pin in default_pins:
+                    if hash_password(test_pin) == stored_pin_hash:
+                        suggested_pin = test_pin
+                        break
+                
+                error_msg = "Invalid PIN. Please try again."
+                if suggested_pin:
+                    error_msg = f"Invalid PIN. Try using the default PIN: {suggested_pin}"
+                elif device.get("must_change_pin", False):
+                    error_msg = "Invalid PIN. Please use the PIN provided by the administrator during device enrollment."
+                
+                return jsonify({"success": False, "error": error_msg}), 401
             
             # Check if device is locked
             if device.get("is_locked", False):
@@ -1580,12 +1808,20 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 15,
-        "version_name": "1.8.6",
+        "version_code": 19,
+        "version_name": "1.9.1",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
         "factory_reset_protection": True,
+        "customer_self_registration": True,
+        "features": [
+            "Customer self-registration",
+            "No default PINs",
+            "Immediate device activation",
+            "Complete lockdown protection",
+            "Persistent authentication"
+        ]
         "features": [
             "Eden Logo Boot Screen for Device Owner",
             "Fixed Customer Login Authentication",

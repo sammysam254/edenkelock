@@ -244,9 +244,10 @@ class PinEntryActivity : AppCompatActivity() {
         newUserLayout.visibility = View.GONE
         titleText.text = "Welcome Back!"
         
-        // Pre-fill phone number
+        // Pre-fill phone number but make it editable
         phoneInput.setText(savedPhone)
-        phoneInput.isEnabled = false
+        phoneInput.isEnabled = true  // Allow editing
+        phoneInput.setSelection(phoneInput.text.length)  // Cursor at end
         
         // Setup PIN boxes
         setupPinBoxes()
@@ -258,11 +259,46 @@ class PinEntryActivity : AppCompatActivity() {
             imm.showSoftInput(pinBox1, InputMethodManager.SHOW_IMPLICIT)
         }, 200)
         
+        // Add phone number formatting
+        phoneInput.addTextChangedListener(object : TextWatcher {
+            private var isFormatting = false
+            
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                if (isFormatting) return
+                
+                isFormatting = true
+                val formatted = formatPhoneNumber(s.toString())
+                if (formatted != s.toString()) {
+                    phoneInput.setText(formatted)
+                    phoneInput.setSelection(formatted.length)
+                }
+                isFormatting = false
+            }
+        })
+        
         // Add "Not you?" button functionality
         findViewById<TextView>(R.id.notYouText).setOnClickListener {
             // Clear saved data and show new user flow
             val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
             prefs.edit().clear().apply()
+            
+            // Clear persistent token as well
+            try {
+                val externalDir = getExternalFilesDir(null)
+                if (externalDir != null) {
+                    val tokenFile = File(externalDir, "eden_persistent_token.txt")
+                    if (tokenFile.exists()) {
+                        tokenFile.delete()
+                    }
+                }
+                val persistentPrefs = getSharedPreferences("eden_persistent", Context.MODE_PRIVATE)
+                persistentPrefs.edit().clear().apply()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to clear persistent token", e)
+            }
+            
             showNewUserPhoneEntry()
         }
     }
@@ -279,10 +315,22 @@ class PinEntryActivity : AppCompatActivity() {
         }, 200)
         
         newPhoneInput.addTextChangedListener(object : TextWatcher {
+            private var isFormatting = false
+            
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val phone = s.toString()
+                if (isFormatting) return
+                
+                isFormatting = true
+                val formatted = formatPhoneNumber(s.toString())
+                if (formatted != s.toString()) {
+                    newPhoneInput.setText(formatted)
+                    newPhoneInput.setSelection(formatted.length)
+                }
+                isFormatting = false
+                
+                val phone = formatted
                 if (phone.length >= 10) {
                     // Check if account exists
                     checkPhoneNumber(phone)
@@ -291,9 +339,171 @@ class PinEntryActivity : AppCompatActivity() {
         })
     }
     
+    /**
+     * Show customer registration screen for enrolled but unregistered customers
+     */
+    private fun showCustomerRegistration(phone: String, customerName: String) {
+        // Hide other layouts
+        returningUserLayout.visibility = View.GONE
+        newUserLayout.visibility = View.GONE
+        
+        // Create registration dialog
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Complete Registration")
+        builder.setMessage("Welcome $customerName!\n\nYour device is enrolled. Please set a 4-digit PIN to complete registration and activate your device.")
+        builder.setCancelable(false)
+        
+        val dialogView = layoutInflater.inflate(R.layout.dialog_change_pin, null)
+        builder.setView(dialogView)
+        
+        val newPin1 = dialogView.findViewById<EditText>(R.id.newPinBox1)
+        val newPin2 = dialogView.findViewById<EditText>(R.id.newPinBox2)
+        val newPin3 = dialogView.findViewById<EditText>(R.id.newPinBox3)
+        val newPin4 = dialogView.findViewById<EditText>(R.id.newPinBox4)
+        val confirmPin1 = dialogView.findViewById<EditText>(R.id.confirmPinBox1)
+        val confirmPin2 = dialogView.findViewById<EditText>(R.id.confirmPinBox2)
+        val confirmPin3 = dialogView.findViewById<EditText>(R.id.confirmPinBox3)
+        val confirmPin4 = dialogView.findViewById<EditText>(R.id.confirmPinBox4)
+        
+        // Setup PIN box navigation
+        setupPinBoxNavigation(listOf(newPin1, newPin2, newPin3, newPin4))
+        setupPinBoxNavigation(listOf(confirmPin1, confirmPin2, confirmPin3, confirmPin4))
+        
+        builder.setPositiveButton("Register") { _, _ ->
+            val newPin = newPin1.text.toString() + newPin2.text.toString() + 
+                        newPin3.text.toString() + newPin4.text.toString()
+            val confirmPin = confirmPin1.text.toString() + confirmPin2.text.toString() + 
+                            confirmPin3.text.toString() + confirmPin4.text.toString()
+            
+            if (newPin.length != 4 || confirmPin.length != 4) {
+                Toast.makeText(this, "Please enter 4 digits for both PINs", Toast.LENGTH_SHORT).show()
+                showCustomerRegistration(phone, customerName) // Show dialog again
+                return@setPositiveButton
+            }
+            
+            if (newPin != confirmPin) {
+                Toast.makeText(this, "PINs do not match", Toast.LENGTH_SHORT).show()
+                showCustomerRegistration(phone, customerName) // Show dialog again
+                return@setPositiveButton
+            }
+            
+            registerCustomer(phone, newPin)
+        }
+        
+        builder.setNegativeButton("Cancel") { _, _ ->
+            showNewUserPhoneEntry()
+        }
+        
+        val dialog = builder.create()
+        dialog.show()
+        
+        // Focus on first new PIN box
+        newPin1.requestFocus()
+        newPin1.postDelayed({
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(newPin1, InputMethodManager.SHOW_IMPLICIT)
+        }, 200)
+    }
+    
+    /**
+     * Register customer with their chosen PIN
+     */
+    private fun registerCustomer(phone: String, pin: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("$BASE_URL/api/customer/register")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+                
+                val jsonBody = JSONObject()
+                jsonBody.put("phone_number", phone)
+                jsonBody.put("pin", pin)
+                jsonBody.put("confirm_pin", pin)
+                
+                connection.outputStream.write(jsonBody.toString().toByteArray())
+                
+                val responseCode = connection.responseCode
+                if (responseCode == 200) {
+                    val response = connection.inputStream.bufferedReader().readText()
+                    val jsonResponse = JSONObject(response)
+                    
+                    withContext(Dispatchers.Main) {
+                        if (jsonResponse.getBoolean("success")) {
+                            Toast.makeText(this@PinEntryActivity, "Registration successful! Welcome to Eden.", Toast.LENGTH_LONG).show()
+                            
+                            // Save registration data and proceed to MainActivity
+                            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                            prefs.edit()
+                                .putBoolean("pin_completed", true)
+                                .putString("customer_phone", phone)
+                                .putString("customer_id", jsonResponse.getString("customer_id"))
+                                .putString("device_id", jsonResponse.getString("device_id"))
+                                .apply()
+                            
+                            // Save persistent token if provided
+                            val token = jsonResponse.optString("token")
+                            if (token.isNotEmpty()) {
+                                savePersistentToken(token)
+                            }
+                            
+                            val intent = Intent(this@PinEntryActivity, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            Toast.makeText(this@PinEntryActivity, "Registration failed: ${jsonResponse.optString("error")}", Toast.LENGTH_LONG).show()
+                            showNewUserPhoneEntry()
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@PinEntryActivity, "Registration failed. Please try again.", Toast.LENGTH_SHORT).show()
+                        showNewUserPhoneEntry()
+                    }
+                }
+                
+                connection.disconnect()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@PinEntryActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
+                    showNewUserPhoneEntry()
+                }
+            }
+        }
+    }
+
+    /**
+     * Format phone number to consistent +254 format
+     */
+    private fun formatPhoneNumber(phone: String): String {
+        if (phone.isEmpty()) return phone
+        
+        // Remove all non-digits
+        val digits = phone.replace(Regex("[^0-9]"), "")
+        
+        return when {
+            // Already starts with 254
+            digits.startsWith("254") && digits.length >= 12 -> "+${digits}"
+            // Starts with 07
+            digits.startsWith("07") && digits.length >= 10 -> "+254${digits.substring(1)}"
+            // Starts with 7 (without 0)
+            digits.startsWith("7") && digits.length >= 9 -> "+254${digits}"
+            // Just digits, assume it needs +254
+            digits.length >= 9 -> "+254${digits}"
+            // Return as is if too short
+            else -> phone
+        }
+    }
+    
     private fun checkPhoneNumber(phone: String) {
         errorText.visibility = View.VISIBLE
         errorText.text = "Checking account..."
+        
+        val formattedPhone = formatPhoneNumber(phone)
+        Log.d(TAG, "Checking phone: $formattedPhone (from input: $phone)")
         
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -304,7 +514,7 @@ class PinEntryActivity : AppCompatActivity() {
                 connection.doOutput = true
                 
                 val jsonBody = JSONObject()
-                jsonBody.put("phone_number", phone)
+                jsonBody.put("phone_number", formattedPhone)
                 
                 connection.outputStream.write(jsonBody.toString().toByteArray())
                 
@@ -314,18 +524,31 @@ class PinEntryActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(response)
                     
                     withContext(Dispatchers.Main) {
-                        if (jsonResponse.getBoolean("exists")) {
-                            // Account exists - save phone and show PIN entry
-                            val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-                            prefs.edit().putString("customer_phone", phone).apply()
-                            
-                            errorText.visibility = View.GONE
-                            showReturningUserLogin(phone)
-                        } else {
-                            // Account doesn't exist
-                            errorText.visibility = View.VISIBLE
-                            errorText.text = "Account not found. Please contact support."
-                            newPhoneInput.text.clear()
+                        val enrolled = jsonResponse.optBoolean("enrolled", false)
+                        val registered = jsonResponse.optBoolean("registered", false)
+                        val action = jsonResponse.optString("action", "contact_support")
+                        val customerName = jsonResponse.optString("customer_name", "")
+                        
+                        when (action) {
+                            "login" -> {
+                                // Customer is enrolled and registered - show login
+                                val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                                prefs.edit().putString("customer_phone", formattedPhone).apply()
+                                
+                                errorText.visibility = View.GONE
+                                showReturningUserLogin(formattedPhone)
+                            }
+                            "register" -> {
+                                // Customer is enrolled but not registered - show registration
+                                errorText.visibility = View.GONE
+                                showCustomerRegistration(formattedPhone, customerName)
+                            }
+                            else -> {
+                                // Not enrolled
+                                errorText.visibility = View.VISIBLE
+                                errorText.text = "Phone number not enrolled. Please contact support to enroll your device first."
+                                newPhoneInput.text.clear()
+                            }
                         }
                     }
                 } else {
@@ -375,7 +598,8 @@ class PinEntryActivity : AppCompatActivity() {
     }
     
     private fun verifyPin() {
-        val phone = phoneInput.text.toString()
+        val rawPhone = phoneInput.text.toString()
+        val phone = formatPhoneNumber(rawPhone)  // Ensure consistent formatting
         val pin = pinBox1.text.toString() + 
                   pinBox2.text.toString() + 
                   pinBox3.text.toString() + 
@@ -390,6 +614,8 @@ class PinEntryActivity : AppCompatActivity() {
             showError("Device fingerprint not available")
             return
         }
+        
+        Log.d(TAG, "Attempting login with phone: $phone (formatted from: $rawPhone)")
         
         errorText.visibility = View.VISIBLE
         errorText.text = "Verifying..."
