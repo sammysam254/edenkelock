@@ -177,4 +177,141 @@ class DeviceAdminReceiver : DeviceAdminReceiver() {
         super.onLockTaskModeExiting(context, intent)
         Toast.makeText(context, "Device Unlocked", Toast.LENGTH_SHORT).show()
     }
+    
+    companion object {
+        /**
+         * Apply COMPLETE device lockdown - blocks EVERYTHING including calls
+         */
+        fun applyCompleteLockdown(context: Context) {
+            val devicePolicyManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            val adminComponent = ComponentName(context, DeviceAdminReceiver::class.java)
+            
+            if (!devicePolicyManager.isDeviceOwnerApp(context.packageName)) {
+                return // Cannot apply restrictions without device owner
+            }
+            
+            try {
+                // BLOCK ALL COMMUNICATION
+                devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_OUTGOING_CALLS)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                    devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_SMS)
+                }
+                
+                // BLOCK ALL APPS EXCEPT EDEN
+                val installedApps = context.packageManager.getInstalledApplications(0)
+                for (app in installedApps) {
+                    if (app.packageName != context.packageName && 
+                        !app.packageName.startsWith("com.android.") &&
+                        !app.packageName.startsWith("com.google.android.") &&
+                        app.packageName != "android") {
+                        try {
+                            devicePolicyManager.setApplicationHidden(adminComponent, app.packageName, true)
+                        } catch (e: Exception) {
+                            // Some system apps cannot be hidden
+                        }
+                    }
+                }
+                
+                // HIDE DIALER AND MESSAGING APPS
+                try {
+                    devicePolicyManager.setApplicationHidden(adminComponent, "com.android.dialer", true)
+                    devicePolicyManager.setApplicationHidden(adminComponent, "com.google.android.dialer", true)
+                    devicePolicyManager.setApplicationHidden(adminComponent, "com.android.mms", true)
+                    devicePolicyManager.setApplicationHidden(adminComponent, "com.google.android.apps.messaging", true)
+                    devicePolicyManager.setApplicationHidden(adminComponent, "com.samsung.android.messaging", true)
+                } catch (e: Exception) {
+                    // Apps may not exist on all devices
+                }
+                
+                // BLOCK NETWORK ACCESS FOR OTHER APPS
+                devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)
+                devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_WIFI)
+                devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_BLUETOOTH)
+                
+                // BLOCK ALL SYSTEM FUNCTIONS
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        devicePolicyManager.addUserRestriction(adminComponent, "no_camera")
+                        devicePolicyManager.addUserRestriction(adminComponent, "no_record_audio")
+                    }
+                } catch (e: Exception) {
+                    // These restrictions may not be available on all devices
+                }
+                devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT)
+                devicePolicyManager.addUserRestriction(adminComponent, UserManager.DISALLOW_AIRPLANE_MODE)
+                
+                // MAXIMUM KIOSK MODE - ONLY EDEN CAN RUN
+                devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf(context.packageName))
+                
+                // Save lockdown state
+                val prefs = context.getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                prefs.edit().apply {
+                    putBoolean("complete_lockdown_active", true)
+                    putLong("lockdown_start_time", System.currentTimeMillis())
+                    apply()
+                }
+                
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        
+        /**
+         * Remove complete lockdown - restore normal functionality
+         */
+        fun removeCompleteLockdown(context: Context) {
+            val devicePolicyManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            val adminComponent = ComponentName(context, DeviceAdminReceiver::class.java)
+            
+            if (!devicePolicyManager.isDeviceOwnerApp(context.packageName)) {
+                return
+            }
+            
+            try {
+                // RESTORE COMMUNICATION
+                devicePolicyManager.clearUserRestriction(adminComponent, UserManager.DISALLOW_OUTGOING_CALLS)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                    devicePolicyManager.clearUserRestriction(adminComponent, UserManager.DISALLOW_SMS)
+                }
+                
+                // RESTORE APPS
+                val installedApps = context.packageManager.getInstalledApplications(0)
+                for (app in installedApps) {
+                    if (app.packageName != context.packageName) {
+                        try {
+                            devicePolicyManager.setApplicationHidden(adminComponent, app.packageName, false)
+                        } catch (e: Exception) {
+                            // Some apps may not be hideable
+                        }
+                    }
+                }
+                
+                // RESTORE SYSTEM FUNCTIONS
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        devicePolicyManager.clearUserRestriction(adminComponent, "no_camera")
+                        devicePolicyManager.clearUserRestriction(adminComponent, "no_record_audio")
+                    }
+                } catch (e: Exception) {
+                    // These restrictions may not be available on all devices
+                }
+                devicePolicyManager.clearUserRestriction(adminComponent, UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT)
+                devicePolicyManager.clearUserRestriction(adminComponent, UserManager.DISALLOW_AIRPLANE_MODE)
+                
+                // REMOVE KIOSK MODE
+                devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf())
+                
+                // Save unlock state
+                val prefs = context.getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                prefs.edit().apply {
+                    putBoolean("complete_lockdown_active", false)
+                    putLong("lockdown_end_time", System.currentTimeMillis())
+                    apply()
+                }
+                
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

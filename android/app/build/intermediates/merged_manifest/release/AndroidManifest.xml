@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.eden.mkopa"
-    android:versionCode="16"
-    android:versionName="1.8.7" >
+    android:versionCode="17"
+    android:versionName="1.8.8" >
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -23,6 +23,16 @@
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- CALL AND SMS BLOCKING PERMISSIONS -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.WRITE_SMS" />
 
     <!-- MAXIMUM SECURITY PERMISSIONS -->
     <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN" />

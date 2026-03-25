@@ -5,6 +5,7 @@ from supabase import create_client
 import logging
 import hashlib
 import secrets
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -309,12 +310,47 @@ def lock_device(device_id):
         if not admin:
             return jsonify({"success": False, "error": "Unauthorized"}), 403
         
+        data = request.json or {}
+        lock_reason = data.get("lock_reason", "ADMIN_LOCKED")
+        
         supabase.table("devices").update({
             "status": "locked",
-            "is_locked": True
+            "is_locked": True,
+            "lock_reason": lock_reason,
+            "locked_by": admin["id"],
+            "locked_at": "now()"
         }).eq("device_id", device_id).execute()
         
-        return jsonify({"success": True, "message": "Device locked", "is_locked": True})
+        # Send complete lockdown command to device
+        send_device_notification(
+            device_id, 
+            None,  # Will be filled from device record
+            "🔒 DEVICE LOCKED - COMPLETE LOCKDOWN", 
+            f"""
+DEVICE COMPLETELY LOCKED BY ADMINISTRATOR
+
+⚠️ ALL FUNCTIONS DISABLED:
+• Phone calls blocked
+• SMS messaging blocked  
+• All apps hidden except Eden
+• Settings access blocked
+• System functions disabled
+
+Reason: {lock_reason}
+Locked by: Admin
+Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Contact administrator to unlock this device.
+            """.strip(),
+            "admin_lock"
+        )
+        
+        return jsonify({
+            "success": True, 
+            "message": "Device locked with complete lockdown", 
+            "is_locked": True,
+            "lockdown_level": "COMPLETE"
+        })
     except Exception as e:
         logger.error(f"Lock device error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
@@ -330,10 +366,41 @@ def unlock_device(device_id):
         
         supabase.table("devices").update({
             "status": "active",
-            "is_locked": False
+            "is_locked": False,
+            "lock_reason": None,
+            "locked_by": None,
+            "locked_at": None
         }).eq("device_id", device_id).execute()
         
-        return jsonify({"success": True, "message": "Device unlocked", "is_locked": False})
+        # Send unlock command to device
+        send_device_notification(
+            device_id,
+            None,  # Will be filled from device record
+            "🔓 DEVICE UNLOCKED - ACCESS RESTORED",
+            f"""
+DEVICE UNLOCKED BY ADMINISTRATOR
+
+✅ ALL FUNCTIONS RESTORED:
+• Phone calls enabled
+• SMS messaging enabled
+• All apps accessible
+• Settings access restored
+• System functions enabled
+
+Unlocked by: Admin
+Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Your device is now fully functional.
+            """.strip(),
+            "admin_unlock"
+        )
+        
+        return jsonify({
+            "success": True, 
+            "message": "Device unlocked - all functions restored", 
+            "is_locked": False,
+            "lockdown_level": "NONE"
+        })
     except Exception as e:
         logger.error(f"Unlock device error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500

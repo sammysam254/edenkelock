@@ -11,8 +11,8 @@ android {
         applicationId "com.eden.mkopa"
         minSdk 24
         targetSdk 34
-        versionCode 17
-        versionName "1.8.8"
+        versionCode 18
+        versionName "1.9.0"
     }
 
     signingConfigs {

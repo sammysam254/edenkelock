@@ -66,8 +66,9 @@ class LockScreenActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         
-        // Start lock task mode (Kiosk mode)
+        // APPLY COMPLETE LOCKDOWN - BLOCKS EVERYTHING INCLUDING CALLS
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+            DeviceAdminReceiver.applyCompleteLockdown(this)
             startLockTask()
         }
         
@@ -99,16 +100,16 @@ class LockScreenActivity : AppCompatActivity() {
         
         when (lockReason) {
             "OUTSTANDING_BALANCE" -> {
-                statusText.text = "🔒 DEVICE LOCKED\nOutstanding Balance"
-                balanceText.text = "Amount Due: KES ${balanceAmount.toInt()}\nDevice: $deviceId\nPhone: $phone\n\nContact admin or make payment to unlock"
+                statusText.text = "🔒 DEVICE COMPLETELY LOCKED\nOutstanding Balance"
+                balanceText.text = "Amount Due: KES ${balanceAmount.toInt()}\nDevice: $deviceId\nPhone: $phone\n\n⚠️ ALL FUNCTIONS BLOCKED:\n• Phone calls disabled\n• SMS disabled\n• All apps hidden\n• Settings blocked\n\nContact admin or make payment to unlock"
             }
             "ADMIN_LOCKED" -> {
-                statusText.text = "🔒 DEVICE LOCKED\nBy Administrator"
-                balanceText.text = "Device: $deviceId\nPhone: $phone\n\nContact administrator to unlock"
+                statusText.text = "🔒 DEVICE COMPLETELY LOCKED\nBy Administrator"
+                balanceText.text = "Device: $deviceId\nPhone: $phone\n\n⚠️ ALL FUNCTIONS BLOCKED:\n• Phone calls disabled\n• SMS disabled\n• All apps hidden\n• Settings blocked\n\nContact administrator to unlock"
             }
             else -> {
-                statusText.text = "🔒 DEVICE LOCKED\nPayment Required"
-                balanceText.text = "Device: $deviceId\nPhone: $phone"
+                statusText.text = "🔒 DEVICE COMPLETELY LOCKED\nPayment Required"
+                balanceText.text = "Device: $deviceId\nPhone: $phone\n\n⚠️ COMPLETE LOCKDOWN ACTIVE:\n• No calls allowed\n• No messaging\n• Only Eden app accessible\n• All system functions blocked"
             }
         }
     }
@@ -139,32 +140,50 @@ class LockScreenActivity : AppCompatActivity() {
                             // Device is unlocked, exit lock screen
                             unlockDevice()
                         } else {
-                            // Still locked
-                            balanceText.text = "Balance: KES ${it.balance}\nTotal: KES ${it.total_amount}\nPaid: KES ${it.amount_paid}"
+                            // Still locked - update balance info
+                            val currentText = balanceText.text.toString()
+                            val newBalanceInfo = "Balance: KES ${it.balance}\nTotal: KES ${it.total_amount}\nPaid: KES ${it.amount_paid}"
+                            
+                            // Keep the lockdown warning but update balance
+                            if (currentText.contains("ALL FUNCTIONS BLOCKED")) {
+                                val parts = currentText.split("⚠️")
+                                if (parts.size > 1) {
+                                    balanceText.text = parts[0] + newBalanceInfo + "\n\n⚠️" + parts[1]
+                                } else {
+                                    balanceText.text = newBalanceInfo + "\n\n⚠️ COMPLETE LOCKDOWN ACTIVE"
+                                }
+                            } else {
+                                balanceText.text = newBalanceInfo
+                            }
                         }
                     }
                 } else {
-                    balanceText.text = "Error checking status. Please try again."
+                    balanceText.text = "Error checking status. Please try again.\n\n⚠️ Device remains locked until payment confirmed."
                 }
             }
             
             override fun onFailure(call: Call<DeviceStatus>, t: Throwable) {
                 refreshButton.isEnabled = true
                 refreshButton.text = "Refresh Status"
-                balanceText.text = "Network error. Please check connection."
+                balanceText.text = "Network error. Please check connection.\n\n⚠️ Device remains locked until payment confirmed."
             }
         })
     }
     
     private fun unlockDevice() {
-        // Stop lock task mode
+        // REMOVE COMPLETE LOCKDOWN - RESTORE ALL FUNCTIONS
         if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+            DeviceAdminReceiver.removeCompleteLockdown(this)
             stopLockTask()
         }
         
         // Save unlock status
         val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putBoolean("is_locked", false).apply()
+        prefs.edit().apply {
+            putBoolean("is_locked", false)
+            putBoolean("complete_lockdown_active", false)
+            apply()
+        }
         
         // Return to main activity
         val intent = Intent(this, MainActivity::class.java)
@@ -174,20 +193,29 @@ class LockScreenActivity : AppCompatActivity() {
     }
     
     override fun onBackPressed() {
-        // Disable back button when locked
+        // Disable back button when locked - NO ESCAPE
     }
     
     override fun onPause() {
         super.onPause()
-        // Bring activity back to front if locked
+        // Bring activity back to front if locked - CANNOT MINIMIZE
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        activityManager.moveTaskToFront(taskId, 0)
+    }
+    
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        // Prevent user from leaving this activity
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         activityManager.moveTaskToFront(taskId, 0)
     }
     
     companion object {
-        fun show(context: Context) {
+        fun show(context: Context, lockReason: String = "DEVICE_LOCKED", balanceAmount: Double = 0.0) {
             val intent = Intent(context, LockScreenActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra("lock_reason", lockReason)
+            intent.putExtra("balance_amount", balanceAmount)
             context.startActivity(intent)
         }
     }
