@@ -691,6 +691,237 @@ def log_device_event():
 # Duplicate function removed - keeping the first definition
 
 # ============================================
+# API ROUTES - PERSISTENT AUTHENTICATION
+# ============================================
+
+@app.route("/api/auth/device-login", methods=["POST"])
+def device_persistent_login():
+    """Device-based persistent login that survives app updates"""
+    try:
+        data = request.json
+        device_fingerprint = data.get("device_fingerprint")  # IMEI + Serial + Model
+        phone = format_phone_number(data.get("phone_number"))
+        pin = data.get("pin")
+        
+        if not device_fingerprint or not phone or not pin:
+            return jsonify({"success": False, "error": "Device fingerprint, phone and PIN required"}), 400
+        
+        pin_hash = hash_password(pin)
+        
+        # Find device by phone and validate PIN
+        response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+        
+        if not response.data or len(response.data) == 0:
+            return jsonify({"success": False, "error": "Account not found"}), 404
+        
+        device = response.data[0]
+        
+        if device.get("pin_hash") != pin_hash:
+            return jsonify({"success": False, "error": "Invalid PIN"}), 401
+        
+        if device.get("is_locked", False):
+            return jsonify({"success": False, "error": "Device is locked"}), 403
+        
+        # Create persistent session
+        persistent_token = generate_token()
+        session_data = {
+            "device_fingerprint": device_fingerprint,
+            "customer_phone": phone,
+            "device_id": device["device_id"],
+            "persistent_token": persistent_token,
+            "created_at": "now()",
+            "expires_at": "now() + interval '90 days'",  # 90 day expiry
+            "is_active": True
+        }
+        
+        # Store persistent session
+        supabase.table("persistent_sessions").insert(session_data).execute()
+        
+        # Update device with last login
+        supabase.table("devices").update({
+            "token": persistent_token,
+            "last_login": "now()",
+            "device_fingerprint": device_fingerprint
+        }).eq("id", device["id"]).execute()
+        
+        return jsonify({
+            "success": True,
+            "persistent_token": persistent_token,
+            "customer_id": device.get("customer_id"),
+            "device_id": device["device_id"],
+            "customer_name": device.get("customer_name"),
+            "expires_in_days": 90
+        })
+        
+    except Exception as e:
+        logger.error(f"Device persistent login error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/auth/device-auto-login", methods=["POST"])
+def device_auto_login():
+    """Auto-login using device fingerprint and persistent token"""
+    try:
+        data = request.json
+        device_fingerprint = data.get("device_fingerprint")
+        persistent_token = data.get("persistent_token")
+        
+        if not device_fingerprint or not persistent_token:
+            return jsonify({"success": False, "error": "Device fingerprint and token required"}), 400
+        
+        # Check persistent session
+        session_response = supabase.table("persistent_sessions").select("*").eq("device_fingerprint", device_fingerprint).eq("persistent_token", persistent_token).eq("is_active", True).execute()
+        
+        if not session_response.data or len(session_response.data) == 0:
+            return jsonify({"success": False, "error": "No valid session found"}), 404
+        
+        session = session_response.data[0]
+        
+        # Check if session is expired
+        from datetime import datetime, timezone
+        expires_at = datetime.fromisoformat(session["expires_at"].replace('Z', '+00:00'))
+        if expires_at < datetime.now(timezone.utc):
+            # Session expired - deactivate it
+            supabase.table("persistent_sessions").update({"is_active": False}).eq("id", session["id"]).execute()
+            return jsonify({"success": False, "error": "Session expired"}), 401
+        
+        # Get device info
+        device_response = supabase.table("devices").select("*").eq("customer_phone", session["customer_phone"]).execute()
+        
+        if not device_response.data or len(device_response.data) == 0:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+        device = device_response.data[0]
+        
+        if device.get("is_locked", False):
+            return jsonify({"success": False, "error": "Device is locked"}), 403
+        
+        # Update last access
+        supabase.table("persistent_sessions").update({"last_accessed": "now()"}).eq("id", session["id"]).execute()
+        supabase.table("devices").update({"last_login": "now()"}).eq("id", device["id"]).execute()
+        
+        return jsonify({
+            "success": True,
+            "customer_id": device.get("customer_id"),
+            "device_id": device["device_id"],
+            "customer_name": device.get("customer_name"),
+            "customer_phone": device.get("customer_phone"),
+            "session_valid": True
+        })
+        
+    except Exception as e:
+        logger.error(f"Device auto-login error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/auth/admin-persistent-login", methods=["POST"])
+def admin_persistent_login():
+    """Admin persistent login that survives browser sessions"""
+    try:
+        data = request.json
+        email = data.get("email")
+        password = data.get("password")
+        browser_fingerprint = data.get("browser_fingerprint", "")
+        
+        if not email or not password:
+            return jsonify({"success": False, "error": "Email and password required"}), 400
+        
+        password_hash = hash_password(password)
+        
+        # Authenticate admin
+        response = supabase.table("admins").select("*").eq("email", email).eq("password_hash", password_hash).execute()
+        
+        if not response.data or len(response.data) == 0:
+            return jsonify({"success": False, "error": "Invalid credentials"}), 401
+        
+        admin = response.data[0]
+        
+        # Create persistent session
+        persistent_token = generate_token()
+        session_data = {
+            "admin_id": admin["id"],
+            "email": email,
+            "browser_fingerprint": browser_fingerprint,
+            "persistent_token": persistent_token,
+            "created_at": "now()",
+            "expires_at": "now() + interval '30 days'",  # 30 day expiry for admins
+            "is_active": True
+        }
+        
+        # Store persistent admin session
+        supabase.table("admin_sessions").insert(session_data).execute()
+        
+        # Update admin last login
+        supabase.table("admins").update({
+            "token": persistent_token,
+            "last_login": "now()"
+        }).eq("id", admin["id"]).execute()
+        
+        return jsonify({
+            "success": True,
+            "persistent_token": persistent_token,
+            "role": admin["role"],
+            "admin_id": admin["id"],
+            "email": admin["email"],
+            "expires_in_days": 30,
+            "must_change_password": admin.get("must_change_password", False)
+        })
+        
+    except Exception as e:
+        logger.error(f"Admin persistent login error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/auth/admin-auto-login", methods=["POST"])
+def admin_auto_login():
+    """Auto-login admin using persistent token"""
+    try:
+        data = request.json
+        persistent_token = data.get("persistent_token")
+        browser_fingerprint = data.get("browser_fingerprint", "")
+        
+        if not persistent_token:
+            return jsonify({"success": False, "error": "Persistent token required"}), 400
+        
+        # Check persistent session
+        session_response = supabase.table("admin_sessions").select("*").eq("persistent_token", persistent_token).eq("is_active", True).execute()
+        
+        if not session_response.data or len(session_response.data) == 0:
+            return jsonify({"success": False, "error": "No valid session found"}), 404
+        
+        session = session_response.data[0]
+        
+        # Check if session is expired
+        from datetime import datetime, timezone
+        expires_at = datetime.fromisoformat(session["expires_at"].replace('Z', '+00:00'))
+        if expires_at < datetime.now(timezone.utc):
+            # Session expired - deactivate it
+            supabase.table("admin_sessions").update({"is_active": False}).eq("id", session["id"]).execute()
+            return jsonify({"success": False, "error": "Session expired"}), 401
+        
+        # Get admin info
+        admin_response = supabase.table("admins").select("*").eq("id", session["admin_id"]).execute()
+        
+        if not admin_response.data or len(admin_response.data) == 0:
+            return jsonify({"success": False, "error": "Admin not found"}), 404
+        
+        admin = admin_response.data[0]
+        
+        # Update last access
+        supabase.table("admin_sessions").update({"last_accessed": "now()"}).eq("id", session["id"]).execute()
+        supabase.table("admins").update({"last_login": "now()"}).eq("id", admin["id"]).execute()
+        
+        return jsonify({
+            "success": True,
+            "role": admin["role"],
+            "admin_id": admin["id"],
+            "email": admin["email"],
+            "session_valid": True,
+            "must_change_password": admin.get("must_change_password", False)
+        })
+        
+    except Exception as e:
+        logger.error(f"Admin auto-login error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================
 # API ROUTES - IMEI TRACKING & DEVICE LOCKING
 # ============================================
 
@@ -1194,8 +1425,8 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 13,
-        "version_name": "1.8.4",
+        "version_code": 15,
+        "version_name": "1.8.6",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
@@ -1207,9 +1438,11 @@ def get_app_version():
             "Enhanced Device Admin Capabilities",
             "Automatic Factory Reset Recovery",
             "Maximum Security Restrictions",
-            "Admin Remote Device Control"
+            "Admin Remote Device Control",
+            "Fixed Device Enrollment Issues",
+            "Persistent Authentication (Survives App Updates)"
         ],
-        "changelog": "Added Eden boot screen, fixed customer login, implemented IMEI tracking, enhanced device admin with full remote control capabilities"
+        "changelog": "Added persistent authentication that survives app updates and browser restarts. Users and admins no longer need to re-login after app updates."
     })
 
 # ============================================

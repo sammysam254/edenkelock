@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.eden.mkopa"
-4    android:versionCode="13"
-5    android:versionName="1.8.4" >
+4    android:versionCode="15"
+5    android:versionName="1.8.6" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="24"
@@ -26,581 +26,584 @@
 16    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 16-->C:\lockd\android\app\src\main\AndroidManifest.xml:10:5-81
 16-->C:\lockd\android\app\src\main\AndroidManifest.xml:10:22-78
-17    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-17-->C:\lockd\android\app\src\main\AndroidManifest.xml:11:5-77
-17-->C:\lockd\android\app\src\main\AndroidManifest.xml:11:22-74
-18    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-18-->C:\lockd\android\app\src\main\AndroidManifest.xml:12:5-78
-18-->C:\lockd\android\app\src\main\AndroidManifest.xml:12:22-75
-19    <uses-permission android:name="android.permission.CAMERA" />
-19-->C:\lockd\android\app\src\main\AndroidManifest.xml:13:5-65
-19-->C:\lockd\android\app\src\main\AndroidManifest.xml:13:22-62
-20    <uses-permission android:name="android.permission.NFC" />
-20-->C:\lockd\android\app\src\main\AndroidManifest.xml:14:5-62
-20-->C:\lockd\android\app\src\main\AndroidManifest.xml:14:22-59
-21    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-21-->C:\lockd\android\app\src\main\AndroidManifest.xml:15:5-75
-21-->C:\lockd\android\app\src\main\AndroidManifest.xml:15:22-72
-22    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
-22-->C:\lockd\android\app\src\main\AndroidManifest.xml:16:5-74
-22-->C:\lockd\android\app\src\main\AndroidManifest.xml:16:22-71
-23    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-23-->C:\lockd\android\app\src\main\AndroidManifest.xml:17:5-77
-23-->C:\lockd\android\app\src\main\AndroidManifest.xml:17:22-74
-24    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-24-->C:\lockd\android\app\src\main\AndroidManifest.xml:18:5-75
-24-->C:\lockd\android\app\src\main\AndroidManifest.xml:18:22-72
-25
-26    <!-- MAXIMUM SECURITY PERMISSIONS -->
-27    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN" />
-27-->C:\lockd\android\app\src\main\AndroidManifest.xml:21:5-76
-27-->C:\lockd\android\app\src\main\AndroidManifest.xml:21:22-73
-28    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
-28-->C:\lockd\android\app\src\main\AndroidManifest.xml:22:5-79
-28-->C:\lockd\android\app\src\main\AndroidManifest.xml:22:22-76
-29    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-29-->C:\lockd\android\app\src\main\AndroidManifest.xml:23:5-75
-29-->C:\lockd\android\app\src\main\AndroidManifest.xml:23:22-72
-30    <uses-permission android:name="android.permission.WAKE_LOCK" />
-30-->C:\lockd\android\app\src\main\AndroidManifest.xml:24:5-68
-30-->C:\lockd\android\app\src\main\AndroidManifest.xml:24:22-65
-31    <uses-permission android:name="android.permission.REORDER_TASKS" />
-31-->C:\lockd\android\app\src\main\AndroidManifest.xml:25:5-72
-31-->C:\lockd\android\app\src\main\AndroidManifest.xml:25:22-69
-32    <uses-permission android:name="android.permission.GET_TASKS" />
-32-->C:\lockd\android\app\src\main\AndroidManifest.xml:26:5-68
-32-->C:\lockd\android\app\src\main\AndroidManifest.xml:26:22-65
-33    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-33-->C:\lockd\android\app\src\main\AndroidManifest.xml:27:5-77
-33-->C:\lockd\android\app\src\main\AndroidManifest.xml:27:22-74
-34    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-34-->C:\lockd\android\app\src\main\AndroidManifest.xml:28:5-78
-34-->C:\lockd\android\app\src\main\AndroidManifest.xml:28:22-75
-35    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-35-->C:\lockd\android\app\src\main\AndroidManifest.xml:29:5-80
-35-->C:\lockd\android\app\src\main\AndroidManifest.xml:29:22-77
-36    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-36-->C:\lockd\android\app\src\main\AndroidManifest.xml:30:5-85
-36-->C:\lockd\android\app\src\main\AndroidManifest.xml:30:22-82
-37
-38    <!-- FACTORY RESET PROTECTION -->
-39    <uses-permission android:name="android.permission.MASTER_CLEAR" />
-39-->C:\lockd\android\app\src\main\AndroidManifest.xml:33:5-71
-39-->C:\lockd\android\app\src\main\AndroidManifest.xml:33:22-68
-40    <uses-permission android:name="android.permission.RECOVERY" />
-40-->C:\lockd\android\app\src\main\AndroidManifest.xml:34:5-67
-40-->C:\lockd\android\app\src\main\AndroidManifest.xml:34:22-64
-41    <uses-permission android:name="android.permission.REBOOT" />
-41-->C:\lockd\android\app\src\main\AndroidManifest.xml:35:5-65
-41-->C:\lockd\android\app\src\main\AndroidManifest.xml:35:22-62
-42
-43    <!-- SYSTEM LEVEL PERMISSIONS -->
-44    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-44-->C:\lockd\android\app\src\main\AndroidManifest.xml:38:5-39:47
-44-->C:\lockd\android\app\src\main\AndroidManifest.xml:38:22-77
-45    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-45-->C:\lockd\android\app\src\main\AndroidManifest.xml:40:5-73
-45-->C:\lockd\android\app\src\main\AndroidManifest.xml:40:22-70
-46    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
-46-->C:\lockd\android\app\src\main\AndroidManifest.xml:41:5-79
-46-->C:\lockd\android\app\src\main\AndroidManifest.xml:41:22-76
-47
-48    <!-- PREVENT UNINSTALL -->
-49    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-49-->C:\lockd\android\app\src\main\AndroidManifest.xml:44:5-82
-49-->C:\lockd\android\app\src\main\AndroidManifest.xml:44:22-79
-50    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
-50-->C:\lockd\android\app\src\main\AndroidManifest.xml:45:5-78
-50-->C:\lockd\android\app\src\main\AndroidManifest.xml:45:22-75
-51
-52    <uses-feature
-52-->C:\lockd\android\app\src\main\AndroidManifest.xml:47:5-85
-53        android:name="android.hardware.camera"
-53-->C:\lockd\android\app\src\main\AndroidManifest.xml:47:19-57
-54        android:required="false" />
-54-->C:\lockd\android\app\src\main\AndroidManifest.xml:47:58-82
-55    <uses-feature
-55-->C:\lockd\android\app\src\main\AndroidManifest.xml:48:5-82
-56        android:name="android.hardware.nfc"
-56-->C:\lockd\android\app\src\main\AndroidManifest.xml:48:19-54
-57        android:required="false" />
-57-->C:\lockd\android\app\src\main\AndroidManifest.xml:48:55-79
-58
-59    <permission
-59-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
-60        android:name="com.eden.mkopa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-60-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
-61        android:protectionLevel="signature" />
-61-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
-62
-63    <uses-permission android:name="com.eden.mkopa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-63-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
-63-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
-64
-65    <application
-65-->C:\lockd\android\app\src\main\AndroidManifest.xml:50:5-159:19
-66        android:allowBackup="false"
-66-->C:\lockd\android\app\src\main\AndroidManifest.xml:51:9-36
-67        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-67-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
-68        android:extractNativeLibs="false"
-69        android:icon="@mipmap/ic_launcher"
-69-->C:\lockd\android\app\src\main\AndroidManifest.xml:52:9-43
-70        android:label="@string/app_name"
-70-->C:\lockd\android\app\src\main\AndroidManifest.xml:53:9-41
-71        android:supportsRtl="true"
-71-->C:\lockd\android\app\src\main\AndroidManifest.xml:54:9-35
-72        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
-72-->C:\lockd\android\app\src\main\AndroidManifest.xml:55:9-65
-73
-74        <!-- Device Admin Receiver -->
-75        <receiver
-75-->C:\lockd\android\app\src\main\AndroidManifest.xml:59:9-70:20
-76            android:name="com.eden.mkopa.DeviceAdminReceiver"
-76-->C:\lockd\android\app\src\main\AndroidManifest.xml:60:13-48
-77            android:exported="true"
-77-->C:\lockd\android\app\src\main\AndroidManifest.xml:61:13-36
-78            android:permission="android.permission.BIND_DEVICE_ADMIN" >
-78-->C:\lockd\android\app\src\main\AndroidManifest.xml:62:13-70
-79            <meta-data
-79-->C:\lockd\android\app\src\main\AndroidManifest.xml:63:13-65:56
-80                android:name="android.app.device_admin"
-80-->C:\lockd\android\app\src\main\AndroidManifest.xml:64:17-56
-81                android:resource="@xml/device_admin" />
-81-->C:\lockd\android\app\src\main\AndroidManifest.xml:65:17-53
-82
-83            <intent-filter>
-83-->C:\lockd\android\app\src\main\AndroidManifest.xml:66:13-69:29
-84                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-84-->C:\lockd\android\app\src\main\AndroidManifest.xml:67:17-82
-84-->C:\lockd\android\app\src\main\AndroidManifest.xml:67:25-79
-85                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
-85-->C:\lockd\android\app\src\main\AndroidManifest.xml:68:17-91
-85-->C:\lockd\android\app\src\main\AndroidManifest.xml:68:25-88
-86            </intent-filter>
-87        </receiver>
-88
-89        <!-- Splash Screen Activity (Launcher) -->
-90        <activity
-90-->C:\lockd\android\app\src\main\AndroidManifest.xml:73:9-85:20
-91            android:name="com.eden.mkopa.SplashActivity"
-91-->C:\lockd\android\app\src\main\AndroidManifest.xml:74:13-43
-92            android:exported="true"
-92-->C:\lockd\android\app\src\main\AndroidManifest.xml:75:13-36
-93            android:launchMode="singleTask"
-93-->C:\lockd\android\app\src\main\AndroidManifest.xml:76:13-44
-94            android:lockTaskMode="if_whitelisted"
-94-->C:\lockd\android\app\src\main\AndroidManifest.xml:77:13-50
-95            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
-95-->C:\lockd\android\app\src\main\AndroidManifest.xml:78:13-69
-96            <intent-filter>
-96-->C:\lockd\android\app\src\main\AndroidManifest.xml:79:13-84:29
-97                <action android:name="android.intent.action.MAIN" />
-97-->C:\lockd\android\app\src\main\AndroidManifest.xml:80:17-69
-97-->C:\lockd\android\app\src\main\AndroidManifest.xml:80:25-66
-98
-99                <category android:name="android.intent.category.LAUNCHER" />
-99-->C:\lockd\android\app\src\main\AndroidManifest.xml:81:17-77
-99-->C:\lockd\android\app\src\main\AndroidManifest.xml:81:27-74
-100                <category android:name="android.intent.category.HOME" />
-100-->C:\lockd\android\app\src\main\AndroidManifest.xml:82:17-73
-100-->C:\lockd\android\app\src\main\AndroidManifest.xml:82:27-70
-101                <category android:name="android.intent.category.DEFAULT" />
-101-->C:\lockd\android\app\src\main\AndroidManifest.xml:83:17-76
-101-->C:\lockd\android\app\src\main\AndroidManifest.xml:83:27-73
-102            </intent-filter>
-103        </activity>
-104
-105        <!-- PIN Entry Activity -->
-106        <activity
-106-->C:\lockd\android\app\src\main\AndroidManifest.xml:88:9-92:53
-107            android:name="com.eden.mkopa.PinEntryActivity"
-107-->C:\lockd\android\app\src\main\AndroidManifest.xml:89:13-45
-108            android:exported="false"
-108-->C:\lockd\android\app\src\main\AndroidManifest.xml:90:13-37
-109            android:launchMode="singleTask"
-109-->C:\lockd\android\app\src\main\AndroidManifest.xml:91:13-44
-110            android:lockTaskMode="if_whitelisted" />
-110-->C:\lockd\android\app\src\main\AndroidManifest.xml:92:13-50
-111
-112        <!-- Main Dashboard Activity -->
-113        <activity
-113-->C:\lockd\android\app\src\main\AndroidManifest.xml:95:9-99:53
-114            android:name="com.eden.mkopa.MainActivity"
-114-->C:\lockd\android\app\src\main\AndroidManifest.xml:96:13-41
-115            android:exported="false"
-115-->C:\lockd\android\app\src\main\AndroidManifest.xml:97:13-37
-116            android:launchMode="singleTask"
-116-->C:\lockd\android\app\src\main\AndroidManifest.xml:98:13-44
-117            android:lockTaskMode="if_whitelisted" />
-117-->C:\lockd\android\app\src\main\AndroidManifest.xml:99:13-50
-118
-119        <!-- Lock Screen Activity -->
-120        <activity
-120-->C:\lockd\android\app\src\main\AndroidManifest.xml:102:9-107:49
-121            android:name="com.eden.mkopa.LockScreenActivity"
-121-->C:\lockd\android\app\src\main\AndroidManifest.xml:103:13-47
-122            android:excludeFromRecents="true"
-122-->C:\lockd\android\app\src\main\AndroidManifest.xml:107:13-46
-123            android:exported="false"
-123-->C:\lockd\android\app\src\main\AndroidManifest.xml:104:13-37
-124            android:launchMode="singleTask"
-124-->C:\lockd\android\app\src\main\AndroidManifest.xml:105:13-44
-125            android:lockTaskMode="if_whitelisted" />
-125-->C:\lockd\android\app\src\main\AndroidManifest.xml:106:13-50
-126
-127        <!-- Device Owner Setup Activity -->
-128        <activity
-128-->C:\lockd\android\app\src\main\AndroidManifest.xml:110:9-113:72
-129            android:name="com.eden.mkopa.DeviceOwnerSetupActivity"
-129-->C:\lockd\android\app\src\main\AndroidManifest.xml:111:13-53
-130            android:exported="false"
-130-->C:\lockd\android\app\src\main\AndroidManifest.xml:112:13-37
-131            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-131-->C:\lockd\android\app\src\main\AndroidManifest.xml:113:13-69
-132
-133        <!-- Boot Receiver -->
-134        <receiver
-134-->C:\lockd\android\app\src\main\AndroidManifest.xml:116:9-122:20
-135            android:name="com.eden.mkopa.BootReceiver"
-135-->C:\lockd\android\app\src\main\AndroidManifest.xml:117:13-41
-136            android:exported="true" >
-136-->C:\lockd\android\app\src\main\AndroidManifest.xml:118:13-36
-137            <intent-filter>
-137-->C:\lockd\android\app\src\main\AndroidManifest.xml:119:13-121:29
-138                <action android:name="android.intent.action.BOOT_COMPLETED" />
-138-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:17-79
-138-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:25-76
-139            </intent-filter>
-140        </receiver>
-141
-142        <!-- Sync Worker -->
-143        <service
-143-->C:\lockd\android\app\src\main\AndroidManifest.xml:125:9-127:40
-144            android:name="com.eden.mkopa.SyncService"
-144-->C:\lockd\android\app\src\main\AndroidManifest.xml:126:13-40
-145            android:exported="false" />
-145-->C:\lockd\android\app\src\main\AndroidManifest.xml:127:13-37
-146
-147        <!-- Lock Monitor Service -->
-148        <service
-148-->C:\lockd\android\app\src\main\AndroidManifest.xml:130:9-134:56
-149            android:name="com.eden.mkopa.LockMonitorService"
-149-->C:\lockd\android\app\src\main\AndroidManifest.xml:131:13-47
-150            android:enabled="true"
-150-->C:\lockd\android\app\src\main\AndroidManifest.xml:132:13-35
-151            android:exported="false"
-151-->C:\lockd\android\app\src\main\AndroidManifest.xml:133:13-37
-152            android:foregroundServiceType="dataSync" />
-152-->C:\lockd\android\app\src\main\AndroidManifest.xml:134:13-53
-153
-154        <!-- Factory Reset Protection Service -->
-155        <service
-155-->C:\lockd\android\app\src\main\AndroidManifest.xml:137:9-142:39
-156            android:name="com.eden.mkopa.FactoryResetProtectionService"
-156-->C:\lockd\android\app\src\main\AndroidManifest.xml:138:13-58
-157            android:enabled="true"
-157-->C:\lockd\android\app\src\main\AndroidManifest.xml:139:13-35
-158            android:exported="false"
-158-->C:\lockd\android\app\src\main\AndroidManifest.xml:140:13-37
-159            android:foregroundServiceType="systemExempted"
-159-->C:\lockd\android\app\src\main\AndroidManifest.xml:141:13-59
-160            android:priority="1000" />
-160-->C:\lockd\android\app\src\main\AndroidManifest.xml:142:13-36
-161
-162        <!-- Factory Reset Protection Receiver -->
-163        <receiver
-163-->C:\lockd\android\app\src\main\AndroidManifest.xml:145:9-157:20
-164            android:name="com.eden.mkopa.FactoryResetProtectionReceiver"
-164-->C:\lockd\android\app\src\main\AndroidManifest.xml:146:13-59
-165            android:enabled="true"
-165-->C:\lockd\android\app\src\main\AndroidManifest.xml:147:13-35
-166            android:exported="true"
-166-->C:\lockd\android\app\src\main\AndroidManifest.xml:148:13-36
-167            android:priority="1000" >
+17    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+17-->C:\lockd\android\app\src\main\AndroidManifest.xml:11:5-82
+17-->C:\lockd\android\app\src\main\AndroidManifest.xml:11:22-79
+18    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+18-->C:\lockd\android\app\src\main\AndroidManifest.xml:12:5-77
+18-->C:\lockd\android\app\src\main\AndroidManifest.xml:12:22-74
+19    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+19-->C:\lockd\android\app\src\main\AndroidManifest.xml:13:5-78
+19-->C:\lockd\android\app\src\main\AndroidManifest.xml:13:22-75
+20    <uses-permission android:name="android.permission.CAMERA" />
+20-->C:\lockd\android\app\src\main\AndroidManifest.xml:14:5-65
+20-->C:\lockd\android\app\src\main\AndroidManifest.xml:14:22-62
+21    <uses-permission android:name="android.permission.NFC" />
+21-->C:\lockd\android\app\src\main\AndroidManifest.xml:15:5-62
+21-->C:\lockd\android\app\src\main\AndroidManifest.xml:15:22-59
+22    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+22-->C:\lockd\android\app\src\main\AndroidManifest.xml:16:5-75
+22-->C:\lockd\android\app\src\main\AndroidManifest.xml:16:22-72
+23    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+23-->C:\lockd\android\app\src\main\AndroidManifest.xml:17:5-74
+23-->C:\lockd\android\app\src\main\AndroidManifest.xml:17:22-71
+24    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+24-->C:\lockd\android\app\src\main\AndroidManifest.xml:18:5-77
+24-->C:\lockd\android\app\src\main\AndroidManifest.xml:18:22-74
+25    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+25-->C:\lockd\android\app\src\main\AndroidManifest.xml:19:5-75
+25-->C:\lockd\android\app\src\main\AndroidManifest.xml:19:22-72
+26
+27    <!-- MAXIMUM SECURITY PERMISSIONS -->
+28    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN" />
+28-->C:\lockd\android\app\src\main\AndroidManifest.xml:22:5-76
+28-->C:\lockd\android\app\src\main\AndroidManifest.xml:22:22-73
+29    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+29-->C:\lockd\android\app\src\main\AndroidManifest.xml:23:5-79
+29-->C:\lockd\android\app\src\main\AndroidManifest.xml:23:22-76
+30    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+30-->C:\lockd\android\app\src\main\AndroidManifest.xml:24:5-75
+30-->C:\lockd\android\app\src\main\AndroidManifest.xml:24:22-72
+31    <uses-permission android:name="android.permission.WAKE_LOCK" />
+31-->C:\lockd\android\app\src\main\AndroidManifest.xml:25:5-68
+31-->C:\lockd\android\app\src\main\AndroidManifest.xml:25:22-65
+32    <uses-permission android:name="android.permission.REORDER_TASKS" />
+32-->C:\lockd\android\app\src\main\AndroidManifest.xml:26:5-72
+32-->C:\lockd\android\app\src\main\AndroidManifest.xml:26:22-69
+33    <uses-permission android:name="android.permission.GET_TASKS" />
+33-->C:\lockd\android\app\src\main\AndroidManifest.xml:27:5-68
+33-->C:\lockd\android\app\src\main\AndroidManifest.xml:27:22-65
+34    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+34-->C:\lockd\android\app\src\main\AndroidManifest.xml:28:5-77
+34-->C:\lockd\android\app\src\main\AndroidManifest.xml:28:22-74
+35    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+35-->C:\lockd\android\app\src\main\AndroidManifest.xml:29:5-78
+35-->C:\lockd\android\app\src\main\AndroidManifest.xml:29:22-75
+36    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+36-->C:\lockd\android\app\src\main\AndroidManifest.xml:30:5-80
+36-->C:\lockd\android\app\src\main\AndroidManifest.xml:30:22-77
+37    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+37-->C:\lockd\android\app\src\main\AndroidManifest.xml:31:5-85
+37-->C:\lockd\android\app\src\main\AndroidManifest.xml:31:22-82
+38
+39    <!-- FACTORY RESET PROTECTION -->
+40    <uses-permission android:name="android.permission.MASTER_CLEAR" />
+40-->C:\lockd\android\app\src\main\AndroidManifest.xml:34:5-71
+40-->C:\lockd\android\app\src\main\AndroidManifest.xml:34:22-68
+41    <uses-permission android:name="android.permission.RECOVERY" />
+41-->C:\lockd\android\app\src\main\AndroidManifest.xml:35:5-67
+41-->C:\lockd\android\app\src\main\AndroidManifest.xml:35:22-64
+42    <uses-permission android:name="android.permission.REBOOT" />
+42-->C:\lockd\android\app\src\main\AndroidManifest.xml:36:5-65
+42-->C:\lockd\android\app\src\main\AndroidManifest.xml:36:22-62
+43
+44    <!-- SYSTEM LEVEL PERMISSIONS -->
+45    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+45-->C:\lockd\android\app\src\main\AndroidManifest.xml:39:5-40:47
+45-->C:\lockd\android\app\src\main\AndroidManifest.xml:39:22-77
+46    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+46-->C:\lockd\android\app\src\main\AndroidManifest.xml:41:5-73
+46-->C:\lockd\android\app\src\main\AndroidManifest.xml:41:22-70
+47    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+47-->C:\lockd\android\app\src\main\AndroidManifest.xml:42:5-79
+47-->C:\lockd\android\app\src\main\AndroidManifest.xml:42:22-76
+48
+49    <!-- PREVENT UNINSTALL -->
+50    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+50-->C:\lockd\android\app\src\main\AndroidManifest.xml:45:5-82
+50-->C:\lockd\android\app\src\main\AndroidManifest.xml:45:22-79
+51    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
+51-->C:\lockd\android\app\src\main\AndroidManifest.xml:46:5-78
+51-->C:\lockd\android\app\src\main\AndroidManifest.xml:46:22-75
+52
+53    <uses-feature
+53-->C:\lockd\android\app\src\main\AndroidManifest.xml:48:5-85
+54        android:name="android.hardware.camera"
+54-->C:\lockd\android\app\src\main\AndroidManifest.xml:48:19-57
+55        android:required="false" />
+55-->C:\lockd\android\app\src\main\AndroidManifest.xml:48:58-82
+56    <uses-feature
+56-->C:\lockd\android\app\src\main\AndroidManifest.xml:49:5-82
+57        android:name="android.hardware.nfc"
+57-->C:\lockd\android\app\src\main\AndroidManifest.xml:49:19-54
+58        android:required="false" />
+58-->C:\lockd\android\app\src\main\AndroidManifest.xml:49:55-79
+59
+60    <permission
+60-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+61        android:name="com.eden.mkopa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+61-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+62        android:protectionLevel="signature" />
+62-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+63
+64    <uses-permission android:name="com.eden.mkopa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+64-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+64-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+65
+66    <application
+66-->C:\lockd\android\app\src\main\AndroidManifest.xml:51:5-160:19
+67        android:allowBackup="false"
+67-->C:\lockd\android\app\src\main\AndroidManifest.xml:52:9-36
+68        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+68-->[androidx.core:core:1.12.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\808f25e33273cf777e1c687f415f5885\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+69        android:extractNativeLibs="false"
+70        android:icon="@mipmap/ic_launcher"
+70-->C:\lockd\android\app\src\main\AndroidManifest.xml:53:9-43
+71        android:label="@string/app_name"
+71-->C:\lockd\android\app\src\main\AndroidManifest.xml:54:9-41
+72        android:supportsRtl="true"
+72-->C:\lockd\android\app\src\main\AndroidManifest.xml:55:9-35
+73        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+73-->C:\lockd\android\app\src\main\AndroidManifest.xml:56:9-65
+74
+75        <!-- Device Admin Receiver -->
+76        <receiver
+76-->C:\lockd\android\app\src\main\AndroidManifest.xml:60:9-71:20
+77            android:name="com.eden.mkopa.DeviceAdminReceiver"
+77-->C:\lockd\android\app\src\main\AndroidManifest.xml:61:13-48
+78            android:exported="true"
+78-->C:\lockd\android\app\src\main\AndroidManifest.xml:62:13-36
+79            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+79-->C:\lockd\android\app\src\main\AndroidManifest.xml:63:13-70
+80            <meta-data
+80-->C:\lockd\android\app\src\main\AndroidManifest.xml:64:13-66:56
+81                android:name="android.app.device_admin"
+81-->C:\lockd\android\app\src\main\AndroidManifest.xml:65:17-56
+82                android:resource="@xml/device_admin" />
+82-->C:\lockd\android\app\src\main\AndroidManifest.xml:66:17-53
+83
+84            <intent-filter>
+84-->C:\lockd\android\app\src\main\AndroidManifest.xml:67:13-70:29
+85                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+85-->C:\lockd\android\app\src\main\AndroidManifest.xml:68:17-82
+85-->C:\lockd\android\app\src\main\AndroidManifest.xml:68:25-79
+86                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
+86-->C:\lockd\android\app\src\main\AndroidManifest.xml:69:17-91
+86-->C:\lockd\android\app\src\main\AndroidManifest.xml:69:25-88
+87            </intent-filter>
+88        </receiver>
+89
+90        <!-- Splash Screen Activity (Launcher) -->
+91        <activity
+91-->C:\lockd\android\app\src\main\AndroidManifest.xml:74:9-86:20
+92            android:name="com.eden.mkopa.SplashActivity"
+92-->C:\lockd\android\app\src\main\AndroidManifest.xml:75:13-43
+93            android:exported="true"
+93-->C:\lockd\android\app\src\main\AndroidManifest.xml:76:13-36
+94            android:launchMode="singleTask"
+94-->C:\lockd\android\app\src\main\AndroidManifest.xml:77:13-44
+95            android:lockTaskMode="if_whitelisted"
+95-->C:\lockd\android\app\src\main\AndroidManifest.xml:78:13-50
+96            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+96-->C:\lockd\android\app\src\main\AndroidManifest.xml:79:13-69
+97            <intent-filter>
+97-->C:\lockd\android\app\src\main\AndroidManifest.xml:80:13-85:29
+98                <action android:name="android.intent.action.MAIN" />
+98-->C:\lockd\android\app\src\main\AndroidManifest.xml:81:17-69
+98-->C:\lockd\android\app\src\main\AndroidManifest.xml:81:25-66
+99
+100                <category android:name="android.intent.category.LAUNCHER" />
+100-->C:\lockd\android\app\src\main\AndroidManifest.xml:82:17-77
+100-->C:\lockd\android\app\src\main\AndroidManifest.xml:82:27-74
+101                <category android:name="android.intent.category.HOME" />
+101-->C:\lockd\android\app\src\main\AndroidManifest.xml:83:17-73
+101-->C:\lockd\android\app\src\main\AndroidManifest.xml:83:27-70
+102                <category android:name="android.intent.category.DEFAULT" />
+102-->C:\lockd\android\app\src\main\AndroidManifest.xml:84:17-76
+102-->C:\lockd\android\app\src\main\AndroidManifest.xml:84:27-73
+103            </intent-filter>
+104        </activity>
+105
+106        <!-- PIN Entry Activity -->
+107        <activity
+107-->C:\lockd\android\app\src\main\AndroidManifest.xml:89:9-93:53
+108            android:name="com.eden.mkopa.PinEntryActivity"
+108-->C:\lockd\android\app\src\main\AndroidManifest.xml:90:13-45
+109            android:exported="false"
+109-->C:\lockd\android\app\src\main\AndroidManifest.xml:91:13-37
+110            android:launchMode="singleTask"
+110-->C:\lockd\android\app\src\main\AndroidManifest.xml:92:13-44
+111            android:lockTaskMode="if_whitelisted" />
+111-->C:\lockd\android\app\src\main\AndroidManifest.xml:93:13-50
+112
+113        <!-- Main Dashboard Activity -->
+114        <activity
+114-->C:\lockd\android\app\src\main\AndroidManifest.xml:96:9-100:53
+115            android:name="com.eden.mkopa.MainActivity"
+115-->C:\lockd\android\app\src\main\AndroidManifest.xml:97:13-41
+116            android:exported="false"
+116-->C:\lockd\android\app\src\main\AndroidManifest.xml:98:13-37
+117            android:launchMode="singleTask"
+117-->C:\lockd\android\app\src\main\AndroidManifest.xml:99:13-44
+118            android:lockTaskMode="if_whitelisted" />
+118-->C:\lockd\android\app\src\main\AndroidManifest.xml:100:13-50
+119
+120        <!-- Lock Screen Activity -->
+121        <activity
+121-->C:\lockd\android\app\src\main\AndroidManifest.xml:103:9-108:49
+122            android:name="com.eden.mkopa.LockScreenActivity"
+122-->C:\lockd\android\app\src\main\AndroidManifest.xml:104:13-47
+123            android:excludeFromRecents="true"
+123-->C:\lockd\android\app\src\main\AndroidManifest.xml:108:13-46
+124            android:exported="false"
+124-->C:\lockd\android\app\src\main\AndroidManifest.xml:105:13-37
+125            android:launchMode="singleTask"
+125-->C:\lockd\android\app\src\main\AndroidManifest.xml:106:13-44
+126            android:lockTaskMode="if_whitelisted" />
+126-->C:\lockd\android\app\src\main\AndroidManifest.xml:107:13-50
+127
+128        <!-- Device Owner Setup Activity -->
+129        <activity
+129-->C:\lockd\android\app\src\main\AndroidManifest.xml:111:9-114:72
+130            android:name="com.eden.mkopa.DeviceOwnerSetupActivity"
+130-->C:\lockd\android\app\src\main\AndroidManifest.xml:112:13-53
+131            android:exported="false"
+131-->C:\lockd\android\app\src\main\AndroidManifest.xml:113:13-37
+132            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+132-->C:\lockd\android\app\src\main\AndroidManifest.xml:114:13-69
+133
+134        <!-- Boot Receiver -->
+135        <receiver
+135-->C:\lockd\android\app\src\main\AndroidManifest.xml:117:9-123:20
+136            android:name="com.eden.mkopa.BootReceiver"
+136-->C:\lockd\android\app\src\main\AndroidManifest.xml:118:13-41
+137            android:exported="true" >
+137-->C:\lockd\android\app\src\main\AndroidManifest.xml:119:13-36
+138            <intent-filter>
+138-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:13-122:29
+139                <action android:name="android.intent.action.BOOT_COMPLETED" />
+139-->C:\lockd\android\app\src\main\AndroidManifest.xml:121:17-79
+139-->C:\lockd\android\app\src\main\AndroidManifest.xml:121:25-76
+140            </intent-filter>
+141        </receiver>
+142
+143        <!-- Sync Worker -->
+144        <service
+144-->C:\lockd\android\app\src\main\AndroidManifest.xml:126:9-128:40
+145            android:name="com.eden.mkopa.SyncService"
+145-->C:\lockd\android\app\src\main\AndroidManifest.xml:127:13-40
+146            android:exported="false" />
+146-->C:\lockd\android\app\src\main\AndroidManifest.xml:128:13-37
+147
+148        <!-- Lock Monitor Service -->
+149        <service
+149-->C:\lockd\android\app\src\main\AndroidManifest.xml:131:9-135:56
+150            android:name="com.eden.mkopa.LockMonitorService"
+150-->C:\lockd\android\app\src\main\AndroidManifest.xml:132:13-47
+151            android:enabled="true"
+151-->C:\lockd\android\app\src\main\AndroidManifest.xml:133:13-35
+152            android:exported="false"
+152-->C:\lockd\android\app\src\main\AndroidManifest.xml:134:13-37
+153            android:foregroundServiceType="dataSync" />
+153-->C:\lockd\android\app\src\main\AndroidManifest.xml:135:13-53
+154
+155        <!-- Factory Reset Protection Service -->
+156        <service
+156-->C:\lockd\android\app\src\main\AndroidManifest.xml:138:9-143:39
+157            android:name="com.eden.mkopa.FactoryResetProtectionService"
+157-->C:\lockd\android\app\src\main\AndroidManifest.xml:139:13-58
+158            android:enabled="true"
+158-->C:\lockd\android\app\src\main\AndroidManifest.xml:140:13-35
+159            android:exported="false"
+159-->C:\lockd\android\app\src\main\AndroidManifest.xml:141:13-37
+160            android:foregroundServiceType="systemExempted"
+160-->C:\lockd\android\app\src\main\AndroidManifest.xml:142:13-59
+161            android:priority="1000" />
+161-->C:\lockd\android\app\src\main\AndroidManifest.xml:143:13-36
+162
+163        <!-- Factory Reset Protection Receiver -->
+164        <receiver
+164-->C:\lockd\android\app\src\main\AndroidManifest.xml:146:9-158:20
+165            android:name="com.eden.mkopa.FactoryResetProtectionReceiver"
+165-->C:\lockd\android\app\src\main\AndroidManifest.xml:147:13-59
+166            android:enabled="true"
+166-->C:\lockd\android\app\src\main\AndroidManifest.xml:148:13-35
+167            android:exported="true"
 167-->C:\lockd\android\app\src\main\AndroidManifest.xml:149:13-36
-168            <intent-filter android:priority="1000" >
-168-->C:\lockd\android\app\src\main\AndroidManifest.xml:150:13-156:29
-168-->C:\lockd\android\app\src\main\AndroidManifest.xml:150:28-51
-169                <action android:name="android.intent.action.BOOT_COMPLETED" />
-169-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:17-79
-169-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:25-76
-170                <action android:name="android.intent.action.MASTER_CLEAR" />
-170-->C:\lockd\android\app\src\main\AndroidManifest.xml:152:17-77
-170-->C:\lockd\android\app\src\main\AndroidManifest.xml:152:25-74
-171                <action android:name="android.intent.action.FACTORY_RESET" />
-171-->C:\lockd\android\app\src\main\AndroidManifest.xml:153:17-78
-171-->C:\lockd\android\app\src\main\AndroidManifest.xml:153:25-75
-172                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-172-->C:\lockd\android\app\src\main\AndroidManifest.xml:154:17-80
-172-->C:\lockd\android\app\src\main\AndroidManifest.xml:154:25-77
-173
-174                <data android:scheme="package" />
-174-->C:\lockd\android\app\src\main\AndroidManifest.xml:155:17-50
-174-->C:\lockd\android\app\src\main\AndroidManifest.xml:155:23-47
-175            </intent-filter>
-176        </receiver>
-177
-178        <provider
-178-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
-179            android:name="androidx.startup.InitializationProvider"
-179-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
-180            android:authorities="com.eden.mkopa.androidx-startup"
-180-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
-181            android:exported="false" >
-181-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
-182            <meta-data
-182-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
-183                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-183-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
-184                android:value="androidx.startup" />
-184-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
-185            <meta-data
-185-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:34:13-36:52
-186                android:name="androidx.work.WorkManagerInitializer"
-186-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:35:17-68
-187                android:value="androidx.startup" />
-187-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:36:17-49
-188            <meta-data
-188-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\b973978f497d8978f2539821f2ee7b26\transformed\jetified-lifecycle-process-2.6.1\AndroidManifest.xml:29:13-31:52
-189                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-189-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\b973978f497d8978f2539821f2ee7b26\transformed\jetified-lifecycle-process-2.6.1\AndroidManifest.xml:30:17-78
-190                android:value="androidx.startup" />
-190-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\b973978f497d8978f2539821f2ee7b26\transformed\jetified-lifecycle-process-2.6.1\AndroidManifest.xml:31:17-49
-191            <meta-data
-191-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
-192                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-192-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
-193                android:value="androidx.startup" />
-193-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
-194        </provider>
-195
-196        <service
-196-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:39:9-45:35
-197            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
-197-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:40:13-88
-198            android:directBootAware="false"
-198-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:41:13-44
-199            android:enabled="@bool/enable_system_alarm_service_default"
-199-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:42:13-72
-200            android:exported="false" />
-200-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:43:13-37
-201        <service
-201-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:46:9-52:35
-202            android:name="androidx.work.impl.background.systemjob.SystemJobService"
-202-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:47:13-84
-203            android:directBootAware="false"
-203-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:48:13-44
-204            android:enabled="@bool/enable_system_job_service_default"
-204-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:49:13-70
-205            android:exported="true"
-205-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:50:13-36
-206            android:permission="android.permission.BIND_JOB_SERVICE" />
-206-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:51:13-69
-207        <service
-207-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:53:9-59:35
-208            android:name="androidx.work.impl.foreground.SystemForegroundService"
-208-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:54:13-81
-209            android:directBootAware="false"
-209-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:55:13-44
-210            android:enabled="@bool/enable_system_foreground_service_default"
-210-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:56:13-77
-211            android:exported="false" />
-211-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:57:13-37
-212
-213        <receiver
-213-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:61:9-66:35
-214            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
-214-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:62:13-88
-215            android:directBootAware="false"
-215-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:63:13-44
-216            android:enabled="true"
-216-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:64:13-35
-217            android:exported="false" />
-217-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:65:13-37
-218        <receiver
-218-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:67:9-77:20
-219            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
-219-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:68:13-106
-220            android:directBootAware="false"
-220-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:69:13-44
-221            android:enabled="false"
-221-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:70:13-36
-222            android:exported="false" >
-222-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:71:13-37
-223            <intent-filter>
-223-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:73:13-76:29
-224                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-224-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:74:17-87
-224-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:74:25-84
-225                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-225-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:75:17-90
-225-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:75:25-87
-226            </intent-filter>
-227        </receiver>
-228        <receiver
-228-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:78:9-88:20
-229            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
-229-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:79:13-104
-230            android:directBootAware="false"
-230-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:80:13-44
-231            android:enabled="false"
-231-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:81:13-36
-232            android:exported="false" >
-232-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:82:13-37
-233            <intent-filter>
-233-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:84:13-87:29
-234                <action android:name="android.intent.action.BATTERY_OKAY" />
-234-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:85:17-77
-234-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:85:25-74
-235                <action android:name="android.intent.action.BATTERY_LOW" />
-235-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:86:17-76
-235-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:86:25-73
-236            </intent-filter>
-237        </receiver>
-238        <receiver
-238-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:89:9-99:20
-239            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
-239-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:90:13-104
-240            android:directBootAware="false"
-240-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:91:13-44
-241            android:enabled="false"
-241-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:92:13-36
-242            android:exported="false" >
-242-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:93:13-37
-243            <intent-filter>
-243-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:95:13-98:29
-244                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
-244-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:96:17-83
-244-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:96:25-80
-245                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
-245-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:97:17-82
-245-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:97:25-79
-246            </intent-filter>
-247        </receiver>
-248        <receiver
-248-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:100:9-109:20
-249            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
-249-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:101:13-103
-250            android:directBootAware="false"
-250-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:102:13-44
-251            android:enabled="false"
-251-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:103:13-36
-252            android:exported="false" >
-252-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:104:13-37
-253            <intent-filter>
-253-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:106:13-108:29
-254                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-254-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:107:17-79
-254-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:107:25-76
-255            </intent-filter>
-256        </receiver>
-257        <receiver
-257-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:110:9-121:20
-258            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-258-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:111:13-88
-259            android:directBootAware="false"
-259-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:112:13-44
-260            android:enabled="false"
-260-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:113:13-36
-261            android:exported="false" >
-261-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:114:13-37
-262            <intent-filter>
-262-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:116:13-120:29
-263                <action android:name="android.intent.action.BOOT_COMPLETED" />
-263-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:17-79
-263-->C:\lockd\android\app\src\main\AndroidManifest.xml:120:25-76
-264                <action android:name="android.intent.action.TIME_SET" />
-264-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:118:17-73
-264-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:118:25-70
-265                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-265-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:119:17-81
-265-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:119:25-78
-266            </intent-filter>
-267        </receiver>
-268        <receiver
-268-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:122:9-131:20
-269            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
-269-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:123:13-99
-270            android:directBootAware="false"
-270-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:124:13-44
-271            android:enabled="@bool/enable_system_alarm_service_default"
-271-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:125:13-72
-272            android:exported="false" >
-272-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:126:13-37
-273            <intent-filter>
-273-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:128:13-130:29
-274                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
-274-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:129:17-98
-274-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:129:25-95
-275            </intent-filter>
-276        </receiver>
-277        <receiver
-277-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:132:9-142:20
-278            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
-278-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:133:13-78
-279            android:directBootAware="false"
-279-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:134:13-44
-280            android:enabled="true"
-280-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:135:13-35
-281            android:exported="true"
-281-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:136:13-36
-282            android:permission="android.permission.DUMP" >
-282-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:137:13-57
-283            <intent-filter>
-283-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:139:13-141:29
-284                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
-284-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:140:17-88
-284-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:140:25-85
-285            </intent-filter>
-286        </receiver>
-287
-288        <service
-288-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:24:9-28:63
-289            android:name="androidx.room.MultiInstanceInvalidationService"
-289-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:25:13-74
-290            android:directBootAware="true"
-290-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:26:13-43
-291            android:exported="false" />
-291-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:27:13-37
-292
-293        <receiver
-293-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
-294            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-294-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
-295            android:directBootAware="false"
-295-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
-296            android:enabled="true"
-296-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
-297            android:exported="true"
-297-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
-298            android:permission="android.permission.DUMP" >
-298-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
-299            <intent-filter>
-299-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
-300                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-300-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
-300-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
-301            </intent-filter>
-302            <intent-filter>
-302-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
-303                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-303-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
-303-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
-304            </intent-filter>
-305            <intent-filter>
-305-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
-306                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-306-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
-306-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
-307            </intent-filter>
-308            <intent-filter>
-308-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
-309                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-309-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
-309-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
-310            </intent-filter>
-311        </receiver>
-312    </application>
-313
-314</manifest>
+168            android:priority="1000" >
+168-->C:\lockd\android\app\src\main\AndroidManifest.xml:150:13-36
+169            <intent-filter android:priority="1000" >
+169-->C:\lockd\android\app\src\main\AndroidManifest.xml:151:13-157:29
+169-->C:\lockd\android\app\src\main\AndroidManifest.xml:151:28-51
+170                <action android:name="android.intent.action.BOOT_COMPLETED" />
+170-->C:\lockd\android\app\src\main\AndroidManifest.xml:121:17-79
+170-->C:\lockd\android\app\src\main\AndroidManifest.xml:121:25-76
+171                <action android:name="android.intent.action.MASTER_CLEAR" />
+171-->C:\lockd\android\app\src\main\AndroidManifest.xml:153:17-77
+171-->C:\lockd\android\app\src\main\AndroidManifest.xml:153:25-74
+172                <action android:name="android.intent.action.FACTORY_RESET" />
+172-->C:\lockd\android\app\src\main\AndroidManifest.xml:154:17-78
+172-->C:\lockd\android\app\src\main\AndroidManifest.xml:154:25-75
+173                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+173-->C:\lockd\android\app\src\main\AndroidManifest.xml:155:17-80
+173-->C:\lockd\android\app\src\main\AndroidManifest.xml:155:25-77
+174
+175                <data android:scheme="package" />
+175-->C:\lockd\android\app\src\main\AndroidManifest.xml:156:17-50
+175-->C:\lockd\android\app\src\main\AndroidManifest.xml:156:23-47
+176            </intent-filter>
+177        </receiver>
+178
+179        <provider
+179-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+180            android:name="androidx.startup.InitializationProvider"
+180-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+181            android:authorities="com.eden.mkopa.androidx-startup"
+181-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+182            android:exported="false" >
+182-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+183            <meta-data
+183-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+184                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+184-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+185                android:value="androidx.startup" />
+185-->[androidx.emoji2:emoji2:1.2.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\8262367a11bda1b4b9cedc24dd567015\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+186            <meta-data
+186-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:34:13-36:52
+187                android:name="androidx.work.WorkManagerInitializer"
+187-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:35:17-68
+188                android:value="androidx.startup" />
+188-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:36:17-49
+189            <meta-data
+189-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\b973978f497d8978f2539821f2ee7b26\transformed\jetified-lifecycle-process-2.6.1\AndroidManifest.xml:29:13-31:52
+190                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+190-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\b973978f497d8978f2539821f2ee7b26\transformed\jetified-lifecycle-process-2.6.1\AndroidManifest.xml:30:17-78
+191                android:value="androidx.startup" />
+191-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\b973978f497d8978f2539821f2ee7b26\transformed\jetified-lifecycle-process-2.6.1\AndroidManifest.xml:31:17-49
+192            <meta-data
+192-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+193                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+193-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+194                android:value="androidx.startup" />
+194-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+195        </provider>
+196
+197        <service
+197-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:39:9-45:35
+198            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+198-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:40:13-88
+199            android:directBootAware="false"
+199-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:41:13-44
+200            android:enabled="@bool/enable_system_alarm_service_default"
+200-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:42:13-72
+201            android:exported="false" />
+201-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:43:13-37
+202        <service
+202-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:46:9-52:35
+203            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+203-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:47:13-84
+204            android:directBootAware="false"
+204-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:48:13-44
+205            android:enabled="@bool/enable_system_job_service_default"
+205-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:49:13-70
+206            android:exported="true"
+206-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:50:13-36
+207            android:permission="android.permission.BIND_JOB_SERVICE" />
+207-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:51:13-69
+208        <service
+208-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:53:9-59:35
+209            android:name="androidx.work.impl.foreground.SystemForegroundService"
+209-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:54:13-81
+210            android:directBootAware="false"
+210-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:55:13-44
+211            android:enabled="@bool/enable_system_foreground_service_default"
+211-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:56:13-77
+212            android:exported="false" />
+212-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:57:13-37
+213
+214        <receiver
+214-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:61:9-66:35
+215            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+215-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:62:13-88
+216            android:directBootAware="false"
+216-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:63:13-44
+217            android:enabled="true"
+217-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:64:13-35
+218            android:exported="false" />
+218-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:65:13-37
+219        <receiver
+219-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:67:9-77:20
+220            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+220-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:68:13-106
+221            android:directBootAware="false"
+221-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:69:13-44
+222            android:enabled="false"
+222-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:70:13-36
+223            android:exported="false" >
+223-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:71:13-37
+224            <intent-filter>
+224-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:73:13-76:29
+225                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+225-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:74:17-87
+225-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:74:25-84
+226                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+226-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:75:17-90
+226-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:75:25-87
+227            </intent-filter>
+228        </receiver>
+229        <receiver
+229-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:78:9-88:20
+230            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+230-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:79:13-104
+231            android:directBootAware="false"
+231-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:80:13-44
+232            android:enabled="false"
+232-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:81:13-36
+233            android:exported="false" >
+233-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:82:13-37
+234            <intent-filter>
+234-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:84:13-87:29
+235                <action android:name="android.intent.action.BATTERY_OKAY" />
+235-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:85:17-77
+235-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:85:25-74
+236                <action android:name="android.intent.action.BATTERY_LOW" />
+236-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:86:17-76
+236-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:86:25-73
+237            </intent-filter>
+238        </receiver>
+239        <receiver
+239-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:89:9-99:20
+240            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+240-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:90:13-104
+241            android:directBootAware="false"
+241-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:91:13-44
+242            android:enabled="false"
+242-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:92:13-36
+243            android:exported="false" >
+243-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:93:13-37
+244            <intent-filter>
+244-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:95:13-98:29
+245                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+245-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:96:17-83
+245-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:96:25-80
+246                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
+246-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:97:17-82
+246-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:97:25-79
+247            </intent-filter>
+248        </receiver>
+249        <receiver
+249-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:100:9-109:20
+250            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+250-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:101:13-103
+251            android:directBootAware="false"
+251-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:102:13-44
+252            android:enabled="false"
+252-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:103:13-36
+253            android:exported="false" >
+253-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:104:13-37
+254            <intent-filter>
+254-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:106:13-108:29
+255                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+255-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:107:17-79
+255-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:107:25-76
+256            </intent-filter>
+257        </receiver>
+258        <receiver
+258-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:110:9-121:20
+259            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+259-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:111:13-88
+260            android:directBootAware="false"
+260-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:112:13-44
+261            android:enabled="false"
+261-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:113:13-36
+262            android:exported="false" >
+262-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:114:13-37
+263            <intent-filter>
+263-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:116:13-120:29
+264                <action android:name="android.intent.action.BOOT_COMPLETED" />
+264-->C:\lockd\android\app\src\main\AndroidManifest.xml:121:17-79
+264-->C:\lockd\android\app\src\main\AndroidManifest.xml:121:25-76
+265                <action android:name="android.intent.action.TIME_SET" />
+265-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:118:17-73
+265-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:118:25-70
+266                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+266-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:119:17-81
+266-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:119:25-78
+267            </intent-filter>
+268        </receiver>
+269        <receiver
+269-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:122:9-131:20
+270            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+270-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:123:13-99
+271            android:directBootAware="false"
+271-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:124:13-44
+272            android:enabled="@bool/enable_system_alarm_service_default"
+272-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:125:13-72
+273            android:exported="false" >
+273-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:126:13-37
+274            <intent-filter>
+274-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:128:13-130:29
+275                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
+275-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:129:17-98
+275-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:129:25-95
+276            </intent-filter>
+277        </receiver>
+278        <receiver
+278-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:132:9-142:20
+279            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+279-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:133:13-78
+280            android:directBootAware="false"
+280-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:134:13-44
+281            android:enabled="true"
+281-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:135:13-35
+282            android:exported="true"
+282-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:136:13-36
+283            android:permission="android.permission.DUMP" >
+283-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:137:13-57
+284            <intent-filter>
+284-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:139:13-141:29
+285                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+285-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:140:17-88
+285-->[androidx.work:work-runtime:2.9.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\262ccc8cdcc0c2a88db3250c7875c073\transformed\work-runtime-2.9.0\AndroidManifest.xml:140:25-85
+286            </intent-filter>
+287        </receiver>
+288
+289        <service
+289-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:24:9-28:63
+290            android:name="androidx.room.MultiInstanceInvalidationService"
+290-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:25:13-74
+291            android:directBootAware="true"
+291-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:26:13-43
+292            android:exported="false" />
+292-->[androidx.room:room-runtime:2.5.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\f6c7f69e19705b04651515b3d060785e\transformed\room-runtime-2.5.0\AndroidManifest.xml:27:13-37
+293
+294        <receiver
+294-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+295            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+295-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+296            android:directBootAware="false"
+296-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+297            android:enabled="true"
+297-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+298            android:exported="true"
+298-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+299            android:permission="android.permission.DUMP" >
+299-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+300            <intent-filter>
+300-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+301                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+301-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+301-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+302            </intent-filter>
+303            <intent-filter>
+303-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+304                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+304-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+304-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+305            </intent-filter>
+306            <intent-filter>
+306-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+307                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+307-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+307-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+308            </intent-filter>
+309            <intent-filter>
+309-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+310                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+310-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+310-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\COLLINS KIBET\.gradle\caches\transforms-3\20fdc5f449a51857d21c008767a0c843\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+311            </intent-filter>
+312        </receiver>
+313    </application>
+314
+315</manifest>

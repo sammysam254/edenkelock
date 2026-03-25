@@ -79,19 +79,92 @@
     </style>
 
     <script>
+        // Generate browser fingerprint
+        function generateBrowserFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('Browser fingerprint', 2, 2);
+            
+            const fingerprint = [
+                navigator.userAgent,
+                navigator.language,
+                screen.width + 'x' + screen.height,
+                new Date().getTimezoneOffset(),
+                canvas.toDataURL()
+            ].join('|');
+            
+            return btoa(fingerprint).substring(0, 32);
+        }
+        
+        // Try auto-login on page load
+        window.addEventListener('load', function() {
+            const persistentToken = localStorage.getItem('eden_persistent_token');
+            const browserFingerprint = generateBrowserFingerprint();
+            
+            if (persistentToken) {
+                console.log('Attempting auto-login...');
+                
+                fetch('/api/auth/admin-auto-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        persistent_token: persistentToken,
+                        browser_fingerprint: browserFingerprint
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Auto-login successful');
+                        
+                        // Save session data
+                        localStorage.setItem('eden_token', persistentToken);
+                        localStorage.setItem('eden_role', data.role);
+                        localStorage.setItem('eden_admin_id', data.admin_id);
+                        localStorage.setItem('eden_email', data.email);
+                        
+                        // Check if password must be changed
+                        if (data.must_change_password) {
+                            window.location.href = '/change-password';
+                            return;
+                        }
+                        
+                        // Redirect based on role
+                        if (data.role === 'super_admin') {
+                            window.location.href = '/super-admin';
+                        } else {
+                            window.location.href = '/admin';
+                        }
+                    } else {
+                        console.log('Auto-login failed:', data.error);
+                        // Clear invalid token
+                        localStorage.removeItem('eden_persistent_token');
+                    }
+                })
+                .catch(err => {
+                    console.error('Auto-login error:', err);
+                    localStorage.removeItem('eden_persistent_token');
+                });
+            }
+        });
+        
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const browserFingerprint = generateBrowserFingerprint();
             
-            // Use email as username for the API
-            fetch('/api/login', {
+            // Use persistent login endpoint
+            fetch('/api/auth/admin-persistent-login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    username: email, 
-                    password: password 
+                    email: email, 
+                    password: password,
+                    browser_fingerprint: browserFingerprint
                 })
             })
             .then(res => {
@@ -102,9 +175,14 @@
             })
             .then(data => {
                 if (data.success) {
-                    localStorage.setItem('eden_token', data.token);
+                    // Save persistent token
+                    localStorage.setItem('eden_persistent_token', data.persistent_token);
+                    localStorage.setItem('eden_token', data.persistent_token);
                     localStorage.setItem('eden_role', data.role);
                     localStorage.setItem('eden_admin_id', data.admin_id);
+                    localStorage.setItem('eden_email', data.email);
+                    
+                    console.log('Login successful with persistent session (expires in ' + data.expires_in_days + ' days)');
                     
                     // Check if password must be changed
                     if (data.must_change_password) {

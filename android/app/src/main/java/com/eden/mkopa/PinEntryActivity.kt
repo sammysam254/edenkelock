@@ -1,10 +1,17 @@
 package com.eden.mkopa
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.telephony.TelephonyManager
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -13,10 +20,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import org.json.JSONObject
@@ -35,6 +45,10 @@ class PinEntryActivity : AppCompatActivity() {
     private lateinit var titleText: TextView
     
     private val BASE_URL = "https://eden-mkopa.onrender.com"
+    private val TAG = "PinEntryActivity"
+    private val PERMISSION_REQUEST_CODE = 1001
+    
+    private var deviceFingerprint: String? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +66,121 @@ class PinEntryActivity : AppCompatActivity() {
         errorText = findViewById(R.id.errorText)
         titleText = findViewById(R.id.titleText)
         
-        // Check if user has logged in before
+        // Generate device fingerprint
+        generateDeviceFingerprint()
+        
+        // Try auto-login first
+        tryAutoLogin()
+    }
+    
+    @SuppressLint("HardwareIds")
+    private fun generateDeviceFingerprint() {
+        try {
+            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            
+            val imei = if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    telephonyManager.imei ?: "unknown"
+                } else {
+                    @Suppress("DEPRECATION")
+                    telephonyManager.deviceId ?: "unknown"
+                }
+            } else {
+                "no_permission"
+            }
+            
+            val serial = Build.SERIAL ?: "unknown"
+            val model = Build.MODEL ?: "unknown"
+            val brand = Build.BRAND ?: "unknown"
+            
+            // Create unique device fingerprint
+            deviceFingerprint = "${imei}_${serial}_${model}_${brand}".replace(" ", "_")
+            
+            Log.d(TAG, "Device fingerprint generated: ${deviceFingerprint?.take(10)}...")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to generate device fingerprint", e)
+            deviceFingerprint = "fallback_${Build.MODEL}_${Build.BRAND}".replace(" ", "_")
+        }
+    }
+    
+    private fun tryAutoLogin() {
+        val persistentToken = getPersistentToken()
+        
+        if (persistentToken != null && deviceFingerprint != null) {
+            Log.d(TAG, "Attempting auto-login with persistent token")
+            
+            errorText.visibility = View.VISIBLE
+            errorText.text = "Checking saved login..."
+            
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val url = URL("$BASE_URL/api/auth/device-auto-login")
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.requestMethod = "POST"
+                    connection.setRequestProperty("Content-Type", "application/json")
+                    connection.doOutput = true
+                    
+                    val jsonBody = JSONObject()
+                    jsonBody.put("device_fingerprint", deviceFingerprint)
+                    jsonBody.put("persistent_token", persistentToken)
+                    
+                    connection.outputStream.write(jsonBody.toString().toByteArray())
+                    
+                    val responseCode = connection.responseCode
+                    if (responseCode == 200) {
+                        val response = connection.inputStream.bufferedReader().readText()
+                        val jsonResponse = JSONObject(response)
+                        
+                        withContext(Dispatchers.Main) {
+                            if (jsonResponse.getBoolean("success")) {
+                                Log.d(TAG, "Auto-login successful")
+                                
+                                // Save customer info
+                                val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
+                                prefs.edit()
+                                    .putBoolean("pin_completed", true)
+                                    .putString("customer_phone", jsonResponse.getString("customer_phone"))
+                                    .putString("customer_id", jsonResponse.getString("customer_id"))
+                                    .putString("device_id", jsonResponse.getString("device_id"))
+                                    .apply()
+                                
+                                // Go directly to MainActivity
+                                val intent = Intent(this@PinEntryActivity, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                                return@withContext
+                            } else {
+                                Log.w(TAG, "Auto-login failed: ${jsonResponse.optString("error")}")
+                                showManualLogin()
+                            }
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Log.w(TAG, "Auto-login request failed: $responseCode")
+                            showManualLogin()
+                        }
+                    }
+                    
+                    connection.disconnect()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Auto-login error", e)
+                    withContext(Dispatchers.Main) {
+                        showManualLogin()
+                    }
+                }
+            }
+        } else {
+            Log.d(TAG, "No persistent token found, showing manual login")
+            showManualLogin()
+        }
+    }
+    
+    private fun showManualLogin() {
+        errorText.visibility = View.GONE
+        
+        // Check if user has logged in before (fallback to SharedPreferences)
         val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
         val savedPhone = prefs.getString("customer_phone", null)
         
@@ -62,6 +190,52 @@ class PinEntryActivity : AppCompatActivity() {
         } else {
             // New user - show phone number entry first
             showNewUserPhoneEntry()
+        }
+    }
+    
+    private fun getPersistentToken(): String? {
+        return try {
+            // Try to read from external storage first (survives app updates)
+            val externalDir = getExternalFilesDir(null)
+            if (externalDir != null) {
+                val tokenFile = File(externalDir, "eden_persistent_token.txt")
+                if (tokenFile.exists()) {
+                    val token = tokenFile.readText().trim()
+                    Log.d(TAG, "Persistent token found in external storage")
+                    return token
+                }
+            }
+            
+            // Fallback to SharedPreferences
+            val prefs = getSharedPreferences("eden_persistent", Context.MODE_PRIVATE)
+            val token = prefs.getString("persistent_token", null)
+            if (token != null) {
+                Log.d(TAG, "Persistent token found in SharedPreferences")
+            }
+            token
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get persistent token", e)
+            null
+        }
+    }
+    
+    private fun savePersistentToken(token: String) {
+        try {
+            // Save to external storage (survives app updates)
+            val externalDir = getExternalFilesDir(null)
+            if (externalDir != null) {
+                val tokenFile = File(externalDir, "eden_persistent_token.txt")
+                tokenFile.writeText(token)
+                Log.d(TAG, "Persistent token saved to external storage")
+            }
+            
+            // Also save to SharedPreferences as backup
+            val prefs = getSharedPreferences("eden_persistent", Context.MODE_PRIVATE)
+            prefs.edit().putString("persistent_token", token).apply()
+            Log.d(TAG, "Persistent token saved to SharedPreferences")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save persistent token", e)
         }
     }
     
@@ -212,18 +386,24 @@ class PinEntryActivity : AppCompatActivity() {
             return
         }
         
+        if (deviceFingerprint == null) {
+            showError("Device fingerprint not available")
+            return
+        }
+        
         errorText.visibility = View.VISIBLE
         errorText.text = "Verifying..."
         
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val url = URL("$BASE_URL/api/customer/login")
+                val url = URL("$BASE_URL/api/auth/device-login")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")
                 connection.doOutput = true
                 
                 val jsonBody = JSONObject()
+                jsonBody.put("device_fingerprint", deviceFingerprint)
                 jsonBody.put("phone_number", phone)
                 jsonBody.put("pin", pin)
                 
@@ -236,6 +416,12 @@ class PinEntryActivity : AppCompatActivity() {
                     
                     withContext(Dispatchers.Main) {
                         if (jsonResponse.getBoolean("success")) {
+                            // Save persistent token
+                            val persistentToken = jsonResponse.getString("persistent_token")
+                            savePersistentToken(persistentToken)
+                            
+                            Log.d(TAG, "Login successful with persistent token")
+                            
                             // Check if PIN must be changed
                             val mustChangePin = jsonResponse.optBoolean("must_change_pin", false)
                             
@@ -245,7 +431,7 @@ class PinEntryActivity : AppCompatActivity() {
                                 return@withContext
                             }
                             
-                            // Login successful - check if we need to verify loan balance
+                            // Check if we need to verify loan balance
                             val checkBalanceAfterLogin = intent.getBooleanExtra("check_balance_after_login", false)
                             val factoryResetRecovery = intent.getBooleanExtra("factory_reset_recovery", false)
                             
@@ -258,6 +444,8 @@ class PinEntryActivity : AppCompatActivity() {
                                 prefs.edit()
                                     .putBoolean("pin_completed", true)
                                     .putString("customer_phone", phone)
+                                    .putString("customer_id", jsonResponse.getString("customer_id"))
+                                    .putString("device_id", jsonResponse.getString("device_id"))
                                     .apply()
                                 
                                 val intent = Intent(this@PinEntryActivity, MainActivity::class.java)

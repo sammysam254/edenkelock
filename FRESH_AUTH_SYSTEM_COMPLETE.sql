@@ -110,6 +110,32 @@ CREATE TABLE payments (
     recorded_by UUID REFERENCES admins(id)
 );
 
+-- PERSISTENT SESSIONS TABLE - Customer device sessions that survive app updates
+CREATE TABLE persistent_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_fingerprint TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
+    device_id TEXT,
+    persistent_token TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_accessed TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- ADMIN SESSIONS TABLE - Admin browser sessions that survive browser restarts
+CREATE TABLE admin_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    admin_id UUID REFERENCES admins(id) NOT NULL,
+    email TEXT NOT NULL,
+    browser_fingerprint TEXT,
+    persistent_token TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_accessed TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT true
+);
+
 -- ============================================
 -- STEP 3: CREATE INDEXES FOR PERFORMANCE
 -- ============================================
@@ -125,6 +151,10 @@ CREATE INDEX idx_devices_imei ON devices(imei);
 CREATE INDEX idx_security_violations_device_id ON security_violations(device_id);
 CREATE INDEX idx_device_logs_device_id ON device_logs(device_id);
 CREATE INDEX idx_payments_customer_phone ON payments(customer_phone);
+CREATE INDEX idx_persistent_sessions_device_fingerprint ON persistent_sessions(device_fingerprint);
+CREATE INDEX idx_persistent_sessions_token ON persistent_sessions(persistent_token);
+CREATE INDEX idx_admin_sessions_admin_id ON admin_sessions(admin_id);
+CREATE INDEX idx_admin_sessions_token ON admin_sessions(persistent_token);
 
 -- ============================================
 -- STEP 4: ENABLE ROW LEVEL SECURITY
