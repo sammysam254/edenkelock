@@ -105,6 +105,39 @@ BEGIN
         ALTER TABLE devices ADD COLUMN token TEXT;
         RAISE NOTICE 'Added token column';
     END IF;
+
+    -- Add lock_reason column if it doesn't exist
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'devices' 
+        AND column_name = 'lock_reason'
+    ) THEN
+        ALTER TABLE devices ADD COLUMN lock_reason TEXT;
+        RAISE NOTICE 'Added lock_reason column';
+    END IF;
+
+    -- Add locked_by column if it doesn't exist
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'devices' 
+        AND column_name = 'locked_by'
+    ) THEN
+        ALTER TABLE devices ADD COLUMN locked_by TEXT;
+        RAISE NOTICE 'Added locked_by column';
+    END IF;
+
+    -- Add locked_at column if it doesn't exist
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'devices' 
+        AND column_name = 'locked_at'
+    ) THEN
+        ALTER TABLE devices ADD COLUMN locked_at TIMESTAMP WITH TIME ZONE;
+        RAISE NOTICE 'Added locked_at column';
+    END IF;
 END $$;
 
 -- Remove NOT NULL constraint from pin_hash if it exists
@@ -117,6 +150,32 @@ EXCEPTION
         RAISE NOTICE 'pin_hash column does not have NOT NULL constraint or does not exist';
 END $$;
 
+-- Add missing columns to admins table if they don't exist
+DO $$ 
+BEGIN
+    -- Add token column to admins table if it doesn't exist
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'admins' 
+        AND column_name = 'token'
+    ) THEN
+        ALTER TABLE admins ADD COLUMN token TEXT;
+        RAISE NOTICE 'Added token column to admins table';
+    END IF;
+
+    -- Add last_login column to admins table if it doesn't exist
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'admins' 
+        AND column_name = 'last_login'
+    ) THEN
+        ALTER TABLE admins ADD COLUMN last_login TIMESTAMP WITH TIME ZONE;
+        RAISE NOTICE 'Added last_login column to admins table';
+    END IF;
+END $$;
+
 -- Show current table structure
 SELECT 
     'COLUMN VERIFICATION' as info,
@@ -126,7 +185,7 @@ SELECT
     column_default
 FROM information_schema.columns 
 WHERE table_name = 'devices'
-AND column_name IN ('pin_hash', 'is_locked', 'registered_at', 'last_login', 'device_fingerprint', 'token', 'must_change_pin', 'enrolled_by', 'imei')
+AND column_name IN ('pin_hash', 'is_locked', 'registered_at', 'last_login', 'device_fingerprint', 'token', 'must_change_pin', 'enrolled_by', 'imei', 'lock_reason', 'locked_by', 'locked_at')
 ORDER BY column_name;
 
 COMMIT;

@@ -236,11 +236,16 @@ def api_login():
                 admin = response.data[0]
                 token = generate_token()
                 
-                # Update last login and token
-                supabase.table("admins").update({
-                    "token": token,
-                    "last_login": "now()"
-                }).eq("id", admin["id"]).execute()
+                # Update last login and token (handle missing columns gracefully)
+                update_data = {"token": token}
+                
+                try:
+                    supabase.table("admins").select("last_login").limit(1).execute()
+                    update_data["last_login"] = "now()"
+                except:
+                    logger.info("last_login column not found in admins table, skipping")
+                
+                supabase.table("admins").update(update_data).eq("id", admin["id"]).execute()
                 
                 logger.info(f"Login successful for: {username}")
                 
@@ -319,30 +324,70 @@ def get_device_status(device_id):
 
 @app.route("/api/devices/<device_id>/lock", methods=["POST"])
 def lock_device(device_id):
+    """Lock a device remotely with complete lockdown"""
     try:
+        logger.info(f"Lock device request for device_id: {device_id}")
+        
+        # Get and verify admin token
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        logger.info(f"Admin token received: {token[:10] if token else 'None'}...")
+        
         admin = verify_admin_token(token)
         
         if not admin:
+            logger.warning(f"Unauthorized lock attempt for device {device_id}")
             return jsonify({"success": False, "error": "Unauthorized"}), 403
         
+        logger.info(f"Admin verified: {admin.get('email', 'unknown')}")
+        
+        # Get request data
         data = request.json or {}
         lock_reason = data.get("lock_reason", "ADMIN_LOCKED")
         
-        supabase.table("devices").update({
+        logger.info(f"Locking device {device_id} with reason: {lock_reason}")
+        
+        # Update device status in database (handle missing columns gracefully)
+        update_data = {
             "status": "locked",
-            "is_locked": True,
-            "lock_reason": lock_reason,
-            "locked_by": admin["id"],
-            "locked_at": "now()"
-        }).eq("device_id", device_id).execute()
+            "is_locked": True
+        }
+        
+        # Add optional columns if they exist
+        try:
+            supabase.table("devices").select("lock_reason").limit(1).execute()
+            update_data["lock_reason"] = lock_reason
+        except:
+            logger.info("lock_reason column not found, skipping")
+        
+        try:
+            supabase.table("devices").select("locked_by").limit(1).execute()
+            update_data["locked_by"] = admin["id"]
+        except:
+            logger.info("locked_by column not found, skipping")
+        
+        try:
+            supabase.table("devices").select("locked_at").limit(1).execute()
+            update_data["locked_at"] = "now()"
+        except:
+            logger.info("locked_at column not found, skipping")
+        
+        logger.info(f"Updating device with data: {update_data}")
+        
+        update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+        
+        if not update_response.data:
+            logger.error(f"Failed to update device {device_id} in database")
+            return jsonify({"success": False, "error": "Failed to update device status"}), 500
+        
+        logger.info(f"Device {device_id} successfully locked in database")
         
         # Send complete lockdown command to device
-        send_device_notification(
-            device_id, 
-            None,  # Will be filled from device record
-            "🔒 DEVICE LOCKED - COMPLETE LOCKDOWN", 
-            f"""
+        try:
+            send_device_notification(
+                device_id, 
+                None,  # Will be filled from device record
+                "🔒 DEVICE LOCKED - COMPLETE LOCKDOWN", 
+                f"""
 DEVICE COMPLETELY LOCKED BY ADMINISTRATOR
 
 ⚠️ ALL FUNCTIONS DISABLED:
@@ -357,19 +402,27 @@ Locked by: Admin
 Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 Contact administrator to unlock this device.
-            """.strip(),
-            "admin_lock"
-        )
+                """.strip(),
+                "admin_lock"
+            )
+            logger.info(f"Lock notification sent to device {device_id}")
+        except Exception as notification_error:
+            logger.warning(f"Failed to send lock notification to device {device_id}: {notification_error}")
+            # Continue even if notification fails
         
         return jsonify({
             "success": True, 
             "message": "Device locked with complete lockdown", 
             "is_locked": True,
-            "lockdown_level": "COMPLETE"
+            "lockdown_level": "COMPLETE",
+            "device_id": device_id
         })
+        
     except Exception as e:
-        logger.error(f"Lock device error: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        logger.error(f"Lock device error for {device_id}: {e}")
+        import traceback
+        logger.error(f"Lock device traceback: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": f"Lock device failed: {str(e)}"}), 500
 
 @app.route("/api/devices/<device_id>/unlock", methods=["POST"])
 def unlock_device(device_id):
@@ -1856,8 +1909,8 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 21,
-        "version_name": "1.9.3",
+        "version_code": 22,
+        "version_name": "1.9.4",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
@@ -1865,7 +1918,12 @@ def get_app_version():
         "customer_self_registration": True,
         "improved_phone_flow": True,
         "registration_fixes": True,
+        "mobile_dashboard": True,
         "features": [
+            "Clean mobile-friendly customer dashboard",
+            "Compact card layout optimized for mobile",
+            "Properly sized buttons and touch targets",
+            "Enhanced device locking with better error handling",
             "Fixed customer registration issues",
             "Enhanced error handling and logging",
             "Database column compatibility fixes",
@@ -1885,7 +1943,7 @@ def get_app_version():
             "Maximum Security Restrictions",
             "Admin Remote Device Control"
         ],
-        "changelog": "Fixed customer registration issues: Enhanced error handling, database column compatibility, better logging for debugging registration failures. Improved phone number flow and validation."
+        "changelog": "Mobile-optimized customer dashboard: Clean card layout, compact design, properly sized buttons, enhanced device locking with better error handling, and improved mobile user experience."
     })
 
 # ============================================

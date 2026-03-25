@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Dashboard - Eden</title>
-    <link rel="stylesheet" href="/static/css/style.css">
     <style>
         * {
             margin: 0;
@@ -13,124 +12,174 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
+            color: #333;
         }
         
         .dashboard-container {
-            max-width: 600px;
+            max-width: 400px;
             margin: 0 auto;
-        }
-        
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header h1 {
-            color: #059669;
-            font-size: 1.5em;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            color: #6b7280;
-            font-size: 0.9em;
+            padding: 10px;
         }
         
         .card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
-        .card-title {
-            font-size: 1.1em;
-            color: #374151;
-            margin-bottom: 15px;
-            font-weight: 600;
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 12px;
         }
         
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-bottom: 15px;
+        .card-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
-        .status-active {
-            background: #d1fae5;
-            color: #059669;
-        }
-        
-        .status-locked {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
+        .card-label {
+            font-size: 11px;
             color: #6b7280;
-            font-size: 0.9em;
+            margin-bottom: 4px;
+            font-weight: 500;
         }
         
-        .info-value {
-            color: #111827;
+        .card-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .card-value.status {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-value.amount {
+            font-size: 18px;
+        }
+        
+        .card-value.balance {
+            color: #dc2626;
+            font-size: 20px;
+        }
+        
+        .card-value.name {
+            font-size: 14px;
+            color: #059669;
+            text-transform: lowercase;
+        }
+        
+        .progress-section {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #10b981;
             font-weight: 600;
         }
         
-        .amount-large {
-            font-size: 2em;
-            color: #059669;
-            font-weight: 700;
-            text-align: center;
-            margin: 20px 0;
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
         }
         
         .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background: #059669;
-            color: white;
+            padding: 12px 8px;
             border: none;
-            border-radius: 10px;
-            font-size: 1em;
+            border-radius: 8px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.3s;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
         
-        .btn:hover {
-            background: #047857;
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-1px);
         }
         
         .btn-secondary {
-            background: #6b7280;
+            background: #f59e0b;
+            color: white;
         }
         
         .btn-secondary:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+        
+        .btn-tertiary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-tertiary:hover {
             background: #4b5563;
+            transform: translateY(-1px);
+        }
+        
+        .btn-icon {
+            font-size: 16px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 16px;
+            color: white;
+            font-size: 10px;
+            opacity: 0.8;
         }
         
         .loading {
@@ -142,70 +191,114 @@
         .error {
             background: #fee2e2;
             color: #dc2626;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 360px) {
+            .dashboard-container {
+                padding: 5px;
+            }
+            
+            .card-item {
+                padding: 10px;
+            }
+            
+            .card-value {
+                font-size: 14px;
+            }
+            
+            .card-value.amount {
+                font-size: 16px;
+            }
+            
+            .card-value.balance {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
         <div id="loading" class="loading">
-            <h2>Loading your dashboard...</h2>
+            <h2>Loading...</h2>
         </div>
         
         <div id="dashboard" style="display: none;">
-            <div class="header">
-                <h1>🏠 My Dashboard</h1>
-                <p id="customerName">Welcome back!</p>
-            </div>
-            
-            <div class="card">
-                <div class="card-title">Device Status</div>
-                <div id="deviceStatus" class="status-badge status-active">Active</div>
-                <div class="info-row">
-                    <span class="info-label">Device ID</span>
-                    <span class="info-value" id="deviceId">-</span>
+            <!-- Device Info Grid -->
+            <div class="card-grid">
+                <div class="card-item">
+                    <div class="card-label">Device ID</div>
+                    <div class="card-value" id="deviceId">EDN800/01</div>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Serial Number</span>
-                    <span class="info-value" id="serialNumber">-</span>
+                <div class="card-item">
+                    <div class="card-label">Device Status</div>
+                    <div class="card-value status" id="deviceStatus">ACTIVE</div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="card-title">Loan Balance</div>
-                <div class="amount-large" id="loanBalance">KES 0</div>
-                <div class="info-row">
-                    <span class="info-label">Total Loan</span>
-                    <span class="info-value" id="totalLoan">KES 0</span>
+            <!-- Loan Info Grid -->
+            <div class="card-grid">
+                <div class="card-item">
+                    <div class="card-label">Total Loan Amount</div>
+                    <div class="card-value amount" id="totalLoan">KES<br>20,000</div>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Amount Paid</span>
-                    <span class="info-value" id="amountPaid">KES 0</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Next Payment</span>
-                    <span class="info-value" id="nextPayment">-</span>
+                <div class="card-item">
+                    <div class="card-label">Amount Paid</div>
+                    <div class="card-value amount" id="amountPaid">KES<br>2,000</div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="card-title">Payment History</div>
-                <div id="paymentHistory">
-                    <p style="color: #6b7280; text-align: center;">No payments yet</p>
+            <!-- Balance & Customer Grid -->
+            <div class="card-grid">
+                <div class="card-item">
+                    <div class="card-label">Remaining Balance</div>
+                    <div class="card-value balance" id="loanBalance">KES<br>18,000</div>
+                </div>
+                <div class="card-item">
+                    <div class="card-label">Customer Name</div>
+                    <div class="card-value name" id="customerName">samson<br>matata<br>mwinzi</div>
                 </div>
             </div>
             
-            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            <!-- Payment Progress -->
+            <div class="progress-section">
+                <div class="progress-title">Payment Progress</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+                </div>
+                <div class="progress-text" id="progressText">10%</div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="unlockDevice()">
+                    <span class="btn-icon">🔓</span>
+                    <span>Unlock Device</span>
+                </button>
+                <button class="btn btn-secondary" onclick="makePayment()">
+                    <span class="btn-icon">💳</span>
+                    <span>Make Payment</span>
+                </button>
+                <button class="btn btn-tertiary" onclick="showHistory()">
+                    <span class="btn-icon">📋</span>
+                    <span>Payment History</span>
+                </button>
+            </div>
         </div>
         
         <div id="error" style="display: none;">
             <div class="error">
                 <p id="errorMessage">Unable to load dashboard</p>
             </div>
-            <button class="btn" onclick="location.reload()">Retry</button>
-            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            <button class="btn btn-primary" onclick="location.reload()" style="width: 100%; margin-bottom: 8px;">Retry</button>
+            <button class="btn btn-tertiary" onclick="logout()" style="width: 100%;">Logout</button>
+        </div>
+        
+        <div class="footer">
+            Contact Sam 0706499848 for softwares and AI tools
         </div>
     </div>
 
@@ -219,7 +312,6 @@
         
         async function loadDashboard() {
             try {
-                // Fetch customer data
                 const response = await fetch(`/api/customer/dashboard?phone=${encodeURIComponent(customerPhone)}`);
                 const data = await response.json();
                 
@@ -227,44 +319,38 @@
                     throw new Error(data.error || 'Failed to load dashboard');
                 }
                 
-                // Update UI with customer data
-                document.getElementById('customerName').textContent = `${data.customer.full_name || 'Welcome'}`;
-                
-                // Device info
+                // Update device info
                 if (data.device) {
-                    document.getElementById('deviceId').textContent = data.device.device_id || '-';
-                    document.getElementById('serialNumber').textContent = data.device.serial_number || '-';
+                    document.getElementById('deviceId').textContent = data.device.device_id || 'EDN800/01';
                     
-                    const statusBadge = document.getElementById('deviceStatus');
+                    const statusElement = document.getElementById('deviceStatus');
                     if (data.device.is_locked) {
-                        statusBadge.textContent = 'Locked';
-                        statusBadge.className = 'status-badge status-locked';
+                        statusElement.textContent = 'LOCKED';
+                        statusElement.style.color = '#dc2626';
                     } else {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.className = 'status-badge status-active';
+                        statusElement.textContent = 'ACTIVE';
+                        statusElement.style.color = '#10b981';
                     }
                 }
                 
-                // Loan info
+                // Update loan info
                 const balance = parseFloat(data.customer.loan_balance || 0);
                 const total = parseFloat(data.customer.total_loan_amount || 0);
                 const paid = total - balance;
+                const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
                 
-                document.getElementById('loanBalance').textContent = `KES ${balance.toLocaleString()}`;
-                document.getElementById('totalLoan').textContent = `KES ${total.toLocaleString()}`;
-                document.getElementById('amountPaid').textContent = `KES ${paid.toLocaleString()}`;
-                document.getElementById('nextPayment').textContent = data.customer.next_payment_date || 'Not set';
+                document.getElementById('totalLoan').innerHTML = `KES<br>${total.toLocaleString()}`;
+                document.getElementById('amountPaid').innerHTML = `KES<br>${paid.toLocaleString()}`;
+                document.getElementById('loanBalance').innerHTML = `KES<br>${balance.toLocaleString()}`;
                 
-                // Payment history
-                if (data.payments && data.payments.length > 0) {
-                    const historyHTML = data.payments.map(payment => `
-                        <div class="info-row">
-                            <span class="info-label">${new Date(payment.payment_date).toLocaleDateString()}</span>
-                            <span class="info-value">KES ${parseFloat(payment.amount).toLocaleString()}</span>
-                        </div>
-                    `).join('');
-                    document.getElementById('paymentHistory').innerHTML = historyHTML;
-                }
+                // Update customer name
+                const customerName = data.customer.full_name || data.customer.customer_name || 'Customer';
+                const nameParts = customerName.toLowerCase().split(' ');
+                document.getElementById('customerName').innerHTML = nameParts.join('<br>');
+                
+                // Update progress
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = `${progress}%`;
                 
                 // Show dashboard
                 document.getElementById('loading').style.display = 'none';
@@ -276,6 +362,18 @@
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('errorMessage').textContent = error.message;
             }
+        }
+        
+        function unlockDevice() {
+            alert('Device unlock requested. Please wait for admin approval.');
+        }
+        
+        function makePayment() {
+            alert('Payment feature coming soon. Please contact support for payments.');
+        }
+        
+        function showHistory() {
+            alert('Payment history feature coming soon.');
         }
         
         function logout() {
