@@ -1808,14 +1808,18 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 19,
-        "version_name": "1.9.1",
+        "version_code": 20,
+        "version_name": "1.9.2",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
         "factory_reset_protection": True,
         "customer_self_registration": True,
+        "improved_phone_flow": True,
         "features": [
+            "Improved phone number entry flow",
+            "Better 07 format display with +254 server submission",
+            "Enhanced phone number validation",
             "Customer self-registration",
             "No default PINs",
             "Immediate device activation",
@@ -1828,8 +1832,9 @@ def get_app_version():
             "Automatic Factory Reset Recovery",
             "Maximum Security Restrictions",
             "Admin Remote Device Control"
+        ]
         ],
-        "changelog": "Added customer self-registration system. Customers now set their own PINs during registration for better security and user experience."
+        "changelog": "Improved phone number entry flow: After Eden logo, phone entry appears first, waits for complete 10-digit number, uses 07 format for display but submits +254 format to server, better user experience with enhanced validation."
     })
 
 # ============================================

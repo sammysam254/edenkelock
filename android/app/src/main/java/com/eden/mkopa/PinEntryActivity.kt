@@ -259,7 +259,7 @@ class PinEntryActivity : AppCompatActivity() {
             imm.showSoftInput(pinBox1, InputMethodManager.SHOW_IMPLICIT)
         }, 200)
         
-        // Add phone number formatting
+        // Add phone number formatting for returning users
         phoneInput.addTextChangedListener(object : TextWatcher {
             private var isFormatting = false
             
@@ -269,7 +269,7 @@ class PinEntryActivity : AppCompatActivity() {
                 if (isFormatting) return
                 
                 isFormatting = true
-                val formatted = formatPhoneNumber(s.toString())
+                val formatted = formatPhoneForDisplay(s.toString())
                 if (formatted != s.toString()) {
                     phoneInput.setText(formatted)
                     phoneInput.setSelection(formatted.length)
@@ -308,6 +308,12 @@ class PinEntryActivity : AppCompatActivity() {
         newUserLayout.visibility = View.VISIBLE
         titleText.text = "Enter Your Phone Number"
         
+        // Clear any previous error messages
+        errorText.visibility = View.GONE
+        
+        // Clear the input field
+        newPhoneInput.text.clear()
+        
         newPhoneInput.requestFocus()
         newPhoneInput.postDelayed({
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -323,26 +329,40 @@ class PinEntryActivity : AppCompatActivity() {
                 if (isFormatting) return
                 
                 isFormatting = true
-                val formatted = formatPhoneNumber(s.toString())
+                val formatted = formatPhoneForDisplay(s.toString())
                 if (formatted != s.toString()) {
                     newPhoneInput.setText(formatted)
                     newPhoneInput.setSelection(formatted.length)
                 }
                 isFormatting = false
                 
+                // Clear any previous error messages when user types
+                errorText.visibility = View.GONE
+                
+                // Only check when we have a complete 10-digit number (07xxxxxxxx)
                 val phone = formatted
-                if (phone.length >= 10) {
-                    // Check if account exists
-                    checkPhoneNumber(phone)
+                if (phone.length == 10 && phone.startsWith("07")) {
+                    // Wait a moment to avoid too many API calls while typing
+                    newPhoneInput.removeCallbacks(checkPhoneRunnable)
+                    newPhoneInput.postDelayed(checkPhoneRunnable, 1000) // Increased delay for better UX
                 }
             }
         })
     }
     
+    // Runnable to check phone number after user stops typing
+    private val checkPhoneRunnable = Runnable {
+        val phoneDisplay = newPhoneInput.text.toString()
+        if (phoneDisplay.length == 10 && phoneDisplay.startsWith("07")) {
+            val phoneForServer = formatPhoneForServer(phoneDisplay)
+            checkPhoneNumber(phoneForServer, phoneDisplay)
+        }
+    }
+    
     /**
      * Show customer registration screen for enrolled but unregistered customers
      */
-    private fun showCustomerRegistration(phone: String, customerName: String) {
+    private fun showCustomerRegistration(phoneForServer: String, phoneDisplay: String, customerName: String) {
         // Hide other layouts
         returningUserLayout.visibility = View.GONE
         newUserLayout.visibility = View.GONE
@@ -377,17 +397,17 @@ class PinEntryActivity : AppCompatActivity() {
             
             if (newPin.length != 4 || confirmPin.length != 4) {
                 Toast.makeText(this, "Please enter 4 digits for both PINs", Toast.LENGTH_SHORT).show()
-                showCustomerRegistration(phone, customerName) // Show dialog again
+                showCustomerRegistration(phoneForServer, phoneDisplay, customerName) // Show dialog again
                 return@setPositiveButton
             }
             
             if (newPin != confirmPin) {
                 Toast.makeText(this, "PINs do not match", Toast.LENGTH_SHORT).show()
-                showCustomerRegistration(phone, customerName) // Show dialog again
+                showCustomerRegistration(phoneForServer, phoneDisplay, customerName) // Show dialog again
                 return@setPositiveButton
             }
             
-            registerCustomer(phone, newPin)
+            registerCustomer(phoneForServer, newPin)
         }
         
         builder.setNegativeButton("Cancel") { _, _ ->
@@ -476,9 +496,41 @@ class PinEntryActivity : AppCompatActivity() {
     }
 
     /**
-     * Format phone number to consistent +254 format
+     * Format phone number for display (07 format)
+     * Improved to handle various input formats and ensure 07 display
      */
-    private fun formatPhoneNumber(phone: String): String {
+    private fun formatPhoneForDisplay(phone: String): String {
+        if (phone.isEmpty()) return phone
+        
+        // Remove all non-digits
+        val digits = phone.replace(Regex("[^0-9]"), "")
+        
+        return when {
+            // If starts with 254, convert to 07 format
+            digits.startsWith("254") && digits.length >= 12 -> "0${digits.substring(3, 12)}"
+            // If starts with 07, keep as is but limit to 10 digits
+            digits.startsWith("07") -> digits.take(10)
+            // If starts with 7 (without 0), add 0 and limit to 10 digits
+            digits.startsWith("7") && digits.length >= 9 -> "0${digits.take(9)}"
+            // If starts with 0 but not 07, try to format correctly
+            digits.startsWith("0") && digits.length >= 10 -> {
+                if (digits.startsWith("07")) digits.take(10) else "07${digits.substring(1).take(8)}"
+            }
+            // For other cases, try to create valid 07 format
+            digits.length >= 9 -> "07${digits.take(8)}"
+            // If less than 9 digits, just add 0 prefix if needed
+            digits.length > 0 -> {
+                if (digits.startsWith("0")) digits else "0$digits"
+            }
+            else -> phone
+        }
+    }
+    
+    /**
+     * Convert 07 format to +254 format for server submission
+     * Improved to handle edge cases and ensure correct +254 format
+     */
+    private fun formatPhoneForServer(phone: String): String {
         if (phone.isEmpty()) return phone
         
         // Remove all non-digits
@@ -486,24 +538,24 @@ class PinEntryActivity : AppCompatActivity() {
         
         return when {
             // Already starts with 254
-            digits.startsWith("254") && digits.length >= 12 -> "+${digits}"
-            // Starts with 07
-            digits.startsWith("07") && digits.length >= 10 -> "+254${digits.substring(1)}"
+            digits.startsWith("254") && digits.length >= 12 -> "+${digits.take(12)}"
+            // Starts with 07 - convert to +254
+            digits.startsWith("07") && digits.length >= 10 -> "+254${digits.substring(1, 10)}"
+            // Starts with 0 and has enough digits
+            digits.startsWith("0") && digits.length >= 10 -> "+254${digits.substring(1, 10)}"
             // Starts with 7 (without 0)
-            digits.startsWith("7") && digits.length >= 9 -> "+254${digits}"
-            // Just digits, assume it needs +254
-            digits.length >= 9 -> "+254${digits}"
-            // Return as is if too short
+            digits.startsWith("7") && digits.length >= 9 -> "+254${digits.take(9)}"
+            // Default case - assume it's a 9-digit number without country code
+            digits.length >= 9 -> "+254${digits.take(9)}"
             else -> phone
         }
     }
     
-    private fun checkPhoneNumber(phone: String) {
+    private fun checkPhoneNumber(phoneForServer: String, phoneDisplay: String) {
         errorText.visibility = View.VISIBLE
-        errorText.text = "Checking account..."
+        errorText.text = "Verifying phone number..."
         
-        val formattedPhone = formatPhoneNumber(phone)
-        Log.d(TAG, "Checking phone: $formattedPhone (from input: $phone)")
+        Log.d(TAG, "Checking phone: $phoneForServer (display: $phoneDisplay)")
         
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -514,7 +566,7 @@ class PinEntryActivity : AppCompatActivity() {
                 connection.doOutput = true
                 
                 val jsonBody = JSONObject()
-                jsonBody.put("phone_number", formattedPhone)
+                jsonBody.put("phone_number", phoneForServer)
                 
                 connection.outputStream.write(jsonBody.toString().toByteArray())
                 
@@ -533,21 +585,31 @@ class PinEntryActivity : AppCompatActivity() {
                             "login" -> {
                                 // Customer is enrolled and registered - show login
                                 val prefs = getSharedPreferences("eden_prefs", Context.MODE_PRIVATE)
-                                prefs.edit().putString("customer_phone", formattedPhone).apply()
+                                prefs.edit().putString("customer_phone", phoneForServer).apply()
                                 
-                                errorText.visibility = View.GONE
-                                showReturningUserLogin(formattedPhone)
+                                errorText.visibility = View.VISIBLE
+                                errorText.text = "Account found! Please enter your PIN."
+                                
+                                // Small delay for better UX, then show login
+                                newPhoneInput.postDelayed({
+                                    showReturningUserLogin(phoneDisplay) // Show 07 format for display
+                                }, 1000)
                             }
                             "register" -> {
                                 // Customer is enrolled but not registered - show registration
-                                errorText.visibility = View.GONE
-                                showCustomerRegistration(formattedPhone, customerName)
+                                errorText.visibility = View.VISIBLE
+                                errorText.text = "Device enrolled! Setting up your account..."
+                                
+                                // Small delay for better UX, then show registration
+                                newPhoneInput.postDelayed({
+                                    showCustomerRegistration(phoneForServer, phoneDisplay, customerName)
+                                }, 1000)
                             }
                             else -> {
                                 // Not enrolled
                                 errorText.visibility = View.VISIBLE
                                 errorText.text = "Phone number not enrolled. Please contact support to enroll your device first."
-                                newPhoneInput.text.clear()
+                                // Don't clear the input, let user try again or contact support
                             }
                         }
                     }
@@ -599,7 +661,7 @@ class PinEntryActivity : AppCompatActivity() {
     
     private fun verifyPin() {
         val rawPhone = phoneInput.text.toString()
-        val phone = formatPhoneNumber(rawPhone)  // Ensure consistent formatting
+        val phone = formatPhoneForServer(rawPhone)  // Ensure consistent formatting
         val pin = pinBox1.text.toString() + 
                   pinBox2.text.toString() + 
                   pinBox3.text.toString() + 
