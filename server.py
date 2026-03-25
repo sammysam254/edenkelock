@@ -394,32 +394,55 @@ def lock_device(device_id):
             logger.error(f"Error checking device existence: {check_error}")
             return jsonify({"success": False, "error": "Database error"}), 500
         
-        # Update device status in database (handle missing columns gracefully)
-        update_data = {
-            "status": "locked",
-            "is_locked": True
-        }
+        # Update device status in database with bulletproof error handling
+        # Try with all columns first, then fallback to minimal columns
+        logger.info(f"Attempting to lock device {device_id}")
         
-        # Add optional columns if they exist (with error handling)
-        optional_columns = {
-            "lock_reason": lock_reason,
-            "locked_by": str(admin.get("id", "unknown")),
-            "locked_at": "now()"
-        }
+        update_response = None
         
-        for column, value in optional_columns.items():
+        # Attempt 1: Try with all columns
+        try:
+            update_data = {
+                "status": "locked",
+                "is_locked": True,
+                "lock_reason": lock_reason,
+                "locked_by": str(admin.get("id", "unknown")),
+                "locked_at": datetime.now().isoformat()
+            }
+            logger.info(f"Attempt 1: Updating with all columns: {update_data}")
+            update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+            logger.info(f"Attempt 1: Success with all columns")
+        except Exception as e1:
+            logger.warning(f"Attempt 1 failed (missing columns): {e1}")
+            
+            # Attempt 2: Try with is_locked column
             try:
-                # Test if column exists by trying to select it
-                supabase.table("devices").select(column).limit(1).execute()
-                update_data[column] = value
-                logger.info(f"Added {column} to update data")
-            except Exception as col_error:
-                logger.info(f"Column {column} not found, skipping: {col_error}")
-        
-        logger.info(f"Updating device with data: {update_data}")
+                update_data = {
+                    "status": "locked",
+                    "is_locked": True
+                }
+                logger.info(f"Attempt 2: Updating with is_locked: {update_data}")
+                update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+                logger.info(f"Attempt 2: Success with is_locked")
+            except Exception as e2:
+                logger.warning(f"Attempt 2 failed (is_locked missing): {e2}")
+                
+                # Attempt 3: Try with only status column (absolute minimum)
+                try:
+                    update_data = {
+                        "status": "locked"
+                    }
+                    logger.info(f"Attempt 3: Updating with status only: {update_data}")
+                    update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+                    logger.info(f"Attempt 3: Success with status only")
+                except Exception as e3:
+                    logger.error(f"Attempt 3 failed (all attempts exhausted): {e3}")
+                    return jsonify({
+                        "success": False, 
+                        "error": "Database schema missing required columns. Please run COMPLETE_PAYMENT_SYSTEM_FIX.sql"
+                    }), 500
         
         try:
-            update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
             
             if not update_response.data:
                 logger.error(f"Failed to update device {device_id} in database - no data returned")
@@ -485,20 +508,60 @@ def unlock_device(device_id):
         if not admin:
             return jsonify({"success": False, "error": "Unauthorized"}), 403
         
-        supabase.table("devices").update({
-            "status": "active",
-            "is_locked": False,
-            "lock_reason": None,
-            "locked_by": None,
-            "locked_at": None
-        }).eq("device_id", device_id).execute()
+        # Bulletproof unlock with fallback attempts
+        logger.info(f"Attempting to unlock device {device_id}")
+        
+        update_response = None
+        
+        # Attempt 1: Try with all columns
+        try:
+            update_data = {
+                "status": "active",
+                "is_locked": False,
+                "lock_reason": None,
+                "locked_by": None,
+                "locked_at": None
+            }
+            logger.info(f"Attempt 1: Unlocking with all columns")
+            update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+            logger.info(f"Attempt 1: Success with all columns")
+        except Exception as e1:
+            logger.warning(f"Attempt 1 failed: {e1}")
+            
+            # Attempt 2: Try with is_locked column
+            try:
+                update_data = {
+                    "status": "active",
+                    "is_locked": False
+                }
+                logger.info(f"Attempt 2: Unlocking with is_locked")
+                update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+                logger.info(f"Attempt 2: Success with is_locked")
+            except Exception as e2:
+                logger.warning(f"Attempt 2 failed: {e2}")
+                
+                # Attempt 3: Try with only status column
+                try:
+                    update_data = {
+                        "status": "active"
+                    }
+                    logger.info(f"Attempt 3: Unlocking with status only")
+                    update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+                    logger.info(f"Attempt 3: Success with status only")
+                except Exception as e3:
+                    logger.error(f"All unlock attempts failed: {e3}")
+                    return jsonify({
+                        "success": False, 
+                        "error": "Database schema missing required columns. Please run COMPLETE_PAYMENT_SYSTEM_FIX.sql"
+                    }), 500
         
         # Send unlock command to device
-        send_device_notification(
-            device_id,
-            None,  # Will be filled from device record
-            "🔓 DEVICE UNLOCKED - ACCESS RESTORED",
-            f"""
+        try:
+            send_device_notification(
+                device_id,
+                None,  # Will be filled from device record
+                "🔓 DEVICE UNLOCKED - ACCESS RESTORED",
+                f"""
 DEVICE UNLOCKED BY ADMINISTRATOR
 
 ✅ ALL FUNCTIONS RESTORED:
@@ -513,8 +576,10 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 Your device is now fully functional.
             """.strip(),
-            "admin_unlock"
-        )
+                "admin_unlock"
+            )
+        except Exception as notif_error:
+            logger.warning(f"Failed to send unlock notification: {notif_error}")
         
         return jsonify({
             "success": True, 
