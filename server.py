@@ -1820,20 +1820,16 @@ def get_app_version():
             "No default PINs",
             "Immediate device activation",
             "Complete lockdown protection",
-            "Persistent authentication"
-        ]
-        "features": [
+            "Persistent authentication",
             "Eden Logo Boot Screen for Device Owner",
             "Fixed Customer Login Authentication",
             "IMEI Tracking & Device Locking",
             "Enhanced Device Admin Capabilities",
             "Automatic Factory Reset Recovery",
             "Maximum Security Restrictions",
-            "Admin Remote Device Control",
-            "Fixed Device Enrollment Issues",
-            "Persistent Authentication (Survives App Updates)"
+            "Admin Remote Device Control"
         ],
-        "changelog": "Added persistent authentication that survives app updates and browser restarts. Users and admins no longer need to re-login after app updates."
+        "changelog": "Added customer self-registration system. Customers now set their own PINs during registration for better security and user experience."
     })
 
 # ============================================
