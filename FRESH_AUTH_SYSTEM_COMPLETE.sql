@@ -41,6 +41,7 @@ CREATE TABLE devices (
     serial_number TEXT UNIQUE NOT NULL,
     
     -- Customer Information
+    customer_id TEXT NOT NULL, -- This will store national_id
     customer_name TEXT NOT NULL,
     customer_phone TEXT UNIQUE NOT NULL,
     national_id TEXT UNIQUE NOT NULL,
@@ -116,6 +117,7 @@ CREATE TABLE payments (
 CREATE INDEX idx_admins_email ON admins(email);
 CREATE INDEX idx_admins_token ON admins(token);
 CREATE INDEX idx_devices_device_id ON devices(device_id);
+CREATE INDEX idx_devices_customer_id ON devices(customer_id);
 CREATE INDEX idx_devices_customer_phone ON devices(customer_phone);
 CREATE INDEX idx_devices_pin_hash ON devices(pin_hash);
 CREATE INDEX idx_devices_token ON devices(token);
