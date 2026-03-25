@@ -336,7 +336,7 @@ def lock_device(device_id):
         
         if not admin:
             logger.warning(f"Unauthorized lock attempt for device {device_id}")
-            return jsonify({"success": False, "error": "Unauthorized"}), 403
+            return jsonify({"success": False, "error": "Unauthorized access"}), 403
         
         logger.info(f"Admin verified: {admin.get('email', 'unknown')}")
         
@@ -346,42 +346,54 @@ def lock_device(device_id):
         
         logger.info(f"Locking device {device_id} with reason: {lock_reason}")
         
+        # Check if device exists first
+        try:
+            device_check = supabase.table("devices").select("device_id, status").eq("device_id", device_id).execute()
+            if not device_check.data:
+                logger.error(f"Device {device_id} not found")
+                return jsonify({"success": False, "error": "Device not found"}), 404
+        except Exception as check_error:
+            logger.error(f"Error checking device existence: {check_error}")
+            return jsonify({"success": False, "error": "Database error"}), 500
+        
         # Update device status in database (handle missing columns gracefully)
         update_data = {
             "status": "locked",
             "is_locked": True
         }
         
-        # Add optional columns if they exist
-        try:
-            supabase.table("devices").select("lock_reason").limit(1).execute()
-            update_data["lock_reason"] = lock_reason
-        except:
-            logger.info("lock_reason column not found, skipping")
+        # Add optional columns if they exist (with error handling)
+        optional_columns = {
+            "lock_reason": lock_reason,
+            "locked_by": str(admin.get("id", "unknown")),
+            "locked_at": "now()"
+        }
         
-        try:
-            supabase.table("devices").select("locked_by").limit(1).execute()
-            update_data["locked_by"] = admin["id"]
-        except:
-            logger.info("locked_by column not found, skipping")
-        
-        try:
-            supabase.table("devices").select("locked_at").limit(1).execute()
-            update_data["locked_at"] = "now()"
-        except:
-            logger.info("locked_at column not found, skipping")
+        for column, value in optional_columns.items():
+            try:
+                # Test if column exists by trying to select it
+                supabase.table("devices").select(column).limit(1).execute()
+                update_data[column] = value
+                logger.info(f"Added {column} to update data")
+            except Exception as col_error:
+                logger.info(f"Column {column} not found, skipping: {col_error}")
         
         logger.info(f"Updating device with data: {update_data}")
         
-        update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+        try:
+            update_response = supabase.table("devices").update(update_data).eq("device_id", device_id).execute()
+            
+            if not update_response.data:
+                logger.error(f"Failed to update device {device_id} in database - no data returned")
+                return jsonify({"success": False, "error": "Failed to update device status"}), 500
+            
+            logger.info(f"Device {device_id} successfully locked in database")
+            
+        except Exception as update_error:
+            logger.error(f"Database update error for device {device_id}: {update_error}")
+            return jsonify({"success": False, "error": f"Database update failed: {str(update_error)}"}), 500
         
-        if not update_response.data:
-            logger.error(f"Failed to update device {device_id} in database")
-            return jsonify({"success": False, "error": "Failed to update device status"}), 500
-        
-        logger.info(f"Device {device_id} successfully locked in database")
-        
-        # Send complete lockdown command to device
+        # Send complete lockdown command to device (optional, don't fail if this fails)
         try:
             send_device_notification(
                 device_id, 
@@ -415,7 +427,9 @@ Contact administrator to unlock this device.
             "message": "Device locked with complete lockdown", 
             "is_locked": True,
             "lockdown_level": "COMPLETE",
-            "device_id": device_id
+            "device_id": device_id,
+            "locked_by": admin.get("email", "unknown"),
+            "lock_reason": lock_reason
         })
         
     except Exception as e:
@@ -472,6 +486,321 @@ Your device is now fully functional.
         })
     except Exception as e:
         logger.error(f"Unlock device error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================
+# PAYMENT SYSTEM WITH AUTO-UNLOCK
+# ============================================
+
+@app.route("/api/customer/make-payment", methods=["POST"])
+def make_payment():
+    """Customer makes a payment and device auto-unlocks based on daily payment logic"""
+    try:
+        data = request.json
+        phone = format_phone_number(data.get("phone_number"))
+        payment_amount = float(data.get("payment_amount", 0))
+        
+        if not phone or payment_amount <= 0:
+            return jsonify({"success": False, "error": "Phone number and valid payment amount required"}), 400
+        
+        logger.info(f"Processing payment: {payment_amount} for phone {phone}")
+        
+        # Get device record
+        device_response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+        
+        if not device_response.data:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+        device = device_response.data[0]
+        
+        # Calculate current amounts
+        total_amount = float(device.get("total_amount", 0))
+        current_paid = float(device.get("amount_paid", 0))
+        daily_payment = float(device.get("daily_payment_amount", 80))
+        current_payment_balance = float(device.get("payment_balance", 0))
+        
+        if daily_payment <= 0:
+            return jsonify({"success": False, "error": "Daily payment amount not set. Contact administrator."}), 400
+        
+        # Add payment to totals
+        new_amount_paid = current_paid + payment_amount
+        remaining_loan_balance = total_amount - new_amount_paid
+        
+        # Calculate days purchased with this payment
+        days_purchased = payment_amount / daily_payment
+        
+        # Add to payment balance (prepaid amount)
+        new_payment_balance = current_payment_balance + payment_amount
+        
+        # Calculate unlock duration
+        total_days_available = new_payment_balance / daily_payment
+        
+        # Determine if device should be unlocked
+        should_unlock = total_days_available >= 1.0
+        
+        # Calculate unlock_until timestamp
+        unlock_until = None
+        if should_unlock:
+            from datetime import datetime, timedelta
+            unlock_until = datetime.now() + timedelta(days=int(total_days_available))
+        
+        # Update device with new payment
+        update_data = {
+            "amount_paid": new_amount_paid,
+            "payment_balance": new_payment_balance,
+            "last_payment_date": "now()",
+            "last_payment_amount": payment_amount
+        }
+        
+        # If payment is sufficient, unlock the device
+        if should_unlock:
+            update_data.update({
+                "status": "active",
+                "is_locked": False,
+                "lock_reason": None,
+                "unlocked_at": "now()",
+                "unlock_until": unlock_until.isoformat() if unlock_until else None
+            })
+        
+        # Record the payment in payments table
+        try:
+            payment_record = {
+                "customer_phone": phone,
+                "amount": payment_amount,
+                "payment_date": "now()",
+                "payment_method": data.get("payment_method", "mobile_money"),
+                "reference": data.get("reference", f"PAY_{int(time.time())}"),
+                "days_purchased": days_purchased,
+                "device_unlocked": should_unlock
+            }
+            supabase.table("payments").insert(payment_record).execute()
+            logger.info(f"Payment recorded in payments table")
+        except Exception as payment_error:
+            logger.warning(f"Could not record in payments table: {payment_error}")
+            # Continue even if payments table doesn't exist
+        
+        # Update device record
+        supabase.table("devices").update(update_data).eq("customer_phone", phone).execute()
+        
+        # Send unlock notification if device should be unlocked
+        unlock_message = ""
+        if should_unlock:
+            days_remaining = int(total_days_available)
+            hours_remaining = int((total_days_available - days_remaining) * 24)
+            
+            if days_remaining > 0:
+                unlock_message = f"Device unlocked for {days_remaining} day{'s' if days_remaining != 1 else ''}"
+                if hours_remaining > 0:
+                    unlock_message += f" and {hours_remaining} hour{'s' if hours_remaining != 1 else ''}"
+            else:
+                unlock_message = f"Device unlocked for {hours_remaining} hour{'s' if hours_remaining != 1 else ''}"
+            
+            try:
+                send_device_notification(
+                    device.get("device_id"),
+                    phone,
+                    "💰 PAYMENT RECEIVED - DEVICE UNLOCKED",
+                    f"""
+PAYMENT SUCCESSFULLY PROCESSED
+
+💰 Payment: KES {payment_amount:,.2f}
+📅 Days Purchased: {days_purchased:.1f}
+💳 Total Paid: KES {new_amount_paid:,.2f}
+💵 Loan Remaining: KES {remaining_loan_balance:,.2f}
+💰 Payment Balance: KES {new_payment_balance:,.2f}
+
+✅ {unlock_message.upper()}
+Your device is now fully functional.
+
+Thank you for your payment!
+                    """.strip(),
+                    "payment_unlock"
+                )
+            except Exception as notification_error:
+                logger.warning(f"Failed to send unlock notification: {notification_error}")
+        
+        return jsonify({
+            "success": True,
+            "message": "Payment processed successfully",
+            "payment_amount": payment_amount,
+            "days_purchased": round(days_purchased, 1),
+            "total_paid": new_amount_paid,
+            "remaining_loan_balance": remaining_loan_balance,
+            "payment_balance": new_payment_balance,
+            "device_unlocked": should_unlock,
+            "unlock_message": unlock_message,
+            "daily_payment_amount": daily_payment,
+            "unlock_until": unlock_until.isoformat() if unlock_until else None
+        })
+        
+    except Exception as e:
+        logger.error(f"Payment processing error: {e}")
+        return jsonify({"success": False, "error": f"Payment failed: {str(e)}"}), 500
+
+@app.route("/api/customer/unlock-now", methods=["POST"])
+def unlock_now():
+    """Customer manually requests device unlock after payment"""
+    try:
+        data = request.json
+        phone = format_phone_number(data.get("phone_number"))
+        
+        if not phone:
+            return jsonify({"success": False, "error": "Phone number required"}), 400
+        
+        logger.info(f"Manual unlock request for phone {phone}")
+        
+        # Get device record
+        device_response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+        
+        if not device_response.data:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+        device = device_response.data[0]
+        
+        # Calculate payment status
+        total_amount = float(device.get("total_amount", 0))
+        amount_paid = float(device.get("amount_paid", 0))
+        daily_payment = float(device.get("daily_payment_amount", 80))
+        payment_balance = float(device.get("payment_balance", 0))
+        remaining_loan_balance = total_amount - amount_paid
+        
+        # Check if customer has sufficient payment balance for at least one day
+        days_available = payment_balance / daily_payment if daily_payment > 0 else 0
+        
+        if days_available < 1.0:
+            return jsonify({
+                "success": False,
+                "error": f"Insufficient payment balance. Need KES {daily_payment:,.2f} for one day unlock.",
+                "payment_balance": payment_balance,
+                "daily_payment_required": daily_payment,
+                "days_available": round(days_available, 1),
+                "remaining_loan_balance": remaining_loan_balance
+            }), 400
+        
+        # Check if device is already unlocked
+        if not device.get("is_locked", True):
+            return jsonify({
+                "success": True,
+                "message": "Device is already unlocked",
+                "device_status": "unlocked",
+                "days_remaining": int(days_available)
+            })
+        
+        # Calculate unlock duration
+        from datetime import datetime, timedelta
+        unlock_until = datetime.now() + timedelta(days=int(days_available))
+        
+        # Unlock the device
+        supabase.table("devices").update({
+            "status": "active",
+            "is_locked": False,
+            "lock_reason": None,
+            "unlocked_at": "now()",
+            "unlock_until": unlock_until.isoformat(),
+            "manual_unlock_requested": True
+        }).eq("customer_phone", phone).execute()
+        
+        # Send unlock notification
+        days_remaining = int(days_available)
+        hours_remaining = int((days_available - days_remaining) * 24)
+        
+        unlock_duration = f"{days_remaining} day{'s' if days_remaining != 1 else ''}"
+        if hours_remaining > 0:
+            unlock_duration += f" and {hours_remaining} hour{'s' if hours_remaining != 1 else ''}"
+        
+        try:
+            send_device_notification(
+                device.get("device_id"),
+                phone,
+                "🔓 MANUAL UNLOCK - DEVICE ACTIVATED",
+                f"""
+DEVICE MANUALLY UNLOCKED
+
+✅ Status: Payment verified
+💰 Payment Balance: KES {payment_balance:,.2f}
+📅 Unlocked for: {unlock_duration}
+💵 Loan Remaining: KES {remaining_loan_balance:,.2f}
+
+Your device is now fully functional.
+                """.strip(),
+                "manual_unlock"
+            )
+        except Exception as notification_error:
+            logger.warning(f"Failed to send unlock notification: {notification_error}")
+        
+        return jsonify({
+            "success": True,
+            "message": f"Device unlocked for {unlock_duration}",
+            "payment_balance": payment_balance,
+            "days_unlocked": int(days_available),
+            "remaining_loan_balance": remaining_loan_balance,
+            "device_status": "unlocked",
+            "unlock_until": unlock_until.isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Manual unlock error: {e}")
+        return jsonify({"success": False, "error": f"Unlock failed: {str(e)}"}), 500
+
+@app.route("/api/customer/payment-status", methods=["GET"])
+def payment_status():
+    """Get customer payment status and device unlock eligibility"""
+    try:
+        phone = format_phone_number(request.args.get("phone"))
+        
+        if not phone:
+            return jsonify({"success": False, "error": "Phone number required"}), 400
+        
+        # Get device record
+        device_response = supabase.table("devices").select("*").eq("customer_phone", phone).execute()
+        
+        if not device_response.data:
+            return jsonify({"success": False, "error": "Device not found"}), 404
+        
+        device = device_response.data[0]
+        
+        # Calculate payment status
+        total_amount = float(device.get("total_amount", 0))
+        amount_paid = float(device.get("amount_paid", 0))
+        daily_payment = float(device.get("daily_payment_amount", 80))
+        payment_balance = float(device.get("payment_balance", 0))
+        remaining_loan_balance = total_amount - amount_paid
+        
+        # Calculate unlock eligibility
+        days_available = payment_balance / daily_payment if daily_payment > 0 else 0
+        can_unlock = days_available >= 1.0
+        is_locked = device.get("is_locked", True)
+        
+        # Check if unlock period has expired
+        unlock_until = device.get("unlock_until")
+        unlock_expired = False
+        if unlock_until:
+            from datetime import datetime
+            try:
+                unlock_until_dt = datetime.fromisoformat(unlock_until.replace('Z', '+00:00'))
+                unlock_expired = datetime.now() > unlock_until_dt
+            except:
+                unlock_expired = False
+        
+        return jsonify({
+            "success": True,
+            "total_amount": total_amount,
+            "amount_paid": amount_paid,
+            "remaining_loan_balance": remaining_loan_balance,
+            "daily_payment_amount": daily_payment,
+            "payment_balance": payment_balance,
+            "days_available": round(days_available, 1),
+            "can_unlock": can_unlock,
+            "is_locked": is_locked,
+            "device_status": device.get("status", "unknown"),
+            "last_payment_date": device.get("last_payment_date"),
+            "last_payment_amount": device.get("last_payment_amount", 0),
+            "unlock_until": unlock_until,
+            "unlock_expired": unlock_expired
+        })
+        
+    except Exception as e:
+        logger.error(f"Payment status error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================
@@ -1304,7 +1633,7 @@ def enroll_device():
         data = request.json
         
         # Required fields
-        required_fields = ["serial_number", "national_id", "customer_name", "customer_phone", "total_amount"]
+        required_fields = ["serial_number", "national_id", "customer_name", "customer_phone", "total_amount", "daily_payment_amount"]
         for field in required_fields:
             if not data.get(field):
                 return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
@@ -1330,6 +1659,7 @@ def enroll_device():
             "customer_name": data["customer_name"],
             "customer_phone": customer_phone,
             "total_amount": float(data["total_amount"]),
+            "daily_payment_amount": float(data["daily_payment_amount"]),
             "amount_paid": float(data.get("amount_paid", 0)),
             "status": "pending_registration",  # Customer must register first
             "pin_hash": None,  # No PIN until customer registers
@@ -1909,8 +2239,8 @@ def customer_dashboard_api():
 def get_app_version():
     """Return current app version for OTA updates"""
     return jsonify({
-        "version_code": 22,
-        "version_name": "1.9.4",
+        "version_code": 23,
+        "version_name": "1.9.5",
         "download_url": f"{request.host_url}download/eden.apk",
         "force_update": True,
         "security_level": "MAXIMUM",
@@ -1919,7 +2249,18 @@ def get_app_version():
         "improved_phone_flow": True,
         "registration_fixes": True,
         "mobile_dashboard": True,
+        "payment_system": True,
+        "multi_day_unlock": True,
         "features": [
+            "💳 Complete Payment System with Auto-Unlock",
+            "📅 Multi-day unlock capability (pay 160 = 2 days unlock)",
+            "💰 Payment balance tracking and prepaid system",
+            "🔓 Manual unlock requests from customer app",
+            "⏰ Automatic device locking when payment expires",
+            "📊 Real-time payment status and days available",
+            "🎯 Daily payment amount configuration per device",
+            "💸 KES 80 default daily payment for existing devices",
+            "🔄 Loading animations for all payment actions",
             "Clean mobile-friendly customer dashboard",
             "Compact card layout optimized for mobile",
             "Properly sized buttons and touch targets",
@@ -1943,7 +2284,7 @@ def get_app_version():
             "Maximum Security Restrictions",
             "Admin Remote Device Control"
         ],
-        "changelog": "Mobile-optimized customer dashboard: Clean card layout, compact design, properly sized buttons, enhanced device locking with better error handling, and improved mobile user experience."
+        "changelog": "Eden v1.9.5: Complete Payment System - Customers can now make payments directly in the app with automatic device unlocking. Multi-day unlock capability allows paying for multiple days at once (e.g., pay KES 160 for 2 days unlock). Real-time payment balance tracking, manual unlock requests, and automatic expiry management. Enhanced mobile dashboard with loading animations and improved user experience."
     })
 
 # ============================================

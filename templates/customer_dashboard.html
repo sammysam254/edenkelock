@@ -165,9 +165,113 @@
             color: white;
         }
         
-        .btn-tertiary:hover {
-            background: #4b5563;
-            transform: translateY(-1px);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+        }
+        
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .btn-modal {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-modal-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-modal-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
         }
         
         .btn-icon {
@@ -274,11 +378,11 @@
             
             <!-- Action Buttons -->
             <div class="button-grid">
-                <button class="btn btn-primary" onclick="unlockDevice()">
+                <button class="btn btn-primary" id="unlockBtn" onclick="unlockDevice()">
                     <span class="btn-icon">🔓</span>
-                    <span>Unlock Device</span>
+                    <span>Unlock Now</span>
                 </button>
-                <button class="btn btn-secondary" onclick="makePayment()">
+                <button class="btn btn-secondary" id="paymentBtn" onclick="showPaymentModal()">
                     <span class="btn-icon">💳</span>
                     <span>Make Payment</span>
                 </button>
@@ -286,6 +390,59 @@
                     <span class="btn-icon">📋</span>
                     <span>Payment History</span>
                 </button>
+            </div>
+            
+            <!-- Payment Status Info -->
+            <div class="card">
+                <div class="card-label">Daily Payment Amount</div>
+                <div class="card-value amount" id="dailyPayment">KES 80</div>
+                <div style="margin-top: 8px;">
+                    <div class="card-label">Payment Balance</div>
+                    <div class="card-value" id="paymentBalance" style="font-size: 14px; color: #10b981;">KES 0</div>
+                </div>
+                <div style="margin-top: 8px;">
+                    <div class="card-label">Days Available</div>
+                    <div class="card-value" id="daysAvailable" style="font-size: 14px; color: #059669;">0 days</div>
+                </div>
+                <div style="margin-top: 8px;">
+                    <div class="card-label">Last Payment</div>
+                    <div class="card-value" id="lastPayment" style="font-size: 12px; color: #6b7280;">No payments yet</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Modal -->
+        <div id="paymentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">💳 Make Payment</div>
+                <div id="paymentSuccess" class="success-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label class="form-label">Payment Amount (KES)</label>
+                    <input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount" min="1" step="0.01">
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                        Daily payment: KES <span id="modalDailyPayment">100</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select id="paymentMethod" class="form-input">
+                        <option value="mpesa">M-Pesa</option>
+                        <option value="airtel_money">Airtel Money</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="cash">Cash</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reference (Optional)</label>
+                    <input type="text" id="paymentReference" class="form-input" placeholder="Transaction reference">
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-modal btn-modal-secondary" onclick="closePaymentModal()">Cancel</button>
+                    <button class="btn-modal btn-modal-primary" id="submitPaymentBtn" onclick="submitPayment()">
+                        <span id="paymentBtnText">Submit Payment</span>
+                        <span id="paymentBtnSpinner" class="loading-spinner" style="display: none;"></span>
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -305,6 +462,7 @@
     <script>
         const customerPhone = localStorage.getItem('eden_customer_phone');
         const deviceId = localStorage.getItem('eden_device_id');
+        let currentPaymentStatus = {};
         
         if (!customerPhone) {
             window.location.href = '/customer-login';
@@ -318,6 +476,9 @@
                 if (!data.success) {
                     throw new Error(data.error || 'Failed to load dashboard');
                 }
+                
+                // Load payment status
+                await loadPaymentStatus();
                 
                 // Update device info
                 if (data.device) {
@@ -364,12 +525,181 @@
             }
         }
         
-        function unlockDevice() {
-            alert('Device unlock requested. Please wait for admin approval.');
+        async function loadPaymentStatus() {
+            try {
+                const response = await fetch(`/api/customer/payment-status?phone=${encodeURIComponent(customerPhone)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPaymentStatus = data;
+                    
+                    // Update daily payment display
+                    const dailyPayment = parseFloat(data.daily_payment_amount || 80);
+                    document.getElementById('dailyPayment').innerHTML = `KES ${dailyPayment.toLocaleString()}`;
+                    document.getElementById('modalDailyPayment').textContent = dailyPayment.toLocaleString();
+                    
+                    // Update payment balance and days available
+                    const paymentBalance = parseFloat(data.payment_balance || 0);
+                    const daysAvailable = parseFloat(data.days_available || 0);
+                    
+                    document.getElementById('paymentBalance').innerHTML = `KES ${paymentBalance.toLocaleString()}`;
+                    document.getElementById('daysAvailable').innerHTML = `${daysAvailable.toFixed(1)} day${daysAvailable !== 1 ? 's' : ''}`;
+                    
+                    // Update last payment info
+                    if (data.last_payment_date && data.last_payment_amount > 0) {
+                        const lastPaymentDate = new Date(data.last_payment_date).toLocaleDateString();
+                        document.getElementById('lastPayment').innerHTML = 
+                            `KES ${parseFloat(data.last_payment_amount).toLocaleString()}<br><small>${lastPaymentDate}</small>`;
+                    }
+                    
+                    // Update unlock button state
+                    const unlockBtn = document.getElementById('unlockBtn');
+                    if (data.is_locked && data.can_unlock) {
+                        unlockBtn.style.background = '#10b981';
+                        unlockBtn.disabled = false;
+                        unlockBtn.innerHTML = '<span class="btn-icon">🔓</span><span>Unlock Now</span>';
+                    } else if (data.is_locked && !data.can_unlock) {
+                        unlockBtn.style.background = '#6b7280';
+                        unlockBtn.disabled = true;
+                        unlockBtn.innerHTML = '<span class="btn-icon">🔒</span><span>Need Payment</span>';
+                    } else {
+                        unlockBtn.style.background = '#059669';
+                        unlockBtn.disabled = false;
+                        const daysLeft = Math.floor(daysAvailable);
+                        unlockBtn.innerHTML = `<span class="btn-icon">✅</span><span>Active (${daysLeft}d)</span>`;
+                    }
+                    
+                    // Show unlock expiry warning if needed
+                    if (data.unlock_until && !data.is_locked) {
+                        const unlockUntil = new Date(data.unlock_until);
+                        const now = new Date();
+                        const hoursLeft = Math.max(0, (unlockUntil - now) / (1000 * 60 * 60));
+                        
+                        if (hoursLeft < 24) {
+                            document.getElementById('daysAvailable').innerHTML += 
+                                `<br><small style="color: #dc2626;">Expires in ${Math.floor(hoursLeft)}h</small>`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Payment status error:', error);
+            }
         }
         
-        function makePayment() {
-            alert('Payment feature coming soon. Please contact support for payments.');
+        function showPaymentModal() {
+            document.getElementById('paymentModal').style.display = 'block';
+            document.getElementById('paymentAmount').value = currentPaymentStatus.daily_payment_amount || '';
+        }
+        
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            document.getElementById('paymentSuccess').style.display = 'none';
+            document.getElementById('paymentAmount').value = '';
+            document.getElementById('paymentReference').value = '';
+        }
+        
+        async function submitPayment() {
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const method = document.getElementById('paymentMethod').value;
+            const reference = document.getElementById('paymentReference').value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid payment amount');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitPaymentBtn');
+            const btnText = document.getElementById('paymentBtnText');
+            const btnSpinner = document.getElementById('paymentBtnSpinner');
+            
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('/api/customer/make-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: customerPhone,
+                        payment_amount: amount,
+                        payment_method: method,
+                        reference: reference
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const daysText = data.days_purchased ? `📅 ${data.days_purchased} day${data.days_purchased !== 1 ? 's' : ''} purchased` : '';
+                    document.getElementById('paymentSuccess').innerHTML = 
+                        `✅ Payment of KES ${amount.toLocaleString()} processed successfully!<br>
+                        ${daysText}<br>
+                        ${data.device_unlocked ? `🔓 ${data.unlock_message || 'Device has been unlocked!'}` : '⏳ Device will unlock when sufficient payment is made.'}`;
+                    document.getElementById('paymentSuccess').style.display = 'block';
+                    
+                    // Refresh dashboard after payment
+                    setTimeout(() => {
+                        closePaymentModal();
+                        loadDashboard();
+                    }, 3000);
+                } else {
+                    alert('Payment failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Payment failed: ' + error.message);
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.style.display = 'none';
+            }
+        }
+        
+        async function unlockDevice() {
+            const unlockBtn = document.getElementById('unlockBtn');
+            
+            if (unlockBtn.disabled) {
+                alert('Insufficient payment. Please make a payment first.');
+                return;
+            }
+            
+            // Show loading state
+            const originalContent = unlockBtn.innerHTML;
+            unlockBtn.innerHTML = '<span class="loading-spinner"></span><span>Unlocking...</span>';
+            unlockBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/customer/unlock-now', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: customerPhone
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Device unlocked successfully!');
+                    loadDashboard(); // Refresh dashboard
+                } else {
+                    alert('Unlock failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Unlock error:', error);
+                alert('Unlock failed: ' + error.message);
+            } finally {
+                // Reset button state
+                unlockBtn.innerHTML = originalContent;
+                unlockBtn.disabled = false;
+            }
         }
         
         function showHistory() {
@@ -381,6 +711,14 @@
             localStorage.removeItem('eden_customer_phone');
             localStorage.removeItem('eden_device_id');
             window.location.href = '/customer-login';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target === modal) {
+                closePaymentModal();
+            }
         }
         
         // Load dashboard on page load
