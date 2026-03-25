@@ -1959,6 +1959,15 @@ def download_apk():
         logger.error(f"APK download error: {e}")
         return jsonify({"error": "APK not found"}), 404
 
+@app.route("/download/eden-device-setup.cmd")
+def download_setup_tool():
+    """Serve the device setup CMD file for download"""
+    try:
+        return send_from_directory(".", "eden-device-setup.cmd", as_attachment=True)
+    except Exception as e:
+        logger.error(f"Setup tool download error: {e}")
+        return jsonify({"error": "Setup tool not found"}), 404
+
 # ============================================
 # HEALTH CHECK
 # ============================================
